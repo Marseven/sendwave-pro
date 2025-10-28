@@ -5,7 +5,7 @@ echo "=== Début du déploiement Hostinger ==="
 cd /home/u663389624/domains/jobs-conseil.com/public_html/mysmscampaign/
 
 # Mise à jour de Composer
-echo "Mise à jour des dépendances..."
+echo "Mise à jour des dépendances PHP..."
 composer update --no-dev --optimize-autoloader
 
 # Exécution des migrations
