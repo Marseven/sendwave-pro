@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+import '@/nprogress-custom.css'
 
 const router = createRouter({
-  history: createWebHistory('/sendwave-pro/public'),
+  history: createWebHistory('/'),
   routes: [
     {
       path: '/',
@@ -106,8 +109,18 @@ const router = createRouter({
   ]
 })
 
+// Configure NProgress
+NProgress.configure({
+  showSpinner: false,
+  trickleSpeed: 200,
+  minimum: 0.3
+})
+
 // Navigation guard
 router.beforeEach((to, from, next) => {
+  // Start progress bar
+  NProgress.start()
+
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
@@ -117,6 +130,11 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+})
+
+router.afterEach(() => {
+  // Complete progress bar
+  NProgress.done()
 })
 
 export default router
