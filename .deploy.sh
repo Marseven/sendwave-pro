@@ -2,7 +2,7 @@
 echo "=== Début du déploiement Hostinger ==="
 
 # Aller dans le répertoire du projet
-cd /home/u663389624/domains/jobs-conseil.com/public_html/noya/
+cd /home/u663389624/domains/jobs-conseil.com/public_html/mysmscampaign/
 
 # Mise à jour de Composer
 echo "Mise à jour des dépendances..."
