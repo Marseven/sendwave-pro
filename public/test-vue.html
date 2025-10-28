@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Vue.js</title>
+    <link rel="stylesheet" href="/sendwave-pro/public/build/assets/main-Syxx4VK7.css">
+    <style>
+        .test-inline {
+            background: #3b82f6;
+            color: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="margin: 20px; font-size: 32px; font-weight: bold;">🔍 Diagnostic Vue.js + CSS</h1>
+
+    <!-- Test 1: CSS inline -->
+    <div class="test-inline">
+        <h2 style="font-size: 20px; margin-bottom: 10px;">✅ Test 1: CSS Inline</h2>
+        <p>Si vous voyez ce bloc en bleu avec du texte blanc, le HTML de base fonctionne.</p>
+    </div>
+
+    <!-- Test 2: Tailwind CSS -->
+    <div class="bg-green-500 text-white p-6 m-5 rounded-lg">
+        <h2 class="text-xl font-bold mb-2">✅ Test 2: Tailwind CSS</h2>
+        <p>Si vous voyez ce bloc en VERT, Tailwind CSS se charge correctement.</p>
+    </div>
+
+    <!-- Test 3: Vue.js -->
+    <div id="app" class="bg-purple-500 text-white p-6 m-5 rounded-lg">
+        <h2 class="text-xl font-bold mb-2">⏳ Test 3: Vue.js</h2>
+        <p v-if="!loaded" style="color: red; font-weight: bold;">❌ Vue.js ne fonctionne PAS encore...</p>
+        <p v-if="loaded" class="font-bold">✅ Vue.js fonctionne ! Message: {{ message }}</p>
+        <button
+            v-if="loaded"
+            @click="count++"
+            class="mt-4 bg-white text-purple-600 px-4 py-2 rounded hover:bg-gray-100"
+        >
+            Cliqué {{ count }} fois
+        </button>
+    </div>
+
+    <div class="m-5 p-4 border-l-4 border-yellow-500 bg-yellow-50">
+        <h3 class="font-bold text-lg mb-2">📋 Instructions:</h3>
+        <ol class="list-decimal list-inside space-y-2">
+            <li>Ouvrez la Console (F12 → onglet Console)</li>
+            <li>Regardez quelle couleur vous voyez pour chaque bloc</li>
+            <li>Copiez-moi TOUTES les erreurs en rouge de la console</li>
+        </ol>
+    </div>
+
+    <script>
+        console.log('✅ JavaScript inline fonctionne');
+        console.log('📦 Tentative de chargement de Vue.js...');
+    </script>
+
+    <script type="module">
+        import { createApp, ref } from 'vue'
+
+        console.log('✅ Import Vue réussi !');
+
+        createApp({
+            setup() {
+                const message = ref('Vue.js est chargé !')
+                const count = ref(0)
+                const loaded = ref(true)
+
+                console.log('✅ Vue.js initialisé avec succès !');
+
+                return {
+                    message,
+                    count,
+                    loaded
+                }
+            }
+        }).mount('#app')
+
+        console.log('✅ Vue.js monté sur #app');
+    </script>
+</body>
+</html>
