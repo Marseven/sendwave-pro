@@ -55,6 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Messages
     Route::post('messages/send', [MessageController::class, 'send']);
+    Route::post('messages/analyze', [MessageController::class, 'analyzeNumbers']);
+    Route::post('messages/number-info', [MessageController::class, 'getNumberInfo']);
 
     // User Profile
     Route::get('user/profile', [AuthController::class, 'profile']);

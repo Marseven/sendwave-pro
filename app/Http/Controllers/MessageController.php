@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SmsProvider;
-use App\Services\SmsProviderFactory;
+use App\Services\SMS\SmsRouter;
+use App\Services\SMS\OperatorDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class MessageController extends Controller
 {
+    protected SmsRouter $smsRouter;
+
+    public function __construct()
+    {
+        $this->smsRouter = new SmsRouter();
+    }
+
     /**
-     * Envoyer un ou plusieurs messages SMS
+     * Envoyer un ou plusieurs messages SMS avec routage automatique par opérateur
      */
     public function send(Request $request)
     {
@@ -19,58 +26,74 @@ class MessageController extends Controller
             'recipients.*' => 'required|string',
             'message' => 'required|string|max:320',
             'type' => 'nullable|in:immediate,scheduled',
-            'provider_code' => 'nullable|string|in:msg91,smsala,wapi',
         ]);
 
         try {
-            // Déterminer quel provider utiliser
-            $provider = $this->selectProvider($validated['provider_code'] ?? null);
+            $recipients = $validated['recipients'];
+            $message = $validated['message'];
 
-            if (!$provider) {
-                return response()->json([
-                    'message' => 'Aucun provider SMS actif configuré',
-                ], 400);
-            }
+            // Analyser les numéros avant l'envoi
+            $analysis = $this->smsRouter->analyzeNumbers($recipients);
 
-            // Créer une instance du service
-            $providerService = SmsProviderFactory::make($provider->code, [
-                'api_key' => $provider->api_key,
-                'sender_id' => $provider->sender_id,
-                'config' => $provider->config ?? [],
+            Log::info('SMS Send Request', [
+                'recipients_count' => count($recipients),
+                'message_length' => strlen($message),
+                'analysis' => $analysis,
             ]);
 
-            // Envoyer le message
-            $result = $providerService->send(
-                $validated['recipients'],
-                $validated['message']
-            );
+            // Envoyer les messages avec routage automatique
+            if (count($recipients) === 1) {
+                // Envoi simple
+                $result = $this->smsRouter->sendSms($recipients[0], $message);
 
-            if ($result['success']) {
-                // Log de l'envoi réussi
-                Log::info('SMS sent successfully', [
-                    'provider' => $provider->code,
-                    'recipients_count' => count($validated['recipients']),
-                    'message_length' => strlen($validated['message']),
+                if ($result['success']) {
+                    return response()->json([
+                        'message' => 'Message envoyé avec succès',
+                        'data' => [
+                            'provider' => $result['provider'],
+                            'phone' => $result['phone'],
+                            'sms_count' => ceil(strlen($message) / 160),
+                        ]
+                    ]);
+                }
+
+                return response()->json([
+                    'message' => 'Échec de l\'envoi',
+                    'error' => $result['message'] ?? 'Erreur inconnue',
+                    'details' => $result,
+                ], 400);
+
+            } else {
+                // Envoi en masse
+                $result = $this->smsRouter->sendBulkSms($recipients, $message);
+
+                Log::info('Bulk SMS sent', [
+                    'total' => $result['total'],
+                    'sent' => $result['sent'],
+                    'failed' => $result['failed'],
                 ]);
 
                 return response()->json([
-                    'message' => 'Messages envoyés avec succès',
+                    'message' => 'Envoi terminé',
                     'data' => [
-                        'provider' => $provider->code,
-                        'recipients_count' => count($validated['recipients']),
-                        'sms_count' => ceil(strlen($validated['message']) / 160),
-                        'cost' => count($validated['recipients']) * ceil(strlen($validated['message']) / 160) * $provider->cost_per_sms,
+                        'total' => $result['total'],
+                        'sent' => $result['sent'],
+                        'failed' => $result['failed'],
+                        'sms_count' => ceil(strlen($message) / 160),
+                        'by_operator' => [
+                            'airtel' => $analysis['airtel_count'],
+                            'moov' => $analysis['moov_count'],
+                            'unknown' => $analysis['unknown_count'],
+                        ],
+                        'details' => $result['details'],
                     ]
                 ]);
             }
 
-            return response()->json([
-                'message' => 'Échec de l\'envoi',
-                'error' => $result['message'] ?? 'Erreur inconnue'
-            ], 400);
-
         } catch (\Exception $e) {
-            Log::error('Message Send Error: ' . $e->getMessage());
+            Log::error('Message Send Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'message' => 'Erreur lors de l\'envoi du message',
@@ -80,24 +103,37 @@ class MessageController extends Controller
     }
 
     /**
-     * Sélectionner le meilleur provider disponible
+     * Analyser des numéros de téléphone
      */
-    protected function selectProvider(?string $preferredCode = null): ?SmsProvider
+    public function analyzeNumbers(Request $request)
     {
-        // Si un provider spécifique est demandé
-        if ($preferredCode) {
-            $provider = SmsProvider::where('code', $preferredCode)
-                ->where('is_active', true)
-                ->first();
+        $validated = $request->validate([
+            'phone_numbers' => 'required|array|min:1',
+            'phone_numbers.*' => 'required|string',
+        ]);
 
-            if ($provider) {
-                return $provider;
-            }
-        }
+        $analysis = $this->smsRouter->analyzeNumbers($validated['phone_numbers']);
 
-        // Sinon, prendre le provider actif avec la plus haute priorité
-        return SmsProvider::active()
-            ->orderedByPriority()
-            ->first();
+        return response()->json([
+            'message' => 'Analyse effectuée',
+            'data' => $analysis,
+        ]);
+    }
+
+    /**
+     * Obtenir les informations d'un numéro
+     */
+    public function getNumberInfo(Request $request)
+    {
+        $validated = $request->validate([
+            'phone_number' => 'required|string',
+        ]);
+
+        $info = OperatorDetector::getInfo($validated['phone_number']);
+
+        return response()->json([
+            'message' => 'Informations du numéro',
+            'data' => $info,
+        ]);
     }
 }
