@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('campaigns/stats', [CampaignHistoryController::class, 'stats']);
 
     // Campaigns
+    Route::post('campaigns/{id}/send', [CampaignController::class, 'send']);
     Route::apiResource('campaigns', CampaignController::class);
 
     // Message Templates

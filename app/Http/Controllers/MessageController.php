@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\SMS\SmsRouter;
 use App\Services\SMS\OperatorDetector;
+use App\Models\Message;
+use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -14,6 +16,42 @@ class MessageController extends Controller
     public function __construct()
     {
         $this->smsRouter = new SmsRouter();
+    }
+
+    /**
+     * Calculer le coût d'un SMS
+     */
+    protected function calculateCost(string $message, string $operator = 'airtel'): int
+    {
+        // Nombre de SMS selon la longueur (160 caractères par SMS)
+        $smsCount = ceil(strlen($message) / 160);
+
+        // Coût par SMS selon l'opérateur
+        $costPerSms = config("sms.{$operator}.cost_per_sms", config('sms.cost_per_sms', 20));
+
+        return $smsCount * $costPerSms;
+    }
+
+    /**
+     * Enregistrer un message dans l'historique
+     */
+    protected function saveMessageToHistory(array $data): Message
+    {
+        return Message::create([
+            'user_id' => $data['user_id'],
+            'campaign_id' => $data['campaign_id'] ?? null,
+            'contact_id' => $data['contact_id'] ?? null,
+            'recipient_name' => $data['recipient_name'] ?? null,
+            'recipient_phone' => $data['recipient_phone'],
+            'content' => $data['content'],
+            'type' => $data['type'] ?? 'sms',
+            'status' => $data['status'], // 'sent', 'failed', 'pending'
+            'provider' => $data['provider'], // 'airtel', 'moov'
+            'cost' => $data['cost'],
+            'error_message' => $data['error_message'] ?? null,
+            'sent_at' => $data['status'] === 'sent' ? now() : null,
+            'provider_response' => $data['provider_response'] ?? null,
+        ]);
     }
 
     /**
@@ -46,13 +84,30 @@ class MessageController extends Controller
                 // Envoi simple
                 $result = $this->smsRouter->sendSms($recipients[0], $message);
 
+                // Calculer le coût
+                $cost = $this->calculateCost($message, $result['provider'] ?? 'airtel');
+
+                // Enregistrer dans l'historique
+                $messageRecord = $this->saveMessageToHistory([
+                    'user_id' => $request->user()->id,
+                    'recipient_phone' => $result['phone'] ?? $recipients[0],
+                    'content' => $message,
+                    'status' => $result['success'] ? 'sent' : 'failed',
+                    'provider' => $result['provider'] ?? 'unknown',
+                    'cost' => $cost,
+                    'error_message' => $result['success'] ? null : ($result['message'] ?? 'Erreur inconnue'),
+                    'provider_response' => $result,
+                ]);
+
                 if ($result['success']) {
                     return response()->json([
                         'message' => 'Message envoyé avec succès',
                         'data' => [
+                            'message_id' => $messageRecord->id,
                             'provider' => $result['provider'],
                             'phone' => $result['phone'],
                             'sms_count' => ceil(strlen($message) / 160),
+                            'cost' => $cost,
                         ]
                     ]);
                 }
@@ -67,10 +122,33 @@ class MessageController extends Controller
                 // Envoi en masse
                 $result = $this->smsRouter->sendBulkSms($recipients, $message);
 
+                // Enregistrer chaque message dans l'historique
+                $totalCost = 0;
+                $messageIds = [];
+
+                foreach ($result['details'] as $detail) {
+                    $cost = $this->calculateCost($message, $detail['provider'] ?? 'airtel');
+                    $totalCost += $cost;
+
+                    $messageRecord = $this->saveMessageToHistory([
+                        'user_id' => $request->user()->id,
+                        'recipient_phone' => $detail['phone'] ?? '',
+                        'content' => $message,
+                        'status' => $detail['success'] ? 'sent' : 'failed',
+                        'provider' => $detail['provider'] ?? 'unknown',
+                        'cost' => $cost,
+                        'error_message' => $detail['success'] ? null : ($detail['message'] ?? 'Erreur inconnue'),
+                        'provider_response' => $detail,
+                    ]);
+
+                    $messageIds[] = $messageRecord->id;
+                }
+
                 Log::info('Bulk SMS sent', [
                     'total' => $result['total'],
                     'sent' => $result['sent'],
                     'failed' => $result['failed'],
+                    'total_cost' => $totalCost,
                 ]);
 
                 return response()->json([
@@ -80,12 +158,13 @@ class MessageController extends Controller
                         'sent' => $result['sent'],
                         'failed' => $result['failed'],
                         'sms_count' => ceil(strlen($message) / 160),
+                        'total_cost' => $totalCost,
                         'by_operator' => [
                             'airtel' => $analysis['airtel_count'],
                             'moov' => $analysis['moov_count'],
                             'unknown' => $analysis['unknown_count'],
                         ],
-                        'details' => $result['details'],
+                        'message_ids' => $messageIds,
                     ]
                 ]);
             }

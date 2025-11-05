@@ -11,6 +11,13 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Coût par SMS (en FCFA)
+    |--------------------------------------------------------------------------
+    */
+    'cost_per_sms' => env('SMS_COST_PER_UNIT', 20), // 20 FCFA par défaut
+
     // Configuration Airtel Gabon
     'airtel' => [
         'api_url' => env('AIRTEL_API_URL', 'https://messaging.airtel.ga:9002/smshttp/qs/'),
@@ -18,11 +25,13 @@ return [
         'password' => env('AIRTEL_PASSWORD', ''),
         'origin_addr' => env('AIRTEL_ORIGIN_ADDR', ''),
         'enabled' => env('AIRTEL_ENABLED', true),
+        'cost_per_sms' => env('AIRTEL_COST_PER_SMS', 20), // Coût spécifique Airtel
     ],
 
     // Configuration Moov Gabon (à configurer ultérieurement)
     'moov' => [
         'enabled' => env('MOOV_ENABLED', false), // Désactivé par défaut (API non disponible)
+        'cost_per_sms' => env('MOOV_COST_PER_SMS', 20), // Coût spécifique Moov
     ],
 
     /*
