@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Log;
 
 class MoovService
 {
-    protected string $apiUrl;
-    protected string $username;
-    protected string $password;
-    protected string $originAddr;
+    protected ?string $apiUrl;
+    protected ?string $username;
+    protected ?string $password;
+    protected ?string $originAddr;
 
     public function __construct()
     {
@@ -25,9 +25,9 @@ class MoovService
         } else {
             // Fallback sur les variables d'environnement
             $this->apiUrl = config('sms.moov.api_url', '');
-            $this->username = config('sms.moov.username');
-            $this->password = config('sms.moov.password');
-            $this->originAddr = config('sms.moov.origin_addr');
+            $this->username = config('sms.moov.username', '');
+            $this->password = config('sms.moov.password', '');
+            $this->originAddr = config('sms.moov.origin_addr', '');
         }
     }
 

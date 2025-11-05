@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Log;
 
 class AirtelService
 {
-    protected string $apiUrl;
-    protected string $username;
-    protected string $password;
-    protected string $originAddr;
+    protected ?string $apiUrl;
+    protected ?string $username;
+    protected ?string $password;
+    protected ?string $originAddr;
 
     public function __construct()
     {
@@ -25,9 +25,9 @@ class AirtelService
         } else {
             // Fallback sur les variables d'environnement
             $this->apiUrl = config('sms.airtel.api_url', 'https://messaging.airtel.ga:9002/smshttp/qs/');
-            $this->username = config('sms.airtel.username');
-            $this->password = config('sms.airtel.password');
-            $this->originAddr = config('sms.airtel.origin_addr');
+            $this->username = config('sms.airtel.username', '');
+            $this->password = config('sms.airtel.password', '');
+            $this->originAddr = config('sms.airtel.origin_addr', '');
         }
     }
 
