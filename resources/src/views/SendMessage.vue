@@ -91,10 +91,25 @@
             <input
               v-model="phoneNumber"
               type="tel"
-              placeholder="+33612345678"
+              placeholder="+241 77 75 07 37 ou 77750737"
+              @input="validatePhoneNumber"
               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              :class="phoneValidation.phone && !phoneValidation.phone.valid ? 'border-destructive' : ''"
             />
-            <p class="text-xs text-muted-foreground">Format international recommandé (ex: +33612345678)</p>
+            <div v-if="phoneValidation.phone" class="space-y-1">
+              <p v-if="phoneValidation.phone.valid" class="flex items-center gap-1.5 text-xs text-success">
+                <CheckCircleIcon class="w-4 h-4" />
+                <span>{{ phoneValidation.phone.operator_name }} ({{ phoneValidation.phone.prefix }}) - Format: {{ phoneValidation.phone.formatted }}</span>
+              </p>
+              <p v-else class="flex items-center gap-1.5 text-xs text-destructive">
+                <ExclamationCircleIcon class="w-4 h-4" />
+                <span>{{ phoneValidation.phone.message }}</span>
+              </p>
+            </div>
+            <p class="text-xs text-muted-foreground">
+              Format: +241 XX XX XX XX ou XX XX XX XX<br/>
+              Airtel: 77, 74, 76 | Moov: 60, 62, 65, 66
+            </p>
           </div>
 
           <!-- Multiple phone numbers -->
@@ -105,12 +120,31 @@
             </label>
             <textarea
               v-model="phoneNumbers"
-              placeholder="+33612345678&#10;+33698765432&#10;+33687654321"
+              @input="validateMultiplePhones"
+              placeholder="+241 77 75 07 37&#10;77 75 07 37&#10;62 34 56 78"
               rows="5"
               class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none font-mono"
             ></textarea>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+              <div class="flex items-center gap-1.5">
+                <div class="w-2 h-2 rounded-full bg-primary"></div>
+                <span><strong>{{ phoneNumbersCount }}</strong> total</span>
+              </div>
+              <div v-if="phoneValidation.multiple.airtel > 0" class="flex items-center gap-1.5">
+                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                <span><strong>{{ phoneValidation.multiple.airtel }}</strong> Airtel</span>
+              </div>
+              <div v-if="phoneValidation.multiple.moov > 0" class="flex items-center gap-1.5">
+                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                <span><strong>{{ phoneValidation.multiple.moov }}</strong> Moov</span>
+              </div>
+              <div v-if="phoneValidation.multiple.invalid > 0" class="flex items-center gap-1.5">
+                <div class="w-2 h-2 rounded-full bg-destructive"></div>
+                <span><strong>{{ phoneValidation.multiple.invalid }}</strong> invalide(s)</span>
+              </div>
+            </div>
             <p class="text-xs text-muted-foreground">
-              <span class="font-medium">{{ phoneNumbersCount }}</span> numéro(s) détecté(s)
+              Airtel: 77, 74, 76 | Moov: 60, 62, 65, 66
             </p>
           </div>
 
@@ -246,6 +280,85 @@ const sending = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 
+const phoneValidation = ref<{
+  phone: any
+  multiple: { airtel: number, moov: number, invalid: number }
+}>({
+  phone: null,
+  multiple: { airtel: 0, moov: 0, invalid: 0 }
+})
+
+// Fonction pour valider et détecter l'opérateur d'un numéro
+function detectOperator(phone: string) {
+  const cleaned = phone.replace(/\D/g, '')
+  let number = cleaned
+
+  if (number.startsWith('241')) {
+    number = number.substring(3)
+  }
+
+  if (number.length !== 8) {
+    return {
+      valid: false,
+      message: 'Le numéro doit contenir 8 chiffres',
+      operator: 'unknown'
+    }
+  }
+
+  const prefix = number.substring(0, 2)
+  const airtelPrefixes = ['77', '74', '76']
+  const moovPrefixes = ['60', '62', '65', '66']
+
+  if (airtelPrefixes.includes(prefix)) {
+    return {
+      valid: true,
+      operator: 'airtel',
+      operator_name: 'Airtel Gabon',
+      prefix: prefix,
+      formatted: `+241 ${number.substring(0, 2)} ${number.substring(2, 4)} ${number.substring(4, 6)} ${number.substring(6, 8)}`
+    }
+  }
+
+  if (moovPrefixes.includes(prefix)) {
+    return {
+      valid: true,
+      operator: 'moov',
+      operator_name: 'Moov Gabon',
+      prefix: prefix,
+      formatted: `+241 ${number.substring(0, 2)} ${number.substring(2, 4)} ${number.substring(4, 6)} ${number.substring(6, 8)}`
+    }
+  }
+
+  return {
+    valid: false,
+    message: `Préfixe ${prefix} non reconnu (Airtel: 77, 74, 76 | Moov: 60, 62, 65, 66)`,
+    operator: 'unknown'
+  }
+}
+
+function validatePhoneNumber() {
+  if (!phoneNumber.value.trim()) {
+    phoneValidation.value.phone = null
+    return
+  }
+
+  phoneValidation.value.phone = detectOperator(phoneNumber.value)
+}
+
+function validateMultiplePhones() {
+  const numbers = phoneNumbers.value.split('\n').filter(n => n.trim())
+  const stats = { airtel: 0, moov: 0, invalid: 0 }
+
+  numbers.forEach(num => {
+    const result = detectOperator(num)
+    if (result.operator === 'airtel') stats.airtel++
+    else if (result.operator === 'moov') stats.moov++
+    else stats.invalid++
+  })
+
+  phoneValidation.value.multiple = stats
+}
+
 const messageLength = computed(() => message.value.length)
 const smsCount = computed(() => Math.ceil(message.value.length / 160) || 1)
 
@@ -266,7 +379,7 @@ const estimatedRecipients = computed(() => {
 const totalSMS = computed(() => estimatedRecipients.value * smsCount.value)
 
 const estimatedCost = computed(() => {
-  const costPerSMS = 30
+  const costPerSMS = 20 // 20 FCFA par SMS
   return Math.round(totalSMS.value * costPerSMS)
 })
 

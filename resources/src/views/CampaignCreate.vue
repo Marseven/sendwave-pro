@@ -426,7 +426,7 @@ const estimatedRecipients = computed(() => {
 })
 
 const estimatedCost = computed(() => {
-  const costPerSMS = 30 // À récupérer depuis les paramètres
+  const costPerSMS = 20 // 20 FCFA par SMS (Airtel/Moov Gabon)
   return Math.round(estimatedRecipients.value * smsCount.value * costPerSMS)
 })
 
