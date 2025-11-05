@@ -37,7 +37,10 @@ class SmsRouter
 
         switch ($operator) {
             case 'airtel':
-                if (!config('sms.airtel.enabled')) {
+                $airtelConfig = \App\Models\SmsConfig::where('provider', 'airtel')->first();
+                $isEnabled = ($airtelConfig && $airtelConfig->is_active) || config('sms.airtel.enabled');
+
+                if (!$isEnabled) {
                     return [
                         'success' => false,
                         'message' => 'L\'API Airtel est désactivée',
@@ -49,7 +52,10 @@ class SmsRouter
                 return $this->airtelService->sendSms($phoneNumber, $message);
 
             case 'moov':
-                if (!config('sms.moov.enabled')) {
+                $moovConfig = \App\Models\SmsConfig::where('provider', 'moov')->first();
+                $isEnabled = ($moovConfig && $moovConfig->is_active) || config('sms.moov.enabled');
+
+                if (!$isEnabled) {
                     return [
                         'success' => false,
                         'message' => 'L\'API Moov n\'est pas encore configurée',

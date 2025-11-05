@@ -14,10 +14,21 @@ class AirtelService
 
     public function __construct()
     {
-        $this->apiUrl = config('sms.airtel.api_url', 'https://messaging.airtel.ga:9002/smshttp/qs/');
-        $this->username = config('sms.airtel.username');
-        $this->password = config('sms.airtel.password');
-        $this->originAddr = config('sms.airtel.origin_addr');
+        // Charger depuis la base de données en priorité, sinon depuis config
+        $dbConfig = \App\Models\SmsConfig::where('provider', 'airtel')->first();
+
+        if ($dbConfig && $dbConfig->is_active) {
+            $this->apiUrl = $dbConfig->api_url;
+            $this->username = $dbConfig->username;
+            $this->password = $dbConfig->password;
+            $this->originAddr = $dbConfig->origin_addr;
+        } else {
+            // Fallback sur les variables d'environnement
+            $this->apiUrl = config('sms.airtel.api_url', 'https://messaging.airtel.ga:9002/smshttp/qs/');
+            $this->username = config('sms.airtel.username');
+            $this->password = config('sms.airtel.password');
+            $this->originAddr = config('sms.airtel.origin_addr');
+        }
     }
 
     /**

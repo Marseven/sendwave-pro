@@ -14,10 +14,21 @@ class MoovService
 
     public function __construct()
     {
-        $this->apiUrl = config('sms.moov.api_url', '');
-        $this->username = config('sms.moov.username');
-        $this->password = config('sms.moov.password');
-        $this->originAddr = config('sms.moov.origin_addr');
+        // Charger depuis la base de données en priorité, sinon depuis config
+        $dbConfig = \App\Models\SmsConfig::where('provider', 'moov')->first();
+
+        if ($dbConfig && $dbConfig->is_active) {
+            $this->apiUrl = $dbConfig->api_url;
+            $this->username = $dbConfig->username;
+            $this->password = $dbConfig->password;
+            $this->originAddr = $dbConfig->origin_addr;
+        } else {
+            // Fallback sur les variables d'environnement
+            $this->apiUrl = config('sms.moov.api_url', '');
+            $this->username = config('sms.moov.username');
+            $this->password = config('sms.moov.password');
+            $this->originAddr = config('sms.moov.origin_addr');
+        }
     }
 
     /**

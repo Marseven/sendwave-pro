@@ -43,11 +43,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // API Keys
     Route::apiResource('api-keys', ApiKeyController::class);
 
-    // SMS Providers
+    // SMS Providers (anciens)
     Route::get('sms-providers', [SmsProviderController::class, 'index']);
     Route::post('sms-providers', [SmsProviderController::class, 'store']);
     Route::get('sms-providers/{code}', [SmsProviderController::class, 'show']);
     Route::post('sms-providers/{code}/test', [SmsProviderController::class, 'test']);
+
+    // SMS Configurations (Airtel & Moov)
+    Route::get('sms-configs', [\App\Http\Controllers\Api\SmsConfigController::class, 'index']);
+    Route::get('sms-configs/{provider}', [\App\Http\Controllers\Api\SmsConfigController::class, 'show']);
+    Route::put('sms-configs/{provider}', [\App\Http\Controllers\Api\SmsConfigController::class, 'update']);
+    Route::post('sms-configs/{provider}/test', [\App\Http\Controllers\Api\SmsConfigController::class, 'test']);
+    Route::post('sms-configs/{provider}/toggle', [\App\Http\Controllers\Api\SmsConfigController::class, 'toggle']);
 
     // Message History (doit être AVANT les routes génériques)
     Route::get('messages/history', [MessageHistoryController::class, 'index']);
