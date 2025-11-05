@@ -38,25 +38,28 @@ cd /home/u663389624/domains/jobs-conseil.com/public_html/mysmscampaign
 git pull origin main
 ```
 
-#### Étape 3 : Copier le fichier .env de production
+#### Étape 3 : Mettre à jour le fichier .env
 ```bash
-# Sauvegarder l'ancien .env (optionnel)
-cp .env .env.backup
-
-# Utiliser le nouveau fichier de production
-cp .env.production .env
+# Éditer le fichier .env existant
+nano .env
 ```
 
-#### Étape 4 : Modifier les variables sensibles dans .env
-Éditer le fichier `.env` et remplacer :
-- `DB_PASSWORD=YOUR_DB_PASSWORD` par le vrai mot de passe de la base de données
-- `APP_KEY=` si nécessaire (exécuter `php artisan key:generate`)
-- Les clés API SMS si disponibles
+#### Étape 4 : Ajouter les variables CORS et Sanctum dans .env
+Ajouter ces lignes à la fin du fichier `.env` (si elles n'existent pas déjà) :
 
-```bash
-nano .env
-# ou
-vi .env
+```env
+# CORS Configuration (séparés par des virgules)
+CORS_ALLOWED_ORIGINS=https://lightgreen-otter-916987.hostingersite.com,http://mysmscampaign.jobs-conseil.com,https://mysmscampaign.jobs-conseil.com
+
+# Sanctum Configuration
+SANCTUM_STATEFUL_DOMAINS=lightgreen-otter-916987.hostingersite.com,mysmscampaign.jobs-conseil.com
+```
+
+**IMPORTANT** : Vérifier aussi que ces variables sont correctes :
+```env
+APP_URL=https://lightgreen-otter-916987.hostingersite.com
+APP_ENV=production
+APP_DEBUG=false
 ```
 
 #### Étape 5 : Vérifier la configuration
