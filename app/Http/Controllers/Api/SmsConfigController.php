@@ -52,14 +52,6 @@ class SmsConfigController extends Controller
      */
     public function update(Request $request, string $provider)
     {
-        $config = SmsConfig::where('provider', $provider)->first();
-
-        if (!$config) {
-            return response()->json([
-                'message' => 'Configuration non trouvée'
-            ], 404);
-        }
-
         $validated = $request->validate([
             'api_url' => 'nullable|string',
             'username' => 'nullable|string',
@@ -69,7 +61,25 @@ class SmsConfigController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        $config->update($validated);
+        // Valeurs par défaut selon le provider
+        $defaults = [
+            'airtel' => [
+                'api_url' => 'https://messaging.airtel.ga:9002/smshttp/qs/',
+                'cost_per_sms' => 20,
+                'is_active' => false,
+            ],
+            'moov' => [
+                'api_url' => '',
+                'cost_per_sms' => 20,
+                'is_active' => false,
+            ]
+        ];
+
+        // Créer ou mettre à jour la configuration
+        $config = SmsConfig::updateOrCreate(
+            ['provider' => $provider],
+            array_merge($defaults[$provider] ?? [], $validated)
+        );
 
         Log::info('SMS Config Updated', [
             'provider' => $provider,
@@ -146,6 +156,12 @@ class SmsConfigController extends Controller
     public function toggle(Request $request, string $provider)
     {
         $config = SmsConfig::where('provider', $provider)->first();
+
+        if (!$config) {
+            // Créer la config si elle n'existe pas
+            $this->initializeConfigs();
+            $config = SmsConfig::where('provider', $provider)->first();
+        }
 
         if (!$config) {
             return response()->json([
