@@ -61,8 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('messages/stats', [MessageHistoryController::class, 'stats']);
     Route::get('messages/export', [MessageHistoryController::class, 'export']);
 
-    // Messages
-    Route::post('messages/send', [MessageController::class, 'send']);
+    // Messages avec rate limiting
+    Route::post('messages/send', [MessageController::class, 'send'])
+        ->middleware('throttle:sms-send');
     Route::post('messages/analyze', [MessageController::class, 'analyzeNumbers']);
     Route::post('messages/number-info', [MessageController::class, 'getNumberInfo']);
 

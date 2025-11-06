@@ -56,6 +56,7 @@ class MessageController extends Controller
 
     /**
      * Envoyer un ou plusieurs messages SMS avec routage automatique par opérateur
+     * Utilise des queues pour éviter les erreurs 500 sur envois simultanés
      */
     public function send(Request $request)
     {
@@ -69,102 +70,63 @@ class MessageController extends Controller
         try {
             $recipients = $validated['recipients'];
             $message = $validated['message'];
+            $userId = $request->user()->id;
 
             // Analyser les numéros avant l'envoi
             $analysis = $this->smsRouter->analyzeNumbers($recipients);
 
-            Log::info('SMS Send Request', [
+            Log::info('SMS Send Request (Queue)', [
+                'user_id' => $userId,
                 'recipients_count' => count($recipients),
                 'message_length' => strlen($message),
                 'analysis' => $analysis,
             ]);
 
-            // Envoyer les messages avec routage automatique
+            // Calculer le coût estimé
+            $smsCount = ceil(strlen($message) / 160);
+            $estimatedCostPerSms = 20; // Moyenne Airtel/Moov
+            $totalEstimatedCost = count($recipients) * $smsCount * $estimatedCostPerSms;
+
+            // Dispatcher les jobs en arrière-plan
             if (count($recipients) === 1) {
                 // Envoi simple
-                $result = $this->smsRouter->sendSms($recipients[0], $message);
-
-                // Calculer le coût
-                $cost = $this->calculateCost($message, $result['provider'] ?? 'airtel');
-
-                // Enregistrer dans l'historique
-                $messageRecord = $this->saveMessageToHistory([
-                    'user_id' => $request->user()->id,
-                    'recipient_phone' => $result['phone'] ?? $recipients[0],
-                    'content' => $message,
-                    'status' => $result['success'] ? 'sent' : 'failed',
-                    'provider' => $result['provider'] ?? 'unknown',
-                    'cost' => $cost,
-                    'error_message' => $result['success'] ? null : ($result['message'] ?? 'Erreur inconnue'),
-                    'provider_response' => $result,
-                ]);
-
-                if ($result['success']) {
-                    return response()->json([
-                        'message' => 'Message envoyé avec succès',
-                        'data' => [
-                            'message_id' => $messageRecord->id,
-                            'provider' => $result['provider'],
-                            'phone' => $result['phone'],
-                            'sms_count' => ceil(strlen($message) / 160),
-                            'cost' => $cost,
-                        ]
-                    ]);
-                }
+                \App\Jobs\SendSmsJob::dispatch(
+                    $userId,
+                    $recipients[0],
+                    $message
+                )->onQueue('sms');
 
                 return response()->json([
-                    'message' => 'Échec de l\'envoi',
-                    'error' => $result['message'] ?? 'Erreur inconnue',
-                    'details' => $result,
-                ], 400);
-
+                    'message' => 'Message mis en file d\'attente pour envoi',
+                    'data' => [
+                        'recipients' => 1,
+                        'sms_count' => $smsCount,
+                        'estimated_cost' => $smsCount * $estimatedCostPerSms,
+                        'status' => 'queued',
+                        'info' => 'Le message sera envoyé dans quelques secondes. Consultez l\'historique pour le statut.'
+                    ]
+                ]);
             } else {
                 // Envoi en masse
-                $result = $this->smsRouter->sendBulkSms($recipients, $message);
-
-                // Enregistrer chaque message dans l'historique
-                $totalCost = 0;
-                $messageIds = [];
-
-                foreach ($result['details'] as $detail) {
-                    $cost = $this->calculateCost($message, $detail['provider'] ?? 'airtel');
-                    $totalCost += $cost;
-
-                    $messageRecord = $this->saveMessageToHistory([
-                        'user_id' => $request->user()->id,
-                        'recipient_phone' => $detail['phone'] ?? '',
-                        'content' => $message,
-                        'status' => $detail['success'] ? 'sent' : 'failed',
-                        'provider' => $detail['provider'] ?? 'unknown',
-                        'cost' => $cost,
-                        'error_message' => $detail['success'] ? null : ($detail['message'] ?? 'Erreur inconnue'),
-                        'provider_response' => $detail,
-                    ]);
-
-                    $messageIds[] = $messageRecord->id;
-                }
-
-                Log::info('Bulk SMS sent', [
-                    'total' => $result['total'],
-                    'sent' => $result['sent'],
-                    'failed' => $result['failed'],
-                    'total_cost' => $totalCost,
-                ]);
+                \App\Jobs\SendBulkSmsJob::dispatch(
+                    $userId,
+                    $recipients,
+                    $message
+                )->onQueue('bulk-sms');
 
                 return response()->json([
-                    'message' => 'Envoi terminé',
+                    'message' => 'Envoi en masse mis en file d\'attente',
                     'data' => [
-                        'total' => $result['total'],
-                        'sent' => $result['sent'],
-                        'failed' => $result['failed'],
-                        'sms_count' => ceil(strlen($message) / 160),
-                        'total_cost' => $totalCost,
+                        'total' => count($recipients),
+                        'sms_count' => $smsCount,
+                        'estimated_cost' => $totalEstimatedCost,
                         'by_operator' => [
                             'airtel' => $analysis['airtel_count'],
                             'moov' => $analysis['moov_count'],
                             'unknown' => $analysis['unknown_count'],
                         ],
-                        'message_ids' => $messageIds,
+                        'status' => 'queued',
+                        'info' => 'Les messages seront envoyés progressivement. Consultez l\'historique pour suivre l\'avancement.'
                     ]
                 ]);
             }
@@ -175,7 +137,7 @@ class MessageController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Erreur lors de l\'envoi du message',
+                'message' => 'Erreur lors de la mise en file d\'attente',
                 'error' => $e->getMessage()
             ], 500);
         }
