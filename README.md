@@ -67,9 +67,31 @@ Visit `http://localhost:8000`
 ## Documentation
 
 - **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Complete feature documentation
-- **[API Documentation](API_DOCUMENTATION.md)** - Full API reference
+- **[API Documentation](API_DOCUMENTATION.md)** - Full API reference (Markdown)
+- **[Swagger/OpenAPI](http://localhost:8000/api/documentation)** - Interactive API documentation (when server is running)
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Hostinger deployment instructions
 - **[Roadmap](ROADMAP.md)** - Development roadmap and phases
+
+### API Documentation
+
+**Interactive Swagger UI**:
+```bash
+# Start development server
+php artisan serve
+
+# Access Swagger UI
+http://localhost:8000/api/documentation
+
+# Get OpenAPI JSON
+http://localhost:8000/docs
+```
+
+The Swagger documentation provides:
+- Interactive API testing
+- Request/Response examples
+- Authentication testing with Bearer tokens
+- Complete endpoint reference
+- Model schemas
 
 ---
 
