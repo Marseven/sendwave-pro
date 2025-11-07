@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { DataTable, Column, Action } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { useAppStore, MessageTemplate } from "@/lib/store";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { templateService, Template } from "@/services/templateService";
 import {
   Dialog,
   DialogContent,
@@ -19,72 +19,111 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Templates() {
-  const { templates, loadTemplates, addTemplate, updateTemplate, deleteTemplate } = useAppStore();
   const { toast } = useToast();
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     loadTemplates();
-  }, [loadTemplates]);
-  const [editingTemplate, setEditingTemplate] = useState<MessageTemplate | null>(null);
+  }, []);
+
+  const loadTemplates = async () => {
+    try {
+      setLoading(true);
+      const data = await templateService.getAll();
+      setTemplates(data);
+    } catch (error) {
+      console.error('Failed to load templates:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les modèles",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    content: '',
+    message: '',
     category: ''
   });
 
   const resetForm = () => {
-    setFormData({ name: '', content: '', category: '' });
+    setFormData({ name: '', message: '', category: '' });
     setEditingTemplate(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (editingTemplate) {
-      updateTemplate(editingTemplate.id, formData);
+
+    try {
+      if (editingTemplate) {
+        await templateService.update(editingTemplate.id, formData);
+        toast({
+          title: "Modèle modifié",
+          description: `${formData.name} a été mis à jour avec succès.`,
+        });
+      } else {
+        await templateService.create(formData);
+        toast({
+          title: "Modèle créé",
+          description: `${formData.name} a été créé avec succès.`,
+        });
+      }
+
+      await loadTemplates();
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to save template:', error);
       toast({
-        title: "Modèle modifié",
-        description: `${formData.name} a été mis à jour avec succès.`,
-      });
-    } else {
-      addTemplate(formData);
-      toast({
-        title: "Modèle créé",
-        description: `${formData.name} a été créé avec succès.`,
+        title: "Erreur",
+        description: "Impossible de sauvegarder le modèle",
+        variant: "destructive"
       });
     }
-    
-    resetForm();
-    setIsDialogOpen(false);
   };
 
-  const handleEdit = (template: MessageTemplate) => {
+  const handleEdit = (template: Template) => {
     setEditingTemplate(template);
     setFormData({
       name: template.name,
-      content: template.content,
+      message: template.message,
       category: template.category
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (template: MessageTemplate) => {
-    deleteTemplate(template.id);
-    toast({
-      title: "Modèle supprimé",
-      description: `${template.name} a été supprimé avec succès.`,
-      variant: "destructive",
-    });
+  const handleDelete = async (template: Template) => {
+    try {
+      await templateService.delete(template.id);
+      toast({
+        title: "Modèle supprimé",
+        description: `${template.name} a été supprimé avec succès.`,
+        variant: "destructive",
+      });
+      await loadTemplates();
+    } catch (error) {
+      console.error('Failed to delete template:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le modèle",
+        variant: "destructive"
+      });
+    }
   };
 
-  const columns: Column<MessageTemplate>[] = [
+  const columns: Column<Template>[] = [
     {
       key: 'name',
       header: 'Nom du Modèle',
     },
     {
-      key: 'content',
+      key: 'message',
       header: 'Extrait de Contenu',
       render: (value) => (
         <div className="max-w-md truncate">
@@ -99,10 +138,11 @@ export default function Templates() {
     {
       key: 'updated_at',
       header: 'Dernière Modification',
+      render: (value) => value ? new Date(value as string).toLocaleDateString('fr-FR') : '-'
     }
   ];
 
-  const actions: Action<MessageTemplate>[] = [
+  const actions: Action<Template>[] = [
     {
       label: 'Modifier',
       onClick: handleEdit
@@ -169,17 +209,17 @@ export default function Templates() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="content">Contenu du message</Label>
+                  <Label htmlFor="message">Contenu du message</Label>
                   <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    id="message"
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Entrez le contenu de votre message..."
                     rows={6}
                     required
                   />
                   <p className="text-sm text-muted-foreground">
-                    Caractères: {formData.content.length}/160
+                    Caractères: {formData.message.length}/160
                   </p>
                 </div>
                 
@@ -202,12 +242,21 @@ export default function Templates() {
 
         {/* Templates Table */}
         <div className="bg-card rounded-lg border border-border p-6">
-          <DataTable
-            data={templates}
-            columns={columns}
-            actions={actions}
-            searchPlaceholder="Rechercher des modèles..."
-          />
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Chargement des modèles...</p>
+              </div>
+            </div>
+          ) : (
+            <DataTable
+              data={templates}
+              columns={columns}
+              actions={actions}
+              searchPlaceholder="Rechercher des modèles..."
+            />
+          )}
         </div>
       </div>
     </Layout>

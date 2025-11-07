@@ -5,21 +5,11 @@ import { Button } from "@/components/ui/button";
 import { DataTable, Column, Action } from "@/components/ui/data-table";
 import { Plus, Webhook, Activity, AlertCircle, Shield, RefreshCw, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface WebhookItem {
-  id: number;
-  name: string;
-  url: string;
-  events: string[];
-  is_active: boolean;
-  success_count: number;
-  failure_count: number;
-  last_triggered_at: string | null;
-}
+import webhookService, { Webhook as WebhookType } from "@/services/webhookService";
 
 export default function Webhooks() {
   const { toast } = useToast();
-  const [webhooks, setWebhooks] = useState<WebhookItem[]>([]);
+  const [webhooks, setWebhooks] = useState<WebhookType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,8 +19,8 @@ export default function Webhooks() {
   const loadWebhooks = async () => {
     try {
       setLoading(true);
-      // TODO: Charger depuis l'API
-      setWebhooks([]);
+      const data = await webhookService.getAll();
+      setWebhooks(data);
     } catch (error) {
       console.error('Failed to load webhooks:', error);
       toast({
@@ -43,7 +33,7 @@ export default function Webhooks() {
     }
   };
 
-  const columns: Column<WebhookItem>[] = [
+  const columns: Column<WebhookType>[] = [
     {
       key: 'name',
       header: 'Nom',
@@ -91,10 +81,10 @@ export default function Webhooks() {
     }
   ];
 
-  const actions: Action<WebhookItem>[] = [
+  const actions: Action<WebhookType>[] = [
     {
       label: 'Voir les logs',
-      onClick: (webhook) => {
+      onClick: async (webhook) => {
         toast({
           title: "Logs du webhook",
           description: `Affichage des logs pour "${webhook.name}"`,
@@ -103,20 +93,40 @@ export default function Webhooks() {
     },
     {
       label: 'Tester',
-      onClick: (webhook) => {
-        toast({
-          title: "Test en cours",
-          description: `Envoi d'un événement de test à "${webhook.name}"`,
-        });
+      onClick: async (webhook) => {
+        try {
+          const result = await webhookService.test(webhook.id);
+          toast({
+            title: result.success ? "Test réussi" : "Test échoué",
+            description: `Code: ${result.response_code}`,
+            variant: result.success ? "default" : "destructive"
+          });
+        } catch (error) {
+          toast({
+            title: "Erreur",
+            description: "Impossible de tester le webhook",
+            variant: "destructive"
+          });
+        }
       }
     },
     {
-      label: 'Modifier',
-      onClick: (webhook) => {
-        toast({
-          title: "Modification",
-          description: `Édition du webhook "${webhook.name}"`,
-        });
+      label: 'Toggle',
+      onClick: async (webhook) => {
+        try {
+          await webhookService.toggle(webhook.id);
+          toast({
+            title: "Statut modifié",
+            description: `Le webhook "${webhook.name}" a été ${webhook.is_active ? 'désactivé' : 'activé'}`,
+          });
+          await loadWebhooks();
+        } catch (error) {
+          toast({
+            title: "Erreur",
+            description: "Impossible de modifier le statut",
+            variant: "destructive"
+          });
+        }
       }
     }
   ];

@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { DataTable, Column, Action } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { useAppStore, Contact } from "@/lib/store";
 import { Plus, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { contactService, Contact } from "@/services/contactService";
 import {
   Dialog,
   DialogContent,
@@ -18,51 +18,74 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Contacts() {
-  const { contacts, loadContacts, addContact, updateContact, deleteContact } = useAppStore();
   const { toast } = useToast();
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     loadContacts();
-  }, [loadContacts]);
+  }, []);
+
+  const loadContacts = async () => {
+    try {
+      setLoading(true);
+      const data = await contactService.getAll();
+      setContacts(data);
+    } catch (error) {
+      console.error('Failed to load contacts:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les contacts",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     group: '',
-    status: 'Actif' as 'Actif' | 'En Attente' | 'Inactif'
+    status: 'active' as 'active' | 'inactive'
   });
 
   const resetForm = () => {
-    setFormData({ name: '', phone: '', group: '', status: 'Actif' });
+    setFormData({ name: '', phone: '', email: '', group: '', status: 'active' });
     setEditingContact(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (editingContact) {
-      updateContact(editingContact.id, {
-        ...formData,
-        last_connection: new Date().toISOString().split('T')[0]
-      });
+
+    try {
+      if (editingContact) {
+        await contactService.update(editingContact.id, formData);
+        toast({
+          title: "Contact modifié",
+          description: `${formData.name} a été mis à jour avec succès.`,
+        });
+      } else {
+        await contactService.create(formData);
+        toast({
+          title: "Contact ajouté",
+          description: `${formData.name} a été ajouté avec succès.`,
+        });
+      }
+
+      await loadContacts();
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to save contact:', error);
       toast({
-        title: "Contact modifié",
-        description: `${formData.name} a été mis à jour avec succès.`,
-      });
-    } else {
-      addContact({
-        ...formData,
-        last_connection: new Date().toISOString().split('T')[0]
-      });
-      toast({
-        title: "Contact ajouté",
-        description: `${formData.name} a été ajouté avec succès.`,
+        title: "Erreur",
+        description: "Impossible de sauvegarder le contact",
+        variant: "destructive"
       });
     }
-    
-    resetForm();
-    setIsDialogOpen(false);
   };
 
   const handleEdit = (contact: Contact) => {
@@ -70,19 +93,30 @@ export default function Contacts() {
     setFormData({
       name: contact.name,
       phone: contact.phone,
-      group: contact.group,
+      email: contact.email || '',
+      group: contact.custom_fields?.group || '',
       status: contact.status
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (contact: Contact) => {
-    deleteContact(contact.id);
-    toast({
-      title: "Contact supprimé",
-      description: `${contact.name} a été supprimé avec succès.`,
-      variant: "destructive",
-    });
+  const handleDelete = async (contact: Contact) => {
+    try {
+      await contactService.delete(contact.id);
+      toast({
+        title: "Contact supprimé",
+        description: `${contact.name} a été supprimé avec succès.`,
+        variant: "destructive",
+      });
+      await loadContacts();
+    } catch (error) {
+      console.error('Failed to delete contact:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le contact",
+        variant: "destructive"
+      });
+    }
   };
 
   const columns: Column<Contact>[] = [
@@ -95,16 +129,24 @@ export default function Contacts() {
       header: 'Numéro de Téléphone',
     },
     {
-      key: 'group',
-      header: 'Groupe',
+      key: 'email',
+      header: 'Email',
     },
     {
       key: 'status',
       header: 'Statut',
+      render: (value) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          value === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+        }`}>
+          {value === 'active' ? 'Actif' : 'Inactif'}
+        </span>
+      )
     },
     {
-      key: 'last_connection',
-      header: 'Dernière Connexion',
+      key: 'created_at',
+      header: 'Date de création',
+      render: (value) => value ? new Date(value as string).toLocaleDateString('fr-FR') : '-'
     }
   ];
 
@@ -170,11 +212,22 @@ export default function Contacts() {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="group">Groupe</Label>
-                  <Select 
-                    value={formData.group} 
+                  <Label htmlFor="email">Email (optionnel)</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="email@example.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="group">Groupe (optionnel)</Label>
+                  <Select
+                    value={formData.group}
                     onValueChange={(value) => setFormData({ ...formData, group: value })}
                   >
                     <SelectTrigger>
@@ -187,12 +240,12 @@ export default function Contacts() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="status">Statut</Label>
-                  <Select 
-                    value={formData.status} 
-                    onValueChange={(value: 'Actif' | 'En Attente' | 'Inactif') => 
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value: 'active' | 'inactive') =>
                       setFormData({ ...formData, status: value })
                     }
                   >
@@ -200,9 +253,8 @@ export default function Contacts() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Actif">Actif</SelectItem>
-                      <SelectItem value="En Attente">En Attente</SelectItem>
-                      <SelectItem value="Inactif">Inactif</SelectItem>
+                      <SelectItem value="active">Actif</SelectItem>
+                      <SelectItem value="inactive">Inactif</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -226,12 +278,21 @@ export default function Contacts() {
 
         {/* Contacts Table */}
         <div className="bg-card rounded-lg border border-border p-6">
-          <DataTable
-            data={contacts}
-            columns={columns}
-            actions={actions}
-            searchPlaceholder="Rechercher des contacts..."
-          />
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Chargement des contacts...</p>
+              </div>
+            </div>
+          ) : (
+            <DataTable
+              data={contacts}
+              columns={columns}
+              actions={actions}
+              searchPlaceholder="Rechercher des contacts..."
+            />
+          )}
         </div>
       </div>
     </Layout>
