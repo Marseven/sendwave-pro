@@ -4,10 +4,11 @@ import { DataTable, Column, Action } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppStore, SubAccount } from "@/lib/store";
+import { useAppStore } from "@/lib/store";
 import { Plus, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { subAccountService, SubAccount } from "@/services/subAccountService";
 import {
   Dialog,
   DialogContent,
@@ -21,69 +22,101 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Accounts() {
-  const { user, subAccounts, loadSubAccounts, addSubAccount, updateSubAccount, deleteSubAccount } = useAppStore();
+  const { user } = useAppStore();
   const { toast } = useToast();
+  const [subAccounts, setSubAccounts] = useState<SubAccount[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     loadSubAccounts();
-  }, [loadSubAccounts]);
+  }, []);
+
+  const loadSubAccounts = async () => {
+    try {
+      setLoading(true);
+      const data = await subAccountService.getAll();
+      setSubAccounts(data);
+    } catch (error) {
+      console.error('Failed to load sub-accounts:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les sous-comptes",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [editingAccount, setEditingAccount] = useState<SubAccount | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    status: 'Actif' as 'Actif' | 'Inactif'
+    status: 'active' as 'active' | 'inactive'
   });
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', status: 'Actif' });
+    setFormData({ name: '', status: 'active' });
     setEditingAccount(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (editingAccount) {
-      updateSubAccount(editingAccount.id, {
-        ...formData,
-        last_connection: new Date().toISOString().split('T')[0]
-      });
+
+    try {
+      if (editingAccount) {
+        await subAccountService.update(editingAccount.id, formData);
+        toast({
+          title: "Sous-compte modifié",
+          description: `${formData.name} a été mis à jour avec succès.`,
+        });
+      } else {
+        await subAccountService.create(formData);
+        toast({
+          title: "Sous-compte créé",
+          description: `${formData.name} a été créé avec succès.`,
+        });
+      }
+
+      await loadSubAccounts();
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to save sub-account:', error);
       toast({
-        title: "Sous-compte modifié",
-        description: `${formData.name} a été mis à jour avec succès.`,
-      });
-    } else {
-      addSubAccount({
-        ...formData,
-        last_connection: new Date().toISOString().split('T')[0]
-      });
-      toast({
-        title: "Sous-compte créé",
-        description: `${formData.name} a été créé avec succès.`,
+        title: "Erreur",
+        description: "Impossible de sauvegarder le sous-compte",
+        variant: "destructive"
       });
     }
-    
-    resetForm();
-    setIsDialogOpen(false);
   };
 
   const handleEdit = (account: SubAccount) => {
     setEditingAccount(account);
     setFormData({
       name: account.name,
-      email: account.email,
       status: account.status
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (account: SubAccount) => {
-    deleteSubAccount(account.id);
-    toast({
-      title: "Sous-compte supprimé",
-      description: `${account.name} a été supprimé avec succès.`,
-      variant: "destructive",
-    });
+  const handleDelete = async (account: SubAccount) => {
+    try {
+      await subAccountService.delete(account.id);
+      toast({
+        title: "Sous-compte supprimé",
+        description: `${account.name} a été supprimé avec succès.`,
+        variant: "destructive",
+      });
+      await loadSubAccounts();
+    } catch (error) {
+      console.error('Failed to delete sub-account:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le sous-compte",
+        variant: "destructive"
+      });
+    }
   };
 
   const columns: Column<SubAccount>[] = [
@@ -92,16 +125,30 @@ export default function Accounts() {
       header: 'Nom du Sous-compte',
     },
     {
-      key: 'email',
-      header: 'Email',
-    },
-    {
       key: 'status',
       header: 'Statut',
+      render: (value) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          value === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+        }`}>
+          {value === 'active' ? 'Actif' : 'Inactif'}
+        </span>
+      )
     },
     {
-      key: 'last_connection',
-      header: 'Dernière Connexion',
+      key: 'credits_remaining',
+      header: 'Crédits restants',
+      render: (value) => (value as number).toLocaleString('fr-FR')
+    },
+    {
+      key: 'delivery_rate',
+      header: 'Taux de livraison',
+      render: (value) => `${(value as number).toFixed(1)}%`
+    },
+    {
+      key: 'created_at',
+      header: 'Date de création',
+      render: (value) => value ? new Date(value as string).toLocaleDateString('fr-FR') : '-'
     }
   ];
 
@@ -208,23 +255,12 @@ export default function Accounts() {
                         required
                       />
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="status">Statut</Label>
-                      <Select 
-                        value={formData.status} 
-                        onValueChange={(value: 'Actif' | 'Inactif') => 
+                      <Select
+                        value={formData.status}
+                        onValueChange={(value: 'active' | 'inactive') =>
                           setFormData({ ...formData, status: value })
                         }
                       >
@@ -232,8 +268,8 @@ export default function Accounts() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Actif">Actif</SelectItem>
-                          <SelectItem value="Inactif">Inactif</SelectItem>
+                          <SelectItem value="active">Actif</SelectItem>
+                          <SelectItem value="inactive">Inactif</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -257,12 +293,21 @@ export default function Accounts() {
 
             {/* Sub Accounts Table */}
             <div className="bg-card rounded-lg border border-border p-6">
-              <DataTable
-                data={subAccounts}
-                columns={columns}
-                actions={actions}
-                searchPlaceholder="Rechercher des sous-comptes..."
-              />
+              {loading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Chargement des sous-comptes...</p>
+                  </div>
+                </div>
+              ) : (
+                <DataTable
+                  data={subAccounts}
+                  columns={columns}
+                  actions={actions}
+                  searchPlaceholder="Rechercher des sous-comptes..."
+                />
+              )}
             </div>
           </TabsContent>
         </Tabs>
