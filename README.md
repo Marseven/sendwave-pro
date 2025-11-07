@@ -1,323 +1,381 @@
-# JOBS SMS - API Laravel + React
+# SendWave Pro
 
-Application complète de gestion de campagnes SMS avec backend Laravel et frontend React intégré.
+**Enterprise SMS Campaign Management Platform**
 
-## Technologies
+Version 2.1 | Built with Laravel 12 + Vue 3 + TypeScript
 
-### Backend
-- **Laravel 12** - Framework PHP
-- **Laravel Sanctum** - Authentification API
-- **MySQL/SQLite** - Base de données
+---
 
-### Frontend
-- **React 18** - Framework JavaScript
-- **TypeScript** - Typage statique
-- **Vite** - Build tool
-- **Tailwind CSS** - Framework CSS
-- **shadcn-ui** - Composants UI
-- **Zustand** - State management
-- **React Router** - Routing
+## Overview
 
-### Services SMS
-- **MSG91** - Provider SMS international
-- **SMSALA** - Provider SMS Afrique
-- **WAPI** - Provider WhatsApp/SMS Afrique
+SendWave Pro is a comprehensive SMS campaign management platform designed specifically for the Gabon market, supporting both Airtel and Moov operators with automatic routing and operator detection.
 
-## Installation
+### Key Features
 
-### Prérequis
+- 📱 **Multi-Provider SMS** - Airtel & Moov Gabon integration with automatic routing
+- 👥 **Contact Management** - Advanced contact organization with custom fields and groups
+- 🚀 **Campaign Management** - Recurring campaigns, A/B testing, and scheduling
+- 🔐 **Sub-Accounts** - Role-based access control for team collaboration
+- 📝 **Template Library** - Reusable message templates with dynamic variables
+- 🔗 **Webhooks** - Event-driven integrations with 12 event types
+- 🛡️ **Security** - Blacklist management and comprehensive audit logging
+- 🌍 **i18n** - French/English localization with Gabon timezone
+- 📊 **Analytics** - Message history, campaign tracking, and delivery reports
+
+---
+
+## Quick Start
+
+### Requirements
+
 - PHP 8.2+
-- Composer
+- MySQL 5.7+ / MariaDB 10.3+
+- Composer 2.x
 - Node.js 18+
-- NPM/Bun
-- MySQL/SQLite
 
-### Étapes d'installation
+### Installation
 
-1. **Cloner le projet**
 ```bash
-git clone <url-du-repo>
+# Clone repository
+git clone https://github.com/yourusername/sendwave-pro.git
 cd sendwave-pro
-```
 
-2. **Installer les dépendances PHP**
-```bash
+# Install PHP dependencies
 composer install
-```
 
-3. **Installer les dépendances JavaScript**
-```bash
+# Install Node dependencies
+cd resources
 npm install
-```
+npm run build
+cd ..
 
-4. **Configuration de l'environnement**
-```bash
+# Configure environment
 cp .env.example .env
 php artisan key:generate
-```
 
-5. **Configurer la base de données**
-
-Éditer `.env` :
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=jobs_sms
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-Ou utiliser SQLite (par défaut):
-```env
-DB_CONNECTION=sqlite
-```
-
-6. **Configurer les API SMS**
-
-Éditer `.env` :
-```env
-# MSG91
-MSG91_API_KEY=votre_cle_api
-MSG91_SENDER_ID=JOBSMS
-
-# SMSALA
-SMSALA_API_KEY=votre_cle_api
-SMSALA_SENDER_ID=JOBSMS
-
-# WAPI
-WAPI_API_KEY=votre_cle_api
-WAPI_SENDER_ID=JOBSMS
-```
-
-7. **Exécuter les migrations**
-```bash
+# Setup database
 php artisan migrate
-```
 
-8. **Seeder (données de test)**
-```bash
-php artisan db:seed --class=UserSeeder
-```
-
-Utilisateur créé:
-- Email: `admin@jobs-sms.com`
-- Mot de passe: `password123`
-
-## Développement
-
-### Lancer le serveur Laravel
-```bash
+# Start development server
 php artisan serve
 ```
-Le serveur démarre sur `http://localhost:8000`
 
-### Lancer Vite (pour le frontend React)
+Visit `http://localhost:8000`
+
+---
+
+## Documentation
+
+- **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Complete feature documentation
+- **[API Documentation](API_DOCUMENTATION.md)** - Full API reference
+- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Hostinger deployment instructions
+- **[Roadmap](ROADMAP.md)** - Development roadmap and phases
+
+---
+
+## Platform Statistics
+
+| Metric | Count |
+|--------|-------|
+| API Routes | 89+ |
+| Database Tables | 19 |
+| Models | 17 |
+| Controllers | 13 |
+| Services | 4 |
+| Vue Components | 17 |
+| Migrations | 27 |
+
+---
+
+## Tech Stack
+
+**Backend**:
+- Laravel 12
+- MySQL
+- Laravel Sanctum (Authentication)
+- Laravel Queue (Job Processing)
+
+**Frontend**:
+- Vue 3 (Composition API)
+- TypeScript
+- Vite
+- Tailwind CSS
+- Heroicons
+
+**SMS Providers**:
+- Airtel Gabon API
+- Moov Gabon API
+
+**Integrations**:
+- Webhooks (HMAC-SHA256 signatures)
+- RESTful API
+
+---
+
+## Core Features
+
+### 1. Contact Management
+- Import contacts from CSV
+- Custom fields (JSON-based)
+- Contact groups with many-to-many relationships
+- Bulk operations
+- Status tracking
+
+### 2. Campaign Management
+- One-time and recurring campaigns
+- A/B testing with up to 5 variants
+- Dynamic message variables: `{nom}`, `{email}`, `{custom.field}`
+- Automatic operator routing
+- Campaign scheduling
+
+### 3. Sub-Accounts
+- 4 role types: admin, manager, sender, viewer
+- Granular permissions
+- Credit limits per sub-account
+- Suspend/activate functionality
+- Last connection tracking
+
+### 4. Webhooks
+12 event types:
+- `message.sent`, `message.delivered`, `message.failed`
+- `campaign.started`, `campaign.completed`, `campaign.failed`
+- `contact.created`, `contact.updated`, `contact.deleted`
+- `sub_account.created`, `sub_account.suspended`
+- `blacklist.added`
+
+Features:
+- HMAC-SHA256 signatures
+- Retry logic with exponential backoff
+- Delivery logs and statistics
+- Test endpoint
+
+### 5. Security
+- Blacklist management
+- Comprehensive audit logs
+- IP and user agent tracking
+- Sanctum API authentication
+- CSRF protection
+- Rate limiting
+
+---
+
+## API Quick Reference
+
+### Authentication
 ```bash
-npm run dev
-```
-
-### Build de production
-```bash
-npm run build
-```
-
-## Structure du projet
-
-```
-sendwave-pro/
-├── app/
-│   ├── Http/
-│   │   └── Controllers/
-│   │       └── Api/
-│   │           ├── AuthController.php
-│   │           ├── ContactController.php
-│   │           ├── CampaignController.php
-│   │           ├── MessageTemplateController.php
-│   │           ├── SubAccountController.php
-│   │           └── ApiKeyController.php
-│   ├── Models/
-│   │   ├── User.php
-│   │   ├── Contact.php
-│   │   ├── Campaign.php
-│   │   ├── MessageTemplate.php
-│   │   ├── SubAccount.php
-│   │   └── ApiKey.php
-│   └── Services/
-│       └── SMS/
-│           ├── SmsServiceInterface.php
-│           ├── SmsServiceFactory.php
-│           ├── Msg91Service.php
-│           ├── SmsAlaService.php
-│           └── WapiService.php
-├── resources/
-│   ├── src/              # Code source React
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── lib/
-│   │   └── main.tsx
-│   └── views/
-│       └── app.blade.php # Point d'entrée React
-├── database/
-│   ├── migrations/
-│   └── seeders/
-└── routes/
-    ├── api.php           # Routes API
-    └── web.php           # Routes web (frontend React)
-```
-
-## API Endpoints
-
-### Authentification
-
-#### POST `/api/auth/login`
-Connexion utilisateur
-```json
+# Register
+POST /api/auth/register
+Content-Type: application/json
 {
-  "email": "admin@jobs-sms.com",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+# Login
+POST /api/auth/login
+Content-Type: application/json
+{
+  "email": "john@example.com",
   "password": "password123"
 }
 ```
 
-#### POST `/api/auth/register`
-Inscription utilisateur
-```json
+### Send SMS
+```bash
+POST /api/messages/send
+Authorization: Bearer {token}
+Content-Type: application/json
 {
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123",
-  "role": "User"
+  "recipients": ["+24162000001", "+24177000002"],
+  "message": "Hello {nom}, your code is 123456"
 }
 ```
 
-#### POST `/api/auth/logout`
-Déconnexion (requiert authentification)
-
-#### GET `/api/auth/me`
-Obtenir l'utilisateur connecté (requiert authentification)
-
-### Ressources (requièrent authentification)
-
-Toutes les routes suivantes nécessitent le header:
-```
+### Create Webhook
+```bash
+POST /api/webhooks
 Authorization: Bearer {token}
+Content-Type: application/json
+{
+  "name": "My Integration",
+  "url": "https://myapp.com/webhooks/sendwave",
+  "events": ["message.sent", "campaign.completed"]
+}
 ```
 
-#### Contacts
-- `GET /api/contacts` - Liste des contacts
-- `POST /api/contacts` - Créer un contact
-- `GET /api/contacts/{id}` - Voir un contact
-- `PUT /api/contacts/{id}` - Modifier un contact
-- `DELETE /api/contacts/{id}` - Supprimer un contact
+See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for complete reference.
 
-#### Campagnes
-- `GET /api/campaigns` - Liste des campagnes
-- `POST /api/campaigns` - Créer une campagne
-- `GET /api/campaigns/{id}` - Voir une campagne
-- `PUT /api/campaigns/{id}` - Modifier une campagne
-- `DELETE /api/campaigns/{id}` - Supprimer une campagne
+---
 
-#### Templates de message
-- `GET /api/templates` - Liste des templates
-- `POST /api/templates` - Créer un template
-- `GET /api/templates/{id}` - Voir un template
-- `PUT /api/templates/{id}` - Modifier un template
-- `DELETE /api/templates/{id}` - Supprimer un template
+## Environment Configuration
 
-#### Sous-comptes
-- `GET /api/sub-accounts` - Liste des sous-comptes
-- `POST /api/sub-accounts` - Créer un sous-compte
-- `GET /api/sub-accounts/{id}` - Voir un sous-compte
-- `PUT /api/sub-accounts/{id}` - Modifier un sous-compte
-- `DELETE /api/sub-accounts/{id}` - Supprimer un sous-compte
-
-#### Clés API
-- `GET /api/api-keys` - Liste des clés API
-- `POST /api/api-keys` - Créer une clé API
-- `GET /api/api-keys/{id}` - Voir une clé API
-- `PUT /api/api-keys/{id}` - Modifier une clé API
-- `DELETE /api/api-keys/{id}` - Supprimer une clé API
-
-## Utilisation des services SMS
-
-### Dans le code PHP
-
-```php
-use App\Services\SMS\SmsServiceFactory;
-
-// Créer un service selon le provider
-$smsService = SmsServiceFactory::make('msg91'); // ou 'smsala', 'wapi'
-
-// Envoyer un SMS
-$result = $smsService->sendSms('+241066123456', 'Votre message ici');
-
-// Envoyer un SMS en masse
-$recipients = ['+241066123456', '+241077654321'];
-$result = $smsService->sendBulkSms($recipients, 'Votre message ici');
-
-// Vérifier le statut d'un message
-$status = $smsService->getMessageStatus('message_id_123');
-
-// Vérifier le solde
-$balance = $smsService->getBalance();
-```
-
-## Commandes Artisan utiles
-
-```bash
-# Créer un contrôleur API
-php artisan make:controller Api/NomController --api
-
-# Créer un modèle avec migration
-php artisan make:model NomModele -m
-
-# Créer un seeder
-php artisan make:seeder NomSeeder
-
-# Rafraîchir la base de données
-php artisan migrate:fresh
-
-# Voir les routes
-php artisan route:list
-```
-
-## Configuration CORS
-
-Le CORS est configuré par défaut dans Laravel. Pour l'ajuster, éditer `config/cors.php`.
-
-## Sécurité
-
-- Laravel Sanctum gère l'authentification API par tokens
-- Les mots de passe sont hashés avec bcrypt
-- Protection CSRF activée
-- Validation des données entrantes
-- Rate limiting sur les API
-
-## Production
-
-1. **Build du frontend**
-```bash
-npm run build
-```
-
-2. **Optimiser Laravel**
-```bash
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
-
-3. **Variables d'environnement**
 ```env
+# Application
+APP_NAME="SendWave Pro"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://votre-domaine.com
+APP_URL=https://yourdomain.com
+APP_TIMEZONE=Africa/Libreville
+APP_LOCALE=fr
+
+# Database
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=sendwave_pro
+DB_USERNAME=your_user
+DB_PASSWORD=your_password
+
+# SMS Providers
+AIRTEL_CLIENT_ID=your_airtel_client_id
+AIRTEL_CLIENT_SECRET=your_airtel_client_secret
+AIRTEL_SENDER_ID=SENDWAVE
+
+MOOV_API_KEY=your_moov_api_key
+MOOV_SENDER_ID=SENDWAVE
 ```
 
-## Support
+---
 
-Pour toute question ou problème, contactez l'équipe de développement.
+## Development
+
+### Run Migrations
+```bash
+php artisan migrate
+```
+
+### Seed Database (if seeders exist)
+```bash
+php artisan db:seed
+```
+
+### Build Frontend
+```bash
+cd resources
+npm run dev      # Development with HMR
+npm run build    # Production build
+```
+
+### Run Tests
+```bash
+php artisan test
+```
+
+### Clear Caches
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+```
+
+---
+
+## Production Deployment
+
+See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed instructions.
+
+Quick checklist:
+- ✅ Set `APP_DEBUG=false`
+- ✅ Run `composer install --optimize-autoloader --no-dev`
+- ✅ Run `npm run build`
+- ✅ Set up cron job for scheduler
+- ✅ Configure SSL certificate
+- ✅ Set correct file permissions
+- ✅ Run migrations
+- ✅ Cache config/routes/views
+
+---
+
+## Cron Configuration
+
+Add to crontab for recurring campaigns:
+```bash
+* * * * * cd /path/to/sendwave-pro && php artisan schedule:run >> /dev/null 2>&1
+```
+
+---
+
+## Security
+
+### Best Practices Implemented
+- ✅ CSRF protection
+- ✅ SQL injection prevention (Eloquent ORM)
+- ✅ XSS protection (auto-escaping)
+- ✅ Rate limiting on sensitive endpoints
+- ✅ Secure password hashing (bcrypt)
+- ✅ API token authentication (Sanctum)
+- ✅ Audit logging for all actions
+- ✅ HTTPS enforcement in production
+
+### Webhook Security
+All webhooks include HMAC-SHA256 signature in `X-Webhook-Signature` header.
+
+Verify signatures:
+```php
+$signature = hash_hmac('sha256', $payload, $secret);
+if (hash_equals($signature, $receivedSignature)) {
+    // Valid
+}
+```
+
+---
+
+## Support & Contribution
+
+### Reporting Issues
+Please use the GitHub issue tracker for bug reports and feature requests.
+
+### Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+---
 
 ## License
 
-Propriétaire - JOBS SMS © 2024
+Proprietary - All rights reserved
+
+---
+
+## Credits
+
+**Developed**: November 2025
+**Framework**: Laravel 12 + Vue 3
+**Target Market**: Gabon (Airtel/Moov)
+
+Built with [Claude Code](https://claude.com/claude-code)
+
+---
+
+## Changelog
+
+### v2.1 (2025-11-07)
+- ✨ Added Webhooks system (12 event types)
+- ✨ HMAC-SHA256 webhook signatures
+- ✨ Retry logic with exponential backoff
+- ✨ Webhook delivery logs and statistics
+- 📚 Added API documentation
+- 📚 Added deployment guide
+- ⚡ Optimized .htaccess for production
+- 🔒 Enhanced security headers
+
+### v2.0 (2025-11-07)
+- ✨ Sub-accounts with role-based access
+- ✨ Contact groups and custom fields
+- ✨ Recurring campaigns
+- ✨ A/B testing
+- ✨ Dynamic message variables
+- ✨ Template library
+- ✨ Blacklist management
+- ✨ Audit logging
+- 🌍 French/English localization
+- 📊 Message history and analytics
+
+---
+
+**For detailed documentation, see the `/docs` directory or individual markdown files in the project root.**
