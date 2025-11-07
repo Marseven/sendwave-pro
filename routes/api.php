@@ -106,4 +106,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('audit-logs', [\App\Http\Controllers\Api\AuditLogController::class, 'index']);
     Route::get('audit-logs/actions', [\App\Http\Controllers\Api\AuditLogController::class, 'actions']);
     Route::get('audit-logs/{id}', [\App\Http\Controllers\Api\AuditLogController::class, 'show']);
+
+    // Webhooks
+    Route::get('webhooks/events', [\App\Http\Controllers\Api\WebhookController::class, 'events']);
+    Route::get('webhooks/{id}/logs', [\App\Http\Controllers\Api\WebhookController::class, 'logs']);
+    Route::get('webhooks/{id}/stats', [\App\Http\Controllers\Api\WebhookController::class, 'stats']);
+    Route::post('webhooks/{id}/test', [\App\Http\Controllers\Api\WebhookController::class, 'test']);
+    Route::post('webhooks/{id}/toggle', [\App\Http\Controllers\Api\WebhookController::class, 'toggle']);
+    Route::apiResource('webhooks', \App\Http\Controllers\Api\WebhookController::class);
 });

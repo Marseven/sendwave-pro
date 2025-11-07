@@ -9,16 +9,19 @@ use App\Models\CampaignVariant;
 use App\Models\Message;
 use App\Models\Contact;
 use App\Services\SMS\SmsRouter;
+use App\Services\WebhookService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class CampaignController extends Controller
 {
     protected SmsRouter $smsRouter;
+    protected WebhookService $webhookService;
 
-    public function __construct()
+    public function __construct(WebhookService $webhookService)
     {
         $this->smsRouter = new SmsRouter();
+        $this->webhookService = $webhookService;
     }
     public function index(Request $request)
     {
@@ -155,6 +158,28 @@ class CampaignController extends Controller
                 'cost' => $totalCost,
                 'sent_at' => now(),
             ]);
+
+            // Trigger webhook for campaign completion
+            if ($result['failed'] === 0) {
+                $this->webhookService->trigger('campaign.completed', $request->user()->id, [
+                    'campaign_id' => $campaign->id,
+                    'campaign_name' => $campaign->name,
+                    'total_sent' => $result['sent'],
+                    'total_cost' => $totalCost,
+                ]);
+            } elseif ($result['sent'] === 0) {
+                $this->webhookService->trigger('campaign.failed', $request->user()->id, [
+                    'campaign_id' => $campaign->id,
+                    'campaign_name' => $campaign->name,
+                    'total_failed' => $result['failed'],
+                ]);
+            } else {
+                $this->webhookService->trigger('campaign.started', $request->user()->id, [
+                    'campaign_id' => $campaign->id,
+                    'campaign_name' => $campaign->name,
+                    'total_recipients' => count($recipients),
+                ]);
+            }
 
             return response()->json([
                 'message' => 'Campagne envoyée avec succès',

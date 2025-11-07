@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\SMS\SmsRouter;
 use App\Services\SMS\OperatorDetector;
+use App\Services\WebhookService;
 use App\Models\Message;
 use App\Models\Contact;
 use Illuminate\Http\Request;
@@ -12,10 +13,12 @@ use Illuminate\Support\Facades\Log;
 class MessageController extends Controller
 {
     protected SmsRouter $smsRouter;
+    protected WebhookService $webhookService;
 
-    public function __construct()
+    public function __construct(WebhookService $webhookService)
     {
         $this->smsRouter = new SmsRouter();
+        $this->webhookService = $webhookService;
     }
 
     /**
@@ -100,6 +103,15 @@ class MessageController extends Controller
                 ]);
 
                 if ($result['success']) {
+                    // Trigger webhook for message.sent
+                    $this->webhookService->trigger('message.sent', $request->user()->id, [
+                        'message_id' => $messageRecord->id,
+                        'recipient' => $result['phone'],
+                        'content' => $message,
+                        'provider' => $result['provider'],
+                        'cost' => $cost,
+                    ]);
+
                     return response()->json([
                         'message' => 'Message envoyé avec succès',
                         'data' => [
@@ -109,6 +121,14 @@ class MessageController extends Controller
                             'sms_count' => ceil(strlen($message) / 160),
                             'cost' => $cost,
                         ]
+                    ]);
+                } else {
+                    // Trigger webhook for message.failed
+                    $this->webhookService->trigger('message.failed', $request->user()->id, [
+                        'recipient' => $recipients[0],
+                        'content' => $message,
+                        'error' => $result['message'] ?? 'Erreur inconnue',
+                        'provider' => $result['provider'],
                     ]);
                 }
 

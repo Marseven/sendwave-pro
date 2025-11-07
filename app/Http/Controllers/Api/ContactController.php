@@ -4,10 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
+use App\Services\WebhookService;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
+    protected WebhookService $webhookService;
+
+    public function __construct(WebhookService $webhookService)
+    {
+        $this->webhookService = $webhookService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -46,6 +54,14 @@ class ContactController extends Controller
             'custom_fields' => $validated['custom_fields'] ?? [],
         ]);
 
+        // Trigger webhook for contact.created
+        $this->webhookService->trigger('contact.created', $request->user()->id, [
+            'contact_id' => $contact->id,
+            'name' => $contact->name,
+            'phone' => $contact->phone,
+            'email' => $contact->email,
+        ]);
+
         return response()->json(['data' => $contact], 201);
     }
 
@@ -80,6 +96,14 @@ class ContactController extends Controller
 
         $contact->update($validated);
 
+        // Trigger webhook for contact.updated
+        $this->webhookService->trigger('contact.updated', $request->user()->id, [
+            'contact_id' => $contact->id,
+            'name' => $contact->name,
+            'phone' => $contact->phone,
+            'email' => $contact->email,
+        ]);
+
         return response()->json(['data' => $contact]);
     }
 
@@ -91,7 +115,16 @@ class ContactController extends Controller
         $contact = Contact::where('user_id', $request->user()->id)
             ->findOrFail($id);
 
+        $contactData = [
+            'contact_id' => $contact->id,
+            'name' => $contact->name,
+            'phone' => $contact->phone,
+        ];
+
         $contact->delete();
+
+        // Trigger webhook for contact.deleted
+        $this->webhookService->trigger('contact.deleted', $request->user()->id, $contactData);
 
         return response()->json(['message' => 'Contact supprimé avec succès']);
     }

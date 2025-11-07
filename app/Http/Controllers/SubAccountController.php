@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SubAccount;
+use App\Services\WebhookService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -10,6 +11,13 @@ use Illuminate\Validation\Rule;
 
 class SubAccountController extends Controller
 {
+    protected WebhookService $webhookService;
+
+    public function __construct(WebhookService $webhookService)
+    {
+        $this->webhookService = $webhookService;
+    }
+
     /**
      * Liste tous les sous-comptes de l'utilisateur connecté
      */
@@ -71,6 +79,14 @@ class SubAccountController extends Controller
             Log::info('Sub-account created', [
                 'parent_user_id' => $request->user()->id,
                 'sub_account_id' => $subAccount->id,
+                'email' => $subAccount->email,
+                'role' => $subAccount->role,
+            ]);
+
+            // Trigger webhook for sub_account.created
+            $this->webhookService->trigger('sub_account.created', $request->user()->id, [
+                'sub_account_id' => $subAccount->id,
+                'name' => $subAccount->name,
                 'email' => $subAccount->email,
                 'role' => $subAccount->role,
             ]);
@@ -316,6 +332,13 @@ class SubAccountController extends Controller
             $subAccount->update(['status' => 'suspended']);
 
             Log::info('Sub-account suspended', ['sub_account_id' => $id]);
+
+            // Trigger webhook for sub_account.suspended
+            $this->webhookService->trigger('sub_account.suspended', $request->user()->id, [
+                'sub_account_id' => $subAccount->id,
+                'name' => $subAccount->name,
+                'email' => $subAccount->email,
+            ]);
 
             return response()->json([
                 'message' => 'Sous-compte suspendu avec succès'
