@@ -4,19 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
-class SubAccount extends Model
+class SubAccount extends Authenticatable
 {
+    use HasApiTokens;
+
     protected $fillable = [
         'parent_user_id',
         'name',
         'email',
         'password',
+        'role',
         'status',
+        'sms_credit_limit',
+        'sms_used',
+        'permissions',
         'last_connection',
-        'credits_remaining',
-        'credits_used_this_month',
-        'delivery_rate',
     ];
 
     protected $hidden = [
@@ -26,10 +31,147 @@ class SubAccount extends Model
     protected $casts = [
         'last_connection' => 'datetime',
         'password' => 'hashed',
+        'permissions' => 'array',
+        'sms_credit_limit' => 'integer',
+        'sms_used' => 'integer',
     ];
 
+    /**
+     * Relations
+     */
     public function parentUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'parent_user_id');
+    }
+
+    /**
+     * Permissions Management
+     */
+    public function hasPermission(string $permission): bool
+    {
+        // Admin has all permissions
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        // Check in permissions array
+        return in_array($permission, $this->permissions ?? []);
+    }
+
+    public function grantPermission(string $permission): void
+    {
+        $permissions = $this->permissions ?? [];
+        if (!in_array($permission, $permissions)) {
+            $permissions[] = $permission;
+            $this->update(['permissions' => $permissions]);
+        }
+    }
+
+    public function revokePermission(string $permission): void
+    {
+        $permissions = $this->permissions ?? [];
+        $permissions = array_filter($permissions, fn($p) => $p !== $permission);
+        $this->update(['permissions' => array_values($permissions)]);
+    }
+
+    /**
+     * SMS Credits Management
+     */
+    public function canSendSms(): bool
+    {
+        // Check if account is active
+        if ($this->status !== 'active') {
+            return false;
+        }
+
+        // Check permission
+        if (!$this->hasPermission('send_sms')) {
+            return false;
+        }
+
+        // Check credit limit (null = unlimited)
+        if ($this->sms_credit_limit === null) {
+            return true;
+        }
+
+        return $this->sms_used < $this->sms_credit_limit;
+    }
+
+    public function incrementSmsUsed(int $count = 1): void
+    {
+        $this->increment('sms_used', $count);
+    }
+
+    public function resetSmsUsed(): void
+    {
+        $this->update(['sms_used' => 0]);
+    }
+
+    public function addCredits(int $amount): void
+    {
+        if ($this->sms_credit_limit === null) {
+            $this->update(['sms_credit_limit' => $amount]);
+        } else {
+            $this->increment('sms_credit_limit', $amount);
+        }
+    }
+
+    public function getRemainingCreditsAttribute(): ?int
+    {
+        if ($this->sms_credit_limit === null) {
+            return null; // Unlimited
+        }
+
+        return max(0, $this->sms_credit_limit - $this->sms_used);
+    }
+
+    /**
+     * Role-based permissions
+     */
+    public function getDefaultPermissions(): array
+    {
+        return match($this->role) {
+            'admin' => [
+                'send_sms',
+                'view_history',
+                'manage_contacts',
+                'manage_groups',
+                'create_campaigns',
+                'view_analytics',
+                'manage_templates',
+                'export_data',
+            ],
+            'manager' => [
+                'send_sms',
+                'view_history',
+                'manage_contacts',
+                'manage_groups',
+                'create_campaigns',
+                'view_analytics',
+            ],
+            'sender' => [
+                'send_sms',
+                'view_history',
+                'manage_contacts',
+            ],
+            'viewer' => [
+                'view_history',
+                'view_analytics',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Scopes
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeByParent($query, int $parentUserId)
+    {
+        return $query->where('parent_user_id', $parentUserId);
     }
 }

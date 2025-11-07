@@ -17,9 +17,17 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('status', ['Actif', 'Inactif'])->default('Actif');
+            $table->enum('role', ['admin', 'manager', 'sender', 'viewer'])->default('sender');
+            $table->enum('status', ['active', 'suspended', 'inactive'])->default('active');
+            $table->integer('sms_credit_limit')->nullable()->comment('NULL = unlimited');
+            $table->integer('sms_used')->default(0);
+            $table->json('permissions')->nullable();
             $table->timestamp('last_connection')->nullable();
             $table->timestamps();
+
+            $table->index('parent_user_id');
+            $table->index('email');
+            $table->index('status');
         });
     }
 

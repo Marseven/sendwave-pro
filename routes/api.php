@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 // Routes publiques
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/sub-accounts/login', [\App\Http\Controllers\SubAccountController::class, 'login']);
 
 // Routes protégées
 Route::middleware('auth:sanctum')->group(function () {
@@ -38,7 +39,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('templates', MessageTemplateController::class);
 
     // Sub Accounts
-    Route::apiResource('sub-accounts', SubAccountController::class);
+    Route::post('sub-accounts/{id}/credits', [\App\Http\Controllers\SubAccountController::class, 'addCredits']);
+    Route::post('sub-accounts/{id}/permissions', [\App\Http\Controllers\SubAccountController::class, 'updatePermissions']);
+    Route::post('sub-accounts/{id}/suspend', [\App\Http\Controllers\SubAccountController::class, 'suspend']);
+    Route::post('sub-accounts/{id}/activate', [\App\Http\Controllers\SubAccountController::class, 'activate']);
+    Route::apiResource('sub-accounts', \App\Http\Controllers\SubAccountController::class);
 
     // API Keys
     Route::apiResource('api-keys', ApiKeyController::class);
