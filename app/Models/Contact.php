@@ -16,10 +16,12 @@ class Contact extends Model
         'group',
         'status',
         'last_connection',
+        'custom_fields',
     ];
 
     protected $casts = [
         'last_connection' => 'datetime',
+        'custom_fields' => 'array',
     ];
 
     public function user(): BelongsTo

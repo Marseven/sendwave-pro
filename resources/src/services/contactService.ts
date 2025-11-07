@@ -6,6 +6,7 @@ export interface Contact {
   email: string
   phone: string
   status: 'active' | 'inactive'
+  custom_fields?: Record<string, any>
   created_at?: string
   updated_at?: string
 }

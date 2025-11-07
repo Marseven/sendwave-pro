@@ -32,6 +32,7 @@ class ContactController extends Controller
             'group' => 'nullable|string|max:100',
             'status' => 'nullable|in:active,inactive',
             'last_connection' => 'nullable|date',
+            'custom_fields' => 'nullable|array',
         ]);
 
         $contact = Contact::create([
@@ -42,6 +43,7 @@ class ContactController extends Controller
             'group' => $validated['group'] ?? null,
             'status' => $validated['status'] ?? 'active',
             'last_connection' => $validated['last_connection'] ?? now(),
+            'custom_fields' => $validated['custom_fields'] ?? [],
         ]);
 
         return response()->json(['data' => $contact], 201);
@@ -73,6 +75,7 @@ class ContactController extends Controller
             'group' => 'nullable|string|max:100',
             'status' => 'sometimes|in:active,inactive',
             'last_connection' => 'nullable|date',
+            'custom_fields' => 'nullable|array',
         ]);
 
         $contact->update($validated);

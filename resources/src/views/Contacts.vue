@@ -233,6 +233,62 @@
             </select>
           </div>
 
+          <!-- Custom Fields Section -->
+          <div class="space-y-3 pt-4 border-t">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-medium">Champs personnalisés</label>
+              <TagIcon class="w-4 h-4 text-muted-foreground" />
+            </div>
+
+            <!-- Existing Custom Fields -->
+            <div v-if="Object.keys(contactForm.custom_fields).length > 0" class="space-y-2">
+              <div
+                v-for="(value, key) in contactForm.custom_fields"
+                :key="key"
+                class="flex items-center gap-2 p-2 bg-muted/50 rounded border"
+              >
+                <div class="flex-1">
+                  <p class="text-xs font-medium text-muted-foreground">{{ key }}</p>
+                  <p class="text-sm">{{ value }}</p>
+                </div>
+                <button
+                  type="button"
+                  @click="removeCustomField(key as string)"
+                  class="text-destructive hover:bg-destructive/10 rounded p-1"
+                >
+                  <TrashIcon class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Add New Custom Field -->
+            <div class="space-y-2 p-3 bg-muted/30 rounded-lg">
+              <p class="text-xs text-muted-foreground">Ajouter un nouveau champ</p>
+              <div class="grid grid-cols-2 gap-2">
+                <input
+                  v-model="customFieldKey"
+                  type="text"
+                  placeholder="Nom du champ"
+                  class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+                <input
+                  v-model="customFieldValue"
+                  type="text"
+                  placeholder="Valeur"
+                  class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+              </div>
+              <button
+                type="button"
+                @click="addCustomField"
+                class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9"
+              >
+                <PlusIcon class="w-4 h-4" />
+                <span>Ajouter</span>
+              </button>
+            </div>
+          </div>
+
           <div class="flex gap-3 pt-4 border-t">
             <button
               type="button"
@@ -576,9 +632,12 @@ const contactForm = ref({
   name: '',
   email: '',
   phone: '',
-  status: 'active' as 'active' | 'inactive'
+  status: 'active' as 'active' | 'inactive',
+  custom_fields: {} as Record<string, any>
 })
 const editingContact = ref<Contact | null>(null)
+const customFieldKey = ref('')
+const customFieldValue = ref('')
 
 // CSV Import
 const importStep = ref(1)
@@ -677,8 +736,11 @@ function openAddModal() {
     name: '',
     email: '',
     phone: '',
-    status: 'active'
+    status: 'active',
+    custom_fields: {}
   }
+  customFieldKey.value = ''
+  customFieldValue.value = ''
   showAddModal.value = true
 }
 
@@ -688,9 +750,26 @@ function openEditModal(contact: Contact) {
     name: contact.name,
     email: contact.email,
     phone: contact.phone,
-    status: contact.status
+    status: contact.status,
+    custom_fields: contact.custom_fields || {}
   }
+  customFieldKey.value = ''
+  customFieldValue.value = ''
   showEditModal.value = true
+}
+
+function addCustomField() {
+  if (!customFieldKey.value.trim()) {
+    showError('Le nom du champ est requis')
+    return
+  }
+  contactForm.value.custom_fields[customFieldKey.value] = customFieldValue.value
+  customFieldKey.value = ''
+  customFieldValue.value = ''
+}
+
+function removeCustomField(key: string) {
+  delete contactForm.value.custom_fields[key]
 }
 
 function closeContactModal() {
