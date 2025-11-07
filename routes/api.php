@@ -53,6 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('campaigns', CampaignController::class);
 
     // Message Templates
+    Route::get('templates/categories', [MessageTemplateController::class, 'categories']);
+    Route::post('templates/{id}/use', [MessageTemplateController::class, 'use']);
+    Route::post('templates/{id}/preview', [MessageTemplateController::class, 'preview']);
     Route::apiResource('templates', MessageTemplateController::class);
 
     // Sub Accounts
