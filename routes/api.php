@@ -114,4 +114,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('webhooks/{id}/test', [\App\Http\Controllers\Api\WebhookController::class, 'test']);
     Route::post('webhooks/{id}/toggle', [\App\Http\Controllers\Api\WebhookController::class, 'toggle']);
     Route::apiResource('webhooks', \App\Http\Controllers\Api\WebhookController::class);
+
+    // Analytics
+    Route::get('analytics/dashboard', [\App\Http\Controllers\Api\AnalyticsController::class, 'dashboard']);
+    Route::get('analytics/chart', [\App\Http\Controllers\Api\AnalyticsController::class, 'chart']);
+    Route::get('analytics/report', [\App\Http\Controllers\Api\AnalyticsController::class, 'report']);
+    Route::get('analytics/export/pdf', [\App\Http\Controllers\Api\AnalyticsController::class, 'exportPdf']);
+    Route::get('analytics/export/excel', [\App\Http\Controllers\Api\AnalyticsController::class, 'exportExcel']);
+    Route::get('analytics/export/csv', [\App\Http\Controllers\Api\AnalyticsController::class, 'exportCsv']);
+    Route::get('analytics/providers', [\App\Http\Controllers\Api\AnalyticsController::class, 'providers']);
+    Route::get('analytics/top-campaigns', [\App\Http\Controllers\Api\AnalyticsController::class, 'topCampaigns']);
+    Route::post('analytics/update', [\App\Http\Controllers\Api\AnalyticsController::class, 'update']);
 });
