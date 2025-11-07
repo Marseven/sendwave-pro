@@ -44,4 +44,30 @@ class Campaign extends Model
     {
         return $this->hasMany(Message::class);
     }
+
+    public function schedule(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(CampaignSchedule::class);
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(CampaignVariant::class);
+    }
+
+    /**
+     * Check if campaign has A/B testing enabled
+     */
+    public function hasABTesting(): bool
+    {
+        return $this->variants()->count() > 1;
+    }
+
+    /**
+     * Check if campaign is scheduled/recurring
+     */
+    public function isScheduled(): bool
+    {
+        return $this->schedule()->exists();
+    }
 }
