@@ -272,13 +272,14 @@ import {
   ExclamationTriangleIcon,
   ShieldCheckIcon,
   ArrowPathIcon,
-  ClockIcon
+  ClockIcon,
+  LinkIcon
 } from '@heroicons/vue/24/outline'
 import { webhookService } from '@/services/webhookService'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
 
-// Use shallowRef for icon to avoid reactivity warnings
-const webhookIcon = shallowRef((await import('@heroicons/vue/24/outline')).LinkIcon)
+// Use LinkIcon directly
+const webhookIcon = LinkIcon
 
 interface Webhook {
   id: number
