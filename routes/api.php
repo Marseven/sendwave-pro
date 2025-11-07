@@ -39,6 +39,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Campaigns
     Route::post('campaigns/{id}/send', [CampaignController::class, 'send']);
+
+    // Campaign Schedules (Recurring)
+    Route::post('campaigns/{id}/schedule', [CampaignController::class, 'storeSchedule']);
+    Route::get('campaigns/{id}/schedule', [CampaignController::class, 'getSchedule']);
+    Route::delete('campaigns/{id}/schedule', [CampaignController::class, 'deleteSchedule']);
+
+    // Campaign Variants (A/B Testing)
+    Route::post('campaigns/{id}/variants', [CampaignController::class, 'storeVariants']);
+    Route::get('campaigns/{id}/variants', [CampaignController::class, 'getVariants']);
+    Route::delete('campaigns/{id}/variants', [CampaignController::class, 'deleteVariants']);
+
     Route::apiResource('campaigns', CampaignController::class);
 
     // Message Templates

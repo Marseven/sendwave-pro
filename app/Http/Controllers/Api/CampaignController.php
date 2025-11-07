@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Models\CampaignSchedule;
+use App\Models\CampaignVariant;
 use App\Models\Message;
 use App\Models\Contact;
 use App\Services\SMS\SmsRouter;
@@ -182,5 +184,145 @@ class CampaignController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Create or update campaign schedule
+     */
+    public function storeSchedule(Request $request, string $id)
+    {
+        $campaign = Campaign::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'frequency' => 'required|in:once,daily,weekly,monthly',
+            'day_of_week' => 'nullable|integer|min:1|max:7',
+            'day_of_month' => 'nullable|integer|min:1|max:31',
+            'time' => 'required|date_format:H:i',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after:start_date',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        // Validate frequency-specific fields
+        if ($validated['frequency'] === 'weekly' && empty($validated['day_of_week'])) {
+            return response()->json(['message' => 'day_of_week requis pour la fréquence hebdomadaire'], 422);
+        }
+
+        if ($validated['frequency'] === 'monthly' && empty($validated['day_of_month'])) {
+            return response()->json(['message' => 'day_of_month requis pour la fréquence mensuelle'], 422);
+        }
+
+        $schedule = $campaign->schedule()->updateOrCreate(
+            ['campaign_id' => $campaign->id],
+            array_merge($validated, [
+                'next_run_at' => null // Will be calculated by the model
+            ])
+        );
+
+        // Calculate next run
+        $schedule->next_run_at = $schedule->calculateNextRun();
+        $schedule->save();
+
+        return response()->json([
+            'message' => 'Planification créée avec succès',
+            'data' => $schedule
+        ], 201);
+    }
+
+    /**
+     * Get campaign schedule
+     */
+    public function getSchedule(Request $request, string $id)
+    {
+        $campaign = Campaign::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $schedule = $campaign->schedule;
+
+        if (!$schedule) {
+            return response()->json(['message' => 'Aucune planification trouvée'], 404);
+        }
+
+        return response()->json(['data' => $schedule]);
+    }
+
+    /**
+     * Delete campaign schedule
+     */
+    public function deleteSchedule(Request $request, string $id)
+    {
+        $campaign = Campaign::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $campaign->schedule()->delete();
+
+        return response()->json(['message' => 'Planification supprimée avec succès']);
+    }
+
+    /**
+     * Create or update campaign variants (A/B testing)
+     */
+    public function storeVariants(Request $request, string $id)
+    {
+        $campaign = Campaign::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'variants' => 'required|array|min:2|max:5',
+            'variants.*.variant_name' => 'required|string|max:50',
+            'variants.*.message' => 'required|string|max:320',
+            'variants.*.percentage' => 'required|integer|min:1|max:100',
+        ]);
+
+        // Validate that percentages sum to 100
+        $totalPercentage = array_sum(array_column($validated['variants'], 'percentage'));
+        if ($totalPercentage !== 100) {
+            return response()->json([
+                'message' => 'La somme des pourcentages doit être égale à 100',
+                'total' => $totalPercentage
+            ], 422);
+        }
+
+        // Delete existing variants
+        $campaign->variants()->delete();
+
+        // Create new variants
+        $variants = [];
+        foreach ($validated['variants'] as $variantData) {
+            $variant = $campaign->variants()->create($variantData);
+            $variants[] = $variant;
+        }
+
+        return response()->json([
+            'message' => 'Variantes A/B créées avec succès',
+            'data' => $variants
+        ], 201);
+    }
+
+    /**
+     * Get campaign variants
+     */
+    public function getVariants(Request $request, string $id)
+    {
+        $campaign = Campaign::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $variants = $campaign->variants;
+
+        return response()->json(['data' => $variants]);
+    }
+
+    /**
+     * Delete campaign variants
+     */
+    public function deleteVariants(Request $request, string $id)
+    {
+        $campaign = Campaign::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $campaign->variants()->delete();
+
+        return response()->json(['message' => 'Variantes supprimées avec succès']);
     }
 }
