@@ -27,6 +27,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('contacts/import', [ContactController::class, 'import']);
     Route::apiResource('contacts', ContactController::class);
 
+    // Contact Groups
+    Route::post('contact-groups/{id}/contacts/add', [\App\Http\Controllers\ContactGroupController::class, 'addContacts']);
+    Route::post('contact-groups/{id}/contacts/remove', [\App\Http\Controllers\ContactGroupController::class, 'removeContacts']);
+    Route::get('contact-groups/{id}/contacts', [\App\Http\Controllers\ContactGroupController::class, 'getContacts']);
+    Route::apiResource('contact-groups', \App\Http\Controllers\ContactGroupController::class);
+
     // Campaign History (doit être AVANT apiResource campaigns)
     Route::get('campaigns/history', [CampaignHistoryController::class, 'index']);
     Route::get('campaigns/stats', [CampaignHistoryController::class, 'stats']);

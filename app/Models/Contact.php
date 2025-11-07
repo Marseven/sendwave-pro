@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Contact extends Model
 {
@@ -24,5 +25,12 @@ class Contact extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(ContactGroup::class, 'contact_group_members', 'contact_id', 'group_id')
+            ->withPivot('added_at')
+            ->withTimestamps();
     }
 }
