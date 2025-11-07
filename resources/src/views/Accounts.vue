@@ -313,6 +313,7 @@ import {
   PlusIcon, PencilIcon, TrashIcon, XMarkIcon, UserGroupIcon,
   KeyIcon, LockClosedIcon, LockOpenIcon
 } from '@heroicons/vue/24/outline'
+import { subAccountService } from '@/services/subAccountService'
 import api from '@/services/api'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
 
@@ -383,10 +384,11 @@ watch(unlimitedCredits, (value) => {
 async function loadAccounts() {
   loading.value = true
   try {
-    const response = await api.get('/sub-accounts')
-    accounts.value = response.data.data
+    const data = await subAccountService.getAll()
+    accounts.value = data as any[] // Cast to match the extended interface with permissions
   } catch (err: any) {
     showError(err.response?.data?.message || 'Erreur lors du chargement')
+    console.error('Error loading accounts:', err)
   } finally {
     loading.value = false
   }
@@ -450,16 +452,17 @@ async function saveAccount() {
     }
 
     if (editingAccount.value) {
-      await api.put(`/sub-accounts/${editingAccount.value.id}`, data)
+      await subAccountService.update(editingAccount.value.id, data)
       showSuccess('Sous-compte modifié avec succès')
     } else {
-      await api.post('/sub-accounts', data)
+      await subAccountService.create(data)
       showSuccess('Sous-compte créé avec succès')
     }
     closeModal()
     await loadAccounts()
   } catch (err: any) {
     showError(err.response?.data?.message || 'Erreur lors de l\'enregistrement')
+    console.error('Error saving account:', err)
   } finally {
     saving.value = false
   }
@@ -518,11 +521,12 @@ async function deleteAccount(account: SubAccount) {
 
   if (confirmed) {
     try {
-      await api.delete(`/sub-accounts/${account.id}`)
+      await subAccountService.delete(account.id)
       showSuccess('Compte supprimé avec succès')
       await loadAccounts()
     } catch (err: any) {
       showError(err.response?.data?.message || 'Erreur lors de la suppression')
+      console.error('Error deleting account:', err)
     }
   }
 }

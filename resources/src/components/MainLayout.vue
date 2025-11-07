@@ -112,6 +112,7 @@ import {
   ChartPieIcon,
   CreditCardIcon,
   CodeBracketIcon,
+  LinkIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   BellIcon,
@@ -152,6 +153,7 @@ const menuItems = [
   { path: '/reports', label: 'Rapports', icon: ChartPieIcon },
   { path: '/accounts', label: 'Comptes', icon: CreditCardIcon },
   { path: '/api', label: 'Configuration API SMS', icon: CodeBracketIcon },
+  { path: '/webhooks', label: 'Webhooks', icon: LinkIcon },
   { path: '/settings', label: 'Paramètres', icon: Cog6ToothIcon },
 ]
 
