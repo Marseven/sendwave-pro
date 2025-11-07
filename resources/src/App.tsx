@@ -10,6 +10,7 @@ import Contacts from "./pages/Contacts";
 import Templates from "./pages/Templates";
 import Accounts from "./pages/Accounts";
 import ApiIntegrations from "./pages/ApiIntegrations";
+import Webhooks from "./pages/Webhooks";
 import Settings from "./pages/Settings";
 import CampaignCreate from "./pages/CampaignCreate";
 import Reports from "./pages/Reports";
@@ -50,6 +51,11 @@ const App = () => (
           <Route path="/api" element={
             <ProtectedRoute>
               <ApiIntegrations />
+            </ProtectedRoute>
+          } />
+          <Route path="/webhooks" element={
+            <ProtectedRoute>
+              <Webhooks />
             </ProtectedRoute>
           } />
           <Route path="/settings" element={

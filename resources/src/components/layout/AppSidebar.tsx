@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { 
-  BarChart3, 
-  Rocket, 
-  Users, 
-  MessageSquare, 
-  BarChart, 
-  Calendar, 
-  Plug, 
-  UserCog, 
+import {
+  BarChart3,
+  Rocket,
+  Users,
+  MessageSquare,
+  BarChart,
+  Calendar,
+  Plug,
+  Webhook,
+  UserCog,
   Settings,
   ChevronDown,
   ChevronRight,
@@ -26,6 +27,7 @@ const menuItems = [
   { title: "Rapports", url: "/reports", icon: BarChart },
   { title: "Calendrier", url: "/calendar", icon: Calendar },
   { title: "API & Interconnexions", url: "/api", icon: Plug },
+  { title: "Webhooks", url: "/webhooks", icon: Webhook },
   { title: "Comptes & Sous-comptes", url: "/accounts", icon: UserCog },
   { title: "Paramètres", url: "/settings", icon: Settings },
 ];
