@@ -234,7 +234,7 @@ function formatNumber(value: number): string {
 }
 
 function formatCurrency(value: number): string {
-  return `${value.toLocaleString('fr-FR')} XOF`
+  return `${value.toLocaleString('fr-FR')} XAF`
 }
 
 function getTrendClass(trend?: number): string {

@@ -136,26 +136,35 @@
                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="">Sélectionner...</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Transactionnel">Transactionnel</option>
-                <option value="Notification">Notification</option>
-                <option value="Rappel">Rappel</option>
-                <option value="Confirmation">Confirmation</option>
+                <option v-for="(label, key) in categories" :key="key" :value="key">{{ label }}</option>
               </select>
             </div>
+          </div>
+
+          <!-- Checkbox Public Template -->
+          <div class="flex items-center gap-2">
+            <input
+              v-model="templateForm.is_public"
+              type="checkbox"
+              id="is_public"
+              class="rounded border-gray-300"
+            />
+            <label for="is_public" class="text-sm font-medium cursor-pointer">
+              Rendre ce modèle public (accessible à tous les utilisateurs)
+            </label>
           </div>
 
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <label class="text-sm font-medium">Message *</label>
-              <span class="text-xs text-muted-foreground">{{ templateForm.message.length }}/320 caractères</span>
+              <span class="text-xs text-muted-foreground">{{ templateForm.content.length }}/320 caractères</span>
             </div>
             <textarea
-              v-model="templateForm.message"
+              v-model="templateForm.content"
               required
               rows="6"
               maxlength="320"
-              placeholder="Votre message avec des variables {{name}}, {{email}}, etc."
+              placeholder="Votre message avec des variables {nom}, {email}, etc."
               class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none font-mono"
             ></textarea>
           </div>
@@ -173,6 +182,9 @@
                 {{ variable }}
               </button>
             </div>
+            <p class="text-xs text-muted-foreground mt-2">
+              Variables: {nom}, {prenom}, {phone}, {email}, {date}, {heure}, {code}
+            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -258,12 +270,24 @@ const saving = ref(false)
 const error = ref('')
 const editingTemplate = ref<Template | null>(null)
 
-const variables = ['{{name}}', '{{email}}', '{{phone}}', '{{code}}']
+// Categories from API backend
+const categories = ref({
+  'marketing': 'Marketing',
+  'notifications': 'Notifications',
+  'alerts': 'Alertes',
+  'reminders': 'Rappels',
+  'confirmations': 'Confirmations',
+  'promotions': 'Promotions',
+  'other': 'Autre'
+})
+
+const variables = ['{nom}', '{prenom}', '{phone}', '{email}', '{date}', '{heure}', '{code}']
 
 const templateForm = ref({
   name: '',
   category: '',
-  message: '',
+  content: '',
+  is_public: false,
   icon: 'document',
   status: 'active' as 'active' | 'inactive'
 })
@@ -308,7 +332,8 @@ function openAddModal() {
   templateForm.value = {
     name: '',
     category: '',
-    message: '',
+    content: '',
+    is_public: false,
     icon: 'document',
     status: 'active'
   }
@@ -320,7 +345,8 @@ function openEditModal(template: Template) {
   templateForm.value = {
     name: template.name,
     category: template.category,
-    message: template.message,
+    content: template.content || template.message || '',
+    is_public: template.is_public || false,
     icon: template.icon || 'document',
     status: template.status
   }
@@ -334,7 +360,7 @@ function closeModal() {
 }
 
 function insertVariable(variable: string) {
-  templateForm.value.message += variable
+  templateForm.value.content += variable + ' '
 }
 
 async function saveTemplate() {
