@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('blacklist', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('phone_number', 20);
+            $table->string('reason')->nullable();
+            $table->timestamp('added_at')->useCurrent();
+            $table->timestamps();
+
+            $table->unique(['user_id', 'phone_number']);
+            $table->index('phone_number');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('blacklist');
+    }
+};

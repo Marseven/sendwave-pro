@@ -95,4 +95,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // User Profile
     Route::get('user/profile', [AuthController::class, 'profile']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);
+
+    // Blacklist
+    Route::get('blacklist', [\App\Http\Controllers\Api\BlacklistController::class, 'index']);
+    Route::post('blacklist', [\App\Http\Controllers\Api\BlacklistController::class, 'store']);
+    Route::delete('blacklist/{id}', [\App\Http\Controllers\Api\BlacklistController::class, 'destroy']);
+    Route::post('blacklist/check', [\App\Http\Controllers\Api\BlacklistController::class, 'check']);
+
+    // Audit Logs
+    Route::get('audit-logs', [\App\Http\Controllers\Api\AuditLogController::class, 'index']);
+    Route::get('audit-logs/actions', [\App\Http\Controllers\Api\AuditLogController::class, 'actions']);
+    Route::get('audit-logs/{id}', [\App\Http\Controllers\Api\AuditLogController::class, 'show']);
 });
