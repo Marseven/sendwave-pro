@@ -8,6 +8,14 @@
         </div>
         <div class="flex gap-3">
           <button
+            v-if="hasSelectedContacts"
+            @click="openGroupModal"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+          >
+            <UserGroupIcon class="w-4 h-4" />
+            <span>Ajouter à un groupe ({{ selectedContactIds.length }})</span>
+          </button>
+          <button
             @click="showImportModal = true"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
           >
@@ -81,7 +89,12 @@
             <thead class="border-b bg-muted/50">
               <tr>
                 <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  <input type="checkbox" class="rounded border-gray-300" />
+                  <input
+                    type="checkbox"
+                    :checked="allSelected"
+                    @change="toggleSelectAll"
+                    class="rounded border-gray-300 cursor-pointer"
+                  />
                 </th>
                 <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nom</th>
                 <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Email</th>
@@ -98,7 +111,12 @@
                 class="border-b transition-colors hover:bg-muted/50"
               >
                 <td class="p-4">
-                  <input type="checkbox" class="rounded border-gray-300" />
+                  <input
+                    type="checkbox"
+                    :checked="isContactSelected(contact.id)"
+                    @change="toggleContact(contact.id)"
+                    class="rounded border-gray-300 cursor-pointer"
+                  />
                 </td>
                 <td class="p-4 font-medium">{{ contact.name }}</td>
                 <td class="p-4 text-sm text-muted-foreground">{{ contact.email }}</td>
@@ -444,6 +462,67 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Ajouter à un Groupe -->
+    <div
+      v-if="showGroupModal"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      @click.self="closeGroupModal"
+    >
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-md">
+        <div class="border-b p-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold">Ajouter à un groupe</h2>
+            <button @click="closeGroupModal" class="hover:bg-accent rounded-full p-1">
+              <XMarkIcon class="w-5 h-5" />
+            </button>
+          </div>
+          <p class="text-sm text-muted-foreground mt-2">
+            {{ selectedContactIds.length }} contact(s) sélectionné(s)
+          </p>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <div v-if="groups.length === 0" class="text-center py-6">
+            <UserGroupIcon class="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p class="text-sm text-muted-foreground">Aucun groupe disponible</p>
+            <p class="text-xs text-muted-foreground mt-1">Créez un groupe depuis la page Groupes</p>
+          </div>
+
+          <div v-else class="space-y-2">
+            <label class="text-sm font-medium">Sélectionner un groupe *</label>
+            <select
+              v-model="selectedGroupId"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option :value="null">-- Choisir un groupe --</option>
+              <option v-for="group in groups" :key="group.id" :value="group.id">
+                {{ group.name }} ({{ group.contacts_count }} contacts)
+              </option>
+            </select>
+          </div>
+
+          <div class="flex gap-3 pt-4 border-t">
+            <button
+              type="button"
+              @click="closeGroupModal"
+              class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              @click="addContactsToGroup"
+              :disabled="!selectedGroupId || addingToGroup || groups.length === 0"
+              class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              <div v-if="addingToGroup" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>{{ addingToGroup ? 'Ajout...' : 'Ajouter' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </MainLayout>
 </template>
 
@@ -460,20 +539,37 @@ import {
   DocumentTextIcon,
   InformationCircleIcon,
   ExclamationTriangleIcon,
-  UsersIcon
+  UsersIcon,
+  UserGroupIcon,
+  TagIcon
 } from '@heroicons/vue/24/outline'
 import { contactService, type Contact } from '@/services/contactService'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
+import api from '@/services/api'
+
+interface ContactGroup {
+  id: number
+  name: string
+  description: string | null
+  contacts_count: number
+  created_at: string
+  updated_at: string
+}
 
 const searchQuery = ref('')
 const filterStatus = ref('all')
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showImportModal = ref(false)
+const showGroupModal = ref(false)
 const contacts = ref<Contact[]>([])
+const groups = ref<ContactGroup[]>([])
+const selectedContactIds = ref<number[]>([])
+const selectedGroupId = ref<number | null>(null)
 const loading = ref(false)
 const saving = ref(false)
 const error = ref('')
+const addingToGroup = ref(false)
 
 // Contact Form
 const contactForm = ref({
@@ -542,6 +638,13 @@ const validContacts = computed(() => {
     return contact
   }).filter(c => c.name && c.email && c.phone)
 })
+
+const allSelected = computed(() => {
+  return filteredContacts.value.length > 0 &&
+    filteredContacts.value.every(c => selectedContactIds.value.includes(c.id))
+})
+
+const hasSelectedContacts = computed(() => selectedContactIds.value.length > 0)
 
 function formatDate(dateString?: string): string {
   if (!dateString) return '-'
@@ -724,7 +827,73 @@ async function importContacts() {
   }
 }
 
+function toggleSelectAll() {
+  if (allSelected.value) {
+    selectedContactIds.value = []
+  } else {
+    selectedContactIds.value = filteredContacts.value.map(c => c.id)
+  }
+}
+
+function toggleContact(contactId: number) {
+  const index = selectedContactIds.value.indexOf(contactId)
+  if (index > -1) {
+    selectedContactIds.value.splice(index, 1)
+  } else {
+    selectedContactIds.value.push(contactId)
+  }
+}
+
+function isContactSelected(contactId: number): boolean {
+  return selectedContactIds.value.includes(contactId)
+}
+
+async function loadGroups() {
+  try {
+    const response = await api.get('/contact-groups')
+    groups.value = response.data.data
+  } catch (err: any) {
+    console.error('Error loading groups:', err)
+  }
+}
+
+function openGroupModal() {
+  if (selectedContactIds.value.length === 0) {
+    showError('Veuillez sélectionner au moins un contact')
+    return
+  }
+  selectedGroupId.value = null
+  showGroupModal.value = true
+}
+
+function closeGroupModal() {
+  showGroupModal.value = false
+  selectedGroupId.value = null
+}
+
+async function addContactsToGroup() {
+  if (!selectedGroupId.value) {
+    showError('Veuillez sélectionner un groupe')
+    return
+  }
+
+  addingToGroup.value = true
+  try {
+    await api.post(`/contact-groups/${selectedGroupId.value}/contacts/add`, {
+      contact_ids: selectedContactIds.value
+    })
+    showSuccess(`${selectedContactIds.value.length} contact(s) ajouté(s) au groupe`)
+    selectedContactIds.value = []
+    closeGroupModal()
+  } catch (err: any) {
+    showError(err.response?.data?.message || 'Erreur lors de l\'ajout au groupe')
+  } finally {
+    addingToGroup.value = false
+  }
+}
+
 onMounted(() => {
   loadContacts()
+  loadGroups()
 })
 </script>

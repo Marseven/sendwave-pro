@@ -42,6 +42,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/contact-groups',
+      name: 'ContactGroups',
+      component: () => import('@/views/ContactGroups.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/templates',
       name: 'Templates',
       component: () => import('@/views/Templates.vue'),
