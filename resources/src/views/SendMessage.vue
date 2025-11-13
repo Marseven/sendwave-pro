@@ -420,7 +420,8 @@ async function sendMessage() {
     let recipients: string[] = []
 
     if (recipientType.value === 'contact' && selectedContact.value) {
-      const contact = contacts.value.find(c => c.id.toString() === selectedContact.value)
+      const contact = contacts.value.find(c => c.id == selectedContact.value)
+      console.log('Selected contact:', contact, 'Selected ID:', selectedContact.value)
       if (contact) {
         recipients = [contact.phone]
       }
@@ -430,11 +431,19 @@ async function sendMessage() {
       recipients = phoneNumbers.value.split('\n').map(n => n.trim()).filter(n => n)
     }
 
+    console.log('Recipients to send:', recipients)
+
+    if (recipients.length === 0) {
+      throw new Error('Aucun destinataire valide trouvé')
+    }
+
     const data = {
       recipients,
       message: message.value,
       type: 'immediate'
     }
+
+    console.log('Sending data:', data)
 
     await apiClient.post('/messages/send', data)
 
