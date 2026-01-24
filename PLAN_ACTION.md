@@ -169,10 +169,13 @@
   - Préférences régionales: langue, fuseau horaire
   - Préférences SMS: signature, seuil alerte crédit
 
-- [ ] **3.2.6** Completer page Calendar
+- [x] **3.2.6** Completer page Calendar ✅
   - Fichier: `resources/src/views/Calendar.vue`
-  - Afficher campagnes planifiees
-  - Vue mensuelle/hebdomadaire
+  - 3 modes de vue: Liste, Semaine, Mois
+  - Grille calendrier mensuelle avec navigation
+  - Vue hebdomadaire avec jours et campagnes
+  - Affichage des campagnes sur chaque jour
+  - Navigation mois précédent/suivant
 
 ---
 
@@ -225,9 +228,9 @@
 |-------|-------|-----------|---|
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
-| Phase 3 | 10 | 8 | 80% |
+| Phase 3 | 10 | 10 | 100% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **35** | **23** | **66%** |
+| **Total** | **35** | **25** | **71%** |
 
 ---
 
