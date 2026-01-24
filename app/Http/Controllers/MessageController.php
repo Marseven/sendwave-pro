@@ -6,6 +6,7 @@ use App\Enums\MessageStatus;
 use App\Services\SMS\SmsRouter;
 use App\Services\SMS\OperatorDetector;
 use App\Services\WebhookService;
+use App\Services\AnalyticsService;
 use App\Models\Message;
 use App\Models\Contact;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ class MessageController extends Controller
 {
     public function __construct(
         protected SmsRouter $smsRouter,
-        protected WebhookService $webhookService
+        protected WebhookService $webhookService,
+        protected AnalyticsService $analyticsService
     ) {}
 
     /**
@@ -170,6 +172,9 @@ class MessageController extends Controller
                         'cost' => $cost,
                     ]);
 
+                    // Update daily analytics
+                    $this->analyticsService->updateDailyAnalytics($request->user()->id);
+
                     return response()->json([
                         'message' => 'Message envoyé avec succès',
                         'data' => [
@@ -188,6 +193,9 @@ class MessageController extends Controller
                         'error' => $result['message'] ?? 'Erreur inconnue',
                         'provider' => $result['provider'],
                     ]);
+
+                    // Update daily analytics (even for failed messages)
+                    $this->analyticsService->updateDailyAnalytics($request->user()->id);
                 }
 
                 return response()->json([
@@ -242,6 +250,9 @@ class MessageController extends Controller
                     'failed' => $result['failed'],
                     'total_cost' => $totalCost,
                 ]);
+
+                // Update daily analytics after bulk send
+                $this->analyticsService->updateDailyAnalytics($userId);
 
                 return response()->json([
                     'message' => 'Envoi terminé',
