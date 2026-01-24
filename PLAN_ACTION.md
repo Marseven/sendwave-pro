@@ -150,10 +150,11 @@
   - Récapitulatif avec toutes les variantes
   - Envoi des variantes à l'API
 
-- [ ] **3.2.3** UI Variables Templates
+- [x] **3.2.3** UI Variables Templates ✅
   - Fichier: `resources/src/views/Templates.vue`
-  - Liste variables disponibles
-  - Preview avec remplacement
+  - Liste variables avec descriptions (grille 2 colonnes)
+  - Preview en temps réel avec remplacement par exemples
+  - Affichage nombre de caractères et SMS dans l'aperçu
 
 - [ ] **3.2.4** UI Export Analytics
   - Fichier: `resources/src/views/Reports.vue`
@@ -221,9 +222,9 @@
 |-------|-------|-----------|---|
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
-| Phase 3 | 10 | 5 | 50% |
+| Phase 3 | 10 | 6 | 60% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **35** | **20** | **57%** |
+| **Total** | **35** | **21** | **60%** |
 
 ---
 

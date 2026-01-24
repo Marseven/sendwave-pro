@@ -171,20 +171,31 @@
 
           <div class="p-4 bg-muted/50 rounded-lg">
             <p class="text-sm font-medium mb-3">Variables disponibles :</p>
-            <div class="flex flex-wrap gap-2">
+            <div class="grid grid-cols-2 gap-2 mb-3">
               <button
-                v-for="variable in variables"
+                v-for="(desc, variable) in variableDescriptions"
                 :key="variable"
                 type="button"
                 @click="insertVariable(variable)"
-                class="text-xs px-3 py-1.5 rounded-md bg-background hover:bg-primary hover:text-primary-foreground border border-border hover:border-primary transition-colors font-mono"
+                class="flex items-center justify-between text-xs px-3 py-2 rounded-md bg-background hover:bg-primary hover:text-primary-foreground border border-border hover:border-primary transition-colors text-left"
               >
-                {{ variable }}
+                <span class="font-mono">{{ variable }}</span>
+                <span class="text-muted-foreground ml-2">{{ desc }}</span>
               </button>
             </div>
-            <p class="text-xs text-muted-foreground mt-2">
-              Variables: {nom}, {prenom}, {phone}, {email}, {date}, {heure}, {code}
-            </p>
+          </div>
+
+          <!-- Preview Section -->
+          <div v-if="templateForm.content" class="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-sm font-medium flex items-center gap-2">
+                <EyeIcon class="w-4 h-4" />
+                Aperçu du message
+              </p>
+              <span class="text-xs text-muted-foreground">Variables remplacées par des exemples</span>
+            </div>
+            <div class="p-3 bg-background rounded border font-mono text-sm whitespace-pre-wrap">{{ previewMessage }}</div>
+            <p class="text-xs text-muted-foreground mt-2">{{ previewMessage.length }} caractères • {{ Math.ceil(previewMessage.length / 160) }} SMS</p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -256,7 +267,8 @@ import {
   CalendarIcon,
   CakeIcon,
   GiftIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  EyeIcon
 } from '@heroicons/vue/24/outline'
 import { templateService, type Template } from '@/services/templateService'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
@@ -281,7 +293,25 @@ const categories = ref({
   'other': 'Autre'
 })
 
-const variables = ['{nom}', '{prenom}', '{phone}', '{email}', '{date}', '{heure}', '{code}']
+const variableDescriptions: Record<string, string> = {
+  '{nom}': 'Nom complet',
+  '{prenom}': 'Prénom',
+  '{phone}': 'Téléphone',
+  '{email}': 'Email',
+  '{date}': 'Date actuelle',
+  '{heure}': 'Heure actuelle',
+  '{code}': 'Code unique'
+}
+
+const exampleValues: Record<string, string> = {
+  '{nom}': 'Jean Dupont',
+  '{prenom}': 'Jean',
+  '{phone}': '+241 77 00 00 00',
+  '{email}': 'jean@exemple.com',
+  '{date}': new Date().toLocaleDateString('fr-FR'),
+  '{heure}': new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+  '{code}': 'ABC123'
+}
 
 const templateForm = ref({
   name: '',
@@ -312,6 +342,14 @@ const activeTemplates = computed(() => {
 
 const totalUses = computed(() => {
   return templates.value.reduce((sum, t) => sum + (t.uses || 0), 0)
+})
+
+const previewMessage = computed(() => {
+  let message = templateForm.value.content
+  for (const [variable, value] of Object.entries(exampleValues)) {
+    message = message.replaceAll(variable, value)
+  }
+  return message
 })
 
 async function loadTemplates() {
@@ -360,7 +398,7 @@ function closeModal() {
 }
 
 function insertVariable(variable: string) {
-  templateForm.value.content += variable + ' '
+  templateForm.value.content += variable
 }
 
 async function saveTemplate() {
