@@ -121,7 +121,10 @@ import {
   ChatBubbleLeftIcon,
   PaperAirplaneIcon,
   ClockIcon,
-  InboxIcon
+  InboxIcon,
+  NoSymbolIcon,
+  SignalIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -151,9 +154,12 @@ const menuItems = [
   { path: '/campaigns/history', label: 'Historique campagnes', icon: ClockIcon },
   { path: '/messages/history', label: 'Historique messages', icon: InboxIcon },
   { path: '/reports', label: 'Rapports', icon: ChartPieIcon },
+  { path: '/blacklist', label: 'Liste noire', icon: NoSymbolIcon },
   { path: '/accounts', label: 'Comptes', icon: CreditCardIcon },
-  { path: '/api', label: 'Configuration API SMS', icon: CodeBracketIcon },
+  { path: '/sms-config', label: 'Config. Opérateurs', icon: SignalIcon },
+  { path: '/api', label: 'Clés API', icon: CodeBracketIcon },
   { path: '/webhooks', label: 'Webhooks', icon: LinkIcon },
+  { path: '/audit-logs', label: 'Journal d\'audit', icon: ClipboardDocumentListIcon },
   { path: '/settings', label: 'Paramètres', icon: Cog6ToothIcon },
 ]
 

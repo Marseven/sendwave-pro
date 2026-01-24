@@ -111,25 +111,27 @@
 
 ### 3.1 Pages a Creer
 
-- [ ] **3.1.1** Page Blacklist Management
+- [x] **3.1.1** Page Blacklist Management ✅
   - Fichier: `resources/src/views/Blacklist.vue`
-  - CRUD numeros bloques
-  - Import/Export
+  - CRUD numéros bloqués avec pagination
+  - Vérification de numéro, export CSV
+  - Statistiques (total, ce mois, SMS évités)
 
-- [ ] **3.1.2** Page SMS Configuration
+- [x] **3.1.2** Page SMS Configuration ✅
   - Fichier: `resources/src/views/SmsConfig.vue`
-  - Config Airtel/Moov
-  - Test de connexion
+  - Configuration Airtel (HTTP API) et Moov (SMPP)
+  - Toggle activation, test de connexion
+  - Formulaires séparés par opérateur
 
-- [ ] **3.1.3** Page API Keys Management
-  - Fichier: `resources/src/views/ApiKeys.vue`
-  - Generer/Revoquer cles API
-  - Afficher usage
+- [x] **3.1.3** Page API Keys Management ✅
+  - Existant: `resources/src/views/ApiIntegrations.vue`
+  - Route `/api-keys` déjà fonctionnelle
 
-- [ ] **3.1.4** Page Audit Logs Viewer
+- [x] **3.1.4** Page Audit Logs Viewer ✅
   - Fichier: `resources/src/views/AuditLogs.vue`
-  - Filtres par action/user/date
-  - Export logs
+  - Filtres par action/date, pagination
+  - Détails avec diff old/new values
+  - Export CSV
 
 ### 3.2 Features a Completer
 
@@ -214,9 +216,9 @@
 |-------|-------|-----------|---|
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
-| Phase 3 | 10 | 0 | 0% |
+| Phase 3 | 10 | 4 | 40% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **35** | **15** | **43%** |
+| **Total** | **35** | **19** | **54%** |
 
 ---
 

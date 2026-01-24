@@ -114,6 +114,24 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/blacklist',
+      name: 'Blacklist',
+      component: () => import('@/views/Blacklist.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/sms-config',
+      name: 'SmsConfig',
+      component: () => import('@/views/SmsConfig.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/audit-logs',
+      name: 'AuditLogs',
+      component: () => import('@/views/AuditLogs.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('@/views/NotFound.vue')
