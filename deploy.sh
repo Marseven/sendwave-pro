@@ -21,38 +21,33 @@ echo -e "${GREEN}========================================${NC}"
 PROJECT_DIR="/var/www/sendwave-pro"
 cd $PROJECT_DIR
 
-echo -e "\n${YELLOW}[1/8] Pull des dernières modifications...${NC}"
+echo -e "\n${YELLOW}[1/7] Reset des fichiers build locaux...${NC}"
+git checkout -- public/build/
+git clean -fd public/build/
+
+echo -e "\n${YELLOW}[2/7] Pull des dernières modifications...${NC}"
 git pull origin main
 
-echo -e "\n${YELLOW}[2/8] Installation des dependances Composer...${NC}"
+echo -e "\n${YELLOW}[3/7] Installation des dependances Composer...${NC}"
 composer install --no-dev --optimize-autoloader --no-interaction
 
-echo -e "\n${YELLOW}[3/8] Installation des dependances NPM...${NC}"
-if command -v npm &> /dev/null; then
-    npm ci --silent
-    echo -e "\n${YELLOW}[4/8] Build du frontend...${NC}"
-    npm run build
-else
-    echo -e "${YELLOW}NPM non installe, skip du build frontend${NC}"
-fi
-
-echo -e "\n${YELLOW}[5/8] Execution des migrations...${NC}"
+echo -e "\n${YELLOW}[4/7] Execution des migrations...${NC}"
 php artisan migrate --force
 
-echo -e "\n${YELLOW}[6/8] Nettoyage des caches...${NC}"
+echo -e "\n${YELLOW}[5/7] Nettoyage des caches...${NC}"
 php artisan optimize:clear
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
 rm -rf bootstrap/cache/*.php 2>/dev/null || true
 
-echo -e "\n${YELLOW}[7/8] Regeneration des caches...${NC}"
+echo -e "\n${YELLOW}[6/7] Regeneration des caches...${NC}"
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-echo -e "\n${YELLOW}[8/8] Permissions des fichiers...${NC}"
-chown -R www-data:www-data storage bootstrap/cache
+echo -e "\n${YELLOW}[7/7] Permissions des fichiers...${NC}"
+chown -R www-data:www-data storage bootstrap/cache public/build
 chmod -R 775 storage bootstrap/cache
 
 echo -e "\n${YELLOW}Redemarrage PHP-FPM...${NC}"
