@@ -228,10 +228,22 @@
 
 ### 4.3 Tests
 
-- [ ] **4.3.1** Tests unitaires Models
-- [ ] **4.3.2** Tests unitaires Services
-- [ ] **4.3.3** Tests Feature Controllers
+- [x] **4.3.1** Tests unitaires Models ✅
+  - MessageTest, CampaignTest, ContactTest
+  - Tests des relations, scopes, et enums
+  - Factories créées pour tous les modèles
+
+- [x] **4.3.2** Tests unitaires Services ✅
+  - AnalyticsServiceTest (périodes, calculs, rapports)
+  - OperatorDetectorTest (détection Airtel/Moov)
+
+- [x] **4.3.3** Tests Feature Controllers ✅
+  - ContactControllerTest (CRUD, export, validation)
+  - CampaignControllerTest (CRUD, clone, schedule, variants)
+  - TemplateControllerTest (CRUD, public/private, preview)
+
 - [ ] **4.3.4** Tests E2E Frontend
+  - Tests Cypress/Playwright (non implémentés)
 
 ---
 
@@ -242,8 +254,8 @@
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
 | Phase 3 | 10 | 10 | 100% |
-| Phase 4 | 10 | 7 | 70% |
-| **Total** | **35** | **32** | **91%** |
+| Phase 4 | 10 | 9 | 90% |
+| **Total** | **35** | **34** | **97%** |
 
 ---
 
