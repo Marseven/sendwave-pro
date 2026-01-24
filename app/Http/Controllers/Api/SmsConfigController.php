@@ -24,7 +24,7 @@ class SmsConfigController extends Controller
 
         return response()->json([
             'message' => 'Configurations SMS récupérées',
-            'data' => $configs
+            'data' => $configs->map(fn($config) => $this->formatConfigResponse($config))
         ]);
     }
 
@@ -36,6 +36,12 @@ class SmsConfigController extends Controller
         $config = SmsConfig::where('provider', $provider)->first();
 
         if (!$config) {
+            // Initialiser si non trouvé
+            $this->initializeConfigs();
+            $config = SmsConfig::where('provider', $provider)->first();
+        }
+
+        if (!$config) {
             return response()->json([
                 'message' => 'Configuration non trouvée'
             ], 404);
@@ -43,8 +49,28 @@ class SmsConfigController extends Controller
 
         return response()->json([
             'message' => 'Configuration récupérée',
-            'data' => $config
+            'data' => $this->formatConfigResponse($config)
         ]);
+    }
+
+    /**
+     * Formater la réponse de configuration (masquer le mot de passe)
+     */
+    protected function formatConfigResponse(SmsConfig $config): array
+    {
+        return [
+            'id' => $config->id,
+            'provider' => $config->provider,
+            'api_url' => $config->api_url,
+            'port' => $config->port,
+            'username' => $config->username,
+            'password_set' => !empty($config->getRawPassword()),
+            'origin_addr' => $config->origin_addr,
+            'cost_per_sms' => $config->cost_per_sms,
+            'is_active' => $config->is_active,
+            'created_at' => $config->created_at,
+            'updated_at' => $config->updated_at,
+        ];
     }
 
     /**
@@ -54,6 +80,7 @@ class SmsConfigController extends Controller
     {
         $validated = $request->validate([
             'api_url' => 'nullable|string',
+            'port' => 'nullable|integer|min:1|max:65535',
             'username' => 'nullable|string',
             'password' => 'nullable|string',
             'origin_addr' => 'nullable|string',
@@ -61,24 +88,15 @@ class SmsConfigController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        // Valeurs par défaut selon le provider
-        $defaults = [
-            'airtel' => [
-                'api_url' => 'https://messaging.airtel.ga:9002/smshttp/qs/',
-                'cost_per_sms' => 20,
-                'is_active' => false,
-            ],
-            'moov' => [
-                'api_url' => '',
-                'cost_per_sms' => 20,
-                'is_active' => false,
-            ]
-        ];
+        // Ne pas écraser le mot de passe si non fourni ou vide
+        if (empty($validated['password'])) {
+            unset($validated['password']);
+        }
 
         // Créer ou mettre à jour la configuration
         $config = SmsConfig::updateOrCreate(
             ['provider' => $provider],
-            array_merge($defaults[$provider] ?? [], $validated)
+            $validated
         );
 
         Log::info('SMS Config Updated', [
@@ -88,7 +106,7 @@ class SmsConfigController extends Controller
 
         return response()->json([
             'message' => 'Configuration mise à jour avec succès',
-            'data' => $config
+            'data' => $this->formatConfigResponse($config)
         ]);
     }
 
@@ -175,39 +193,61 @@ class SmsConfigController extends Controller
 
         return response()->json([
             'message' => $config->is_active ? 'Configuration activée' : 'Configuration désactivée',
-            'data' => $config
+            'data' => $this->formatConfigResponse($config)
         ]);
     }
 
     /**
-     * Initialiser les configurations par défaut
+     * Initialiser les configurations par défaut depuis .env
      */
     protected function initializeConfigs()
     {
-        // Airtel
+        // Airtel - Charger depuis .env
         SmsConfig::firstOrCreate(
             ['provider' => 'airtel'],
             [
-                'api_url' => 'https://messaging.airtel.ga:9002/smshttp/qs/',
-                'username' => '',
-                'password' => '',
-                'origin_addr' => '',
-                'cost_per_sms' => 20,
-                'is_active' => false,
+                'api_url' => config('sms.airtel.api_url', 'https://messaging.airtel.ga:9002/smshttp/qs/'),
+                'port' => null, // Airtel n'utilise pas de port séparé
+                'username' => config('sms.airtel.username', ''),
+                'password' => config('sms.airtel.password', ''),
+                'origin_addr' => config('sms.airtel.origin_addr', ''),
+                'cost_per_sms' => config('sms.airtel.cost_per_sms', 20),
+                'is_active' => config('sms.airtel.enabled', false),
             ]
         );
 
-        // Moov
+        // Moov - Charger depuis .env (SMPP)
         SmsConfig::firstOrCreate(
             ['provider' => 'moov'],
             [
-                'api_url' => '',
-                'username' => '',
-                'password' => '',
-                'origin_addr' => '',
-                'cost_per_sms' => 20,
-                'is_active' => false,
+                'api_url' => config('sms.moov.host', '172.16.59.66'),
+                'port' => config('sms.moov.port', 12775),
+                'username' => config('sms.moov.system_id', ''),
+                'password' => config('sms.moov.password', ''),
+                'origin_addr' => config('sms.moov.source_addr', 'SENDWAVE'),
+                'cost_per_sms' => config('sms.moov.cost_per_sms', 20),
+                'is_active' => config('sms.moov.enabled', false),
             ]
         );
+    }
+
+    /**
+     * Réinitialiser les configurations depuis .env
+     */
+    public function reset(string $provider)
+    {
+        $config = SmsConfig::where('provider', $provider)->first();
+
+        if ($config) {
+            $config->delete();
+        }
+
+        $this->initializeConfigs();
+        $config = SmsConfig::where('provider', $provider)->first();
+
+        return response()->json([
+            'message' => 'Configuration réinitialisée depuis les variables d\'environnement',
+            'data' => $this->formatConfigResponse($config)
+        ]);
     }
 }

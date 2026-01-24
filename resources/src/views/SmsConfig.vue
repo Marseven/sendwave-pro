@@ -60,13 +60,17 @@
                 />
               </div>
               <div class="space-y-2">
-                <label class="text-sm font-medium">Mot de passe</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                  Mot de passe
+                  <span v-if="configs.airtel?.password_set" class="text-xs text-success">(configuré)</span>
+                </label>
                 <input
                   v-model="airtelForm.password"
                   type="password"
-                  placeholder="********"
+                  :placeholder="configs.airtel?.password_set ? '••••••••' : 'Entrez le mot de passe'"
                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
+                <p v-if="configs.airtel?.password_set" class="text-xs text-muted-foreground">Laissez vide pour conserver l'actuel</p>
               </div>
             </div>
 
@@ -180,13 +184,17 @@
                 />
               </div>
               <div class="space-y-2">
-                <label class="text-sm font-medium">Mot de passe</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                  Mot de passe
+                  <span v-if="configs.moov?.password_set" class="text-xs text-success">(configuré)</span>
+                </label>
                 <input
                   v-model="moovForm.password"
                   type="password"
-                  placeholder="********"
+                  :placeholder="configs.moov?.password_set ? '••••••••' : 'Entrez le mot de passe'"
                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
+                <p v-if="configs.moov?.password_set" class="text-xs text-muted-foreground">Laissez vide pour conserver l'actuel</p>
               </div>
             </div>
 
@@ -335,7 +343,7 @@ interface SmsConfigData {
   api_url: string
   port?: number
   username: string
-  password?: string
+  password_set?: boolean
   origin_addr: string
   cost_per_sms: number
   is_active: boolean

@@ -87,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('sms-configs/{provider}', [\App\Http\Controllers\Api\SmsConfigController::class, 'update']);
     Route::post('sms-configs/{provider}/test', [\App\Http\Controllers\Api\SmsConfigController::class, 'test']);
     Route::post('sms-configs/{provider}/toggle', [\App\Http\Controllers\Api\SmsConfigController::class, 'toggle']);
+    Route::post('sms-configs/{provider}/reset', [\App\Http\Controllers\Api\SmsConfigController::class, 'reset']);
 
     // Message History (permission: view_history)
     Route::middleware('permission:view_history')->group(function () {
