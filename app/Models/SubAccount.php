@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\SubAccountRole;
+use App\Enums\SubAccountPermission;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -50,7 +52,7 @@ class SubAccount extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         // Admin has all permissions
-        if ($this->role === 'admin') {
+        if ($this->role === SubAccountRole::ADMIN->value) {
             return true;
         }
 
@@ -130,36 +132,16 @@ class SubAccount extends Authenticatable
      */
     public function getDefaultPermissions(): array
     {
-        return match($this->role) {
-            'admin' => [
-                'send_sms',
-                'view_history',
-                'manage_contacts',
-                'manage_groups',
-                'create_campaigns',
-                'view_analytics',
-                'manage_templates',
-                'export_data',
-            ],
-            'manager' => [
-                'send_sms',
-                'view_history',
-                'manage_contacts',
-                'manage_groups',
-                'create_campaigns',
-                'view_analytics',
-            ],
-            'sender' => [
-                'send_sms',
-                'view_history',
-                'manage_contacts',
-            ],
-            'viewer' => [
-                'view_history',
-                'view_analytics',
-            ],
-            default => [],
-        };
+        $role = SubAccountRole::tryFrom($this->role);
+        return $role?->defaultPermissions() ?? [];
+    }
+
+    /**
+     * Get the role as enum
+     */
+    public function getRoleEnum(): ?SubAccountRole
+    {
+        return SubAccountRole::tryFrom($this->role);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\WebhookEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,7 @@ class Webhook extends Model
 {
     /**
      * Available webhook events
+     * @deprecated Use WebhookEvent enum instead
      */
     public const EVENTS = [
         'message.sent' => 'Message envoyé',
@@ -26,6 +28,14 @@ class Webhook extends Model
         'sub_account.suspended' => 'Sous-compte suspendu',
         'blacklist.added' => 'Numéro ajouté à la liste noire',
     ];
+
+    /**
+     * Get available webhook events using enum
+     */
+    public static function getAvailableEvents(): array
+    {
+        return WebhookEvent::toArray();
+    }
 
     protected $fillable = [
         'user_id',

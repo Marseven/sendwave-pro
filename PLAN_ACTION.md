@@ -63,10 +63,13 @@
   - Scanner tous les fichiers pour `// TODO`
   - Nettoyer les imports inutilises
 
-- [ ] **2.1.2** Centraliser les constantes
-  - Creer `app/Enums/MessageStatus.php`
-  - Creer `app/Enums/WebhookEvent.php`
-  - Creer `app/Enums/SubAccountRole.php`
+- [x] **2.1.2** Centraliser les constantes ✅
+  - Créé: `app/Enums/MessageStatus.php` ✅
+  - Créé: `app/Enums/CampaignStatus.php` ✅
+  - Créé: `app/Enums/WebhookEvent.php` ✅
+  - Créé: `app/Enums/SubAccountRole.php` ✅
+  - Créé: `app/Enums/SubAccountPermission.php` ✅
+  - Modèles Webhook et SubAccount mis à jour pour utiliser les enums
 
 - [ ] **2.1.3** Refactorer SmsRouter injection
   - Utiliser dependency injection au lieu de `new SmsRouter()`
@@ -198,11 +201,11 @@
 
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
-| Phase 1 | 10 | 8 | 80% |
-| Phase 2 | 7 | 0 | 0% |
+| Phase 1 | 8 | 8 | 100% |
+| Phase 2 | 7 | 1 | 14% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **37** | **8** | **22%** |
+| **Total** | **35** | **9** | **26%** |
 
 ---
 
