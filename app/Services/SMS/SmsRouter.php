@@ -2,6 +2,7 @@
 
 namespace App\Services\SMS;
 
+use App\Models\SmsConfig;
 use App\Services\SMS\Operators\AirtelService;
 use App\Services\SMS\Operators\MoovService;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +16,34 @@ class SmsRouter
     {
         $this->airtelService = new AirtelService();
         $this->moovService = new MoovService();
+    }
+
+    /**
+     * Vérifier si un opérateur est activé (DB ou .env)
+     */
+    protected function isOperatorEnabled(string $operator): bool
+    {
+        $dbConfig = SmsConfig::where('provider', $operator)->first();
+
+        if ($dbConfig) {
+            return $dbConfig->is_active;
+        }
+
+        return config("sms.{$operator}.enabled", false);
+    }
+
+    /**
+     * Obtenir le message d'erreur pour un opérateur désactivé
+     */
+    protected function getDisabledMessage(string $operator): string
+    {
+        $names = [
+            'airtel' => 'Airtel',
+            'moov' => 'Moov',
+        ];
+
+        $name = $names[$operator] ?? ucfirst($operator);
+        return "L'opérateur {$name} est actuellement désactivé. Veuillez contacter l'administrateur ou activer l'opérateur dans la configuration SMS.";
     }
 
     /**
@@ -37,13 +66,11 @@ class SmsRouter
 
         switch ($operator) {
             case 'airtel':
-                $airtelConfig = \App\Models\SmsConfig::where('provider', 'airtel')->first();
-                $isEnabled = ($airtelConfig && $airtelConfig->is_active) || config('sms.airtel.enabled');
-
-                if (!$isEnabled) {
+                if (!$this->isOperatorEnabled('airtel')) {
                     return [
                         'success' => false,
-                        'message' => 'L\'API Airtel est désactivée',
+                        'message' => $this->getDisabledMessage('airtel'),
+                        'error_code' => 'OPERATOR_DISABLED',
                         'provider' => 'airtel',
                         'phone' => $phoneNumber,
                         'operator_info' => $info,
@@ -52,13 +79,11 @@ class SmsRouter
                 return $this->airtelService->sendSms($phoneNumber, $message);
 
             case 'moov':
-                $moovConfig = \App\Models\SmsConfig::where('provider', 'moov')->first();
-                $isEnabled = ($moovConfig && $moovConfig->is_active) || config('sms.moov.enabled');
-
-                if (!$isEnabled) {
+                if (!$this->isOperatorEnabled('moov')) {
                     return [
                         'success' => false,
-                        'message' => 'L\'API Moov n\'est pas encore configurée',
+                        'message' => $this->getDisabledMessage('moov'),
+                        'error_code' => 'OPERATOR_DISABLED',
                         'provider' => 'moov',
                         'phone' => $phoneNumber,
                         'operator_info' => $info,
@@ -69,7 +94,8 @@ class SmsRouter
             default:
                 return [
                     'success' => false,
-                    'message' => 'Opérateur non reconnu pour ce numéro',
+                    'message' => 'Opérateur non reconnu pour ce numéro. Seuls les numéros Airtel (77, 74, 76) et Moov (60, 62, 65, 66) sont supportés.',
+                    'error_code' => 'UNKNOWN_OPERATOR',
                     'provider' => 'unknown',
                     'phone' => $phoneNumber,
                     'operator_info' => $info,
@@ -103,7 +129,7 @@ class SmsRouter
                 'count' => count($grouped['airtel'])
             ]);
 
-            if (config('sms.airtel.enabled')) {
+            if ($this->isOperatorEnabled('airtel')) {
                 $airtelResults = $this->airtelService->sendBulkSms($grouped['airtel'], $message);
                 $results['sent'] += $airtelResults['sent'];
                 $results['failed'] += $airtelResults['failed'];
@@ -114,7 +140,8 @@ class SmsRouter
                     $results['failed']++;
                     $results['details'][] = [
                         'success' => false,
-                        'message' => 'API Airtel désactivée',
+                        'message' => $this->getDisabledMessage('airtel'),
+                        'error_code' => 'OPERATOR_DISABLED',
                         'provider' => 'airtel',
                         'phone' => $phone,
                     ];
@@ -128,7 +155,7 @@ class SmsRouter
                 'count' => count($grouped['moov'])
             ]);
 
-            if (config('sms.moov.enabled')) {
+            if ($this->isOperatorEnabled('moov')) {
                 $moovResults = $this->moovService->sendBulkSms($grouped['moov'], $message);
                 $results['sent'] += $moovResults['sent'];
                 $results['failed'] += $moovResults['failed'];
@@ -139,7 +166,8 @@ class SmsRouter
                     $results['failed']++;
                     $results['details'][] = [
                         'success' => false,
-                        'message' => 'API Moov non configurée',
+                        'message' => $this->getDisabledMessage('moov'),
+                        'error_code' => 'OPERATOR_DISABLED',
                         'provider' => 'moov',
                         'phone' => $phone,
                     ];
@@ -158,7 +186,8 @@ class SmsRouter
                 $results['failed']++;
                 $results['details'][] = [
                     'success' => false,
-                    'message' => 'Opérateur non reconnu',
+                    'message' => 'Opérateur non reconnu pour ce numéro',
+                    'error_code' => 'UNKNOWN_OPERATOR',
                     'provider' => 'unknown',
                     'phone' => $phone,
                 ];
@@ -183,8 +212,8 @@ class SmsRouter
             'airtel_count' => count($grouped['airtel']),
             'moov_count' => count($grouped['moov']),
             'unknown_count' => count($grouped['unknown']),
-            'airtel_enabled' => config('sms.airtel.enabled'),
-            'moov_enabled' => config('sms.moov.enabled'),
+            'airtel_enabled' => $this->isOperatorEnabled('airtel'),
+            'moov_enabled' => $this->isOperatorEnabled('moov'),
             'grouped' => $grouped,
         ];
     }
