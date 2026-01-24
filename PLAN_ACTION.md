@@ -135,15 +135,20 @@
 
 ### 3.2 Features a Completer
 
-- [ ] **3.2.1** UI Planification Campagnes
+- [x] **3.2.1** UI Planification Campagnes ✅
   - Fichier: `resources/src/views/CampaignCreate.vue`
-  - Ajouter date picker pour scheduling
-  - Frequence recurrence
+  - Date picker avec date minimum (aujourd'hui)
+  - Options récurrence: quotidienne, hebdomadaire (sélection jours), mensuelle
+  - Date de fin optionnelle pour récurrence
+  - Intégration API schedules
 
-- [ ] **3.2.2** UI A/B Testing
+- [x] **3.2.2** UI A/B Testing ✅
   - Fichier: `resources/src/views/CampaignCreate.vue`
-  - Ajouter variantes de messages
-  - Afficher resultats dans historique
+  - Checkbox pour activer le test A/B
+  - Gestion de 2-4 variantes de messages
+  - Affichage du pourcentage par variante
+  - Récapitulatif avec toutes les variantes
+  - Envoi des variantes à l'API
 
 - [ ] **3.2.3** UI Variables Templates
   - Fichier: `resources/src/views/Templates.vue`
@@ -216,9 +221,9 @@
 |-------|-------|-----------|---|
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
-| Phase 3 | 10 | 4 | 40% |
+| Phase 3 | 10 | 5 | 50% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **35** | **19** | **54%** |
+| **Total** | **35** | **20** | **57%** |
 
 ---
 

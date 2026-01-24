@@ -106,22 +106,94 @@
               </div>
             </div>
 
-            <div v-if="campaign.sendType === 'scheduled'" class="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-              <div class="space-y-2">
-                <label class="text-sm font-medium">Date d'envoi *</label>
-                <input
-                  v-model="campaign.sendDate"
-                  type="date"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                />
+            <div v-if="campaign.sendType === 'scheduled'" class="space-y-4 p-4 bg-muted/50 rounded-lg">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Date d'envoi *</label>
+                  <input
+                    v-model="campaign.sendDate"
+                    type="date"
+                    :min="minDate"
+                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Heure d'envoi *</label>
+                  <input
+                    v-model="campaign.sendTime"
+                    type="time"
+                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                </div>
               </div>
-              <div class="space-y-2">
-                <label class="text-sm font-medium">Heure d'envoi *</label>
-                <input
-                  v-model="campaign.sendTime"
-                  type="time"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                />
+
+              <!-- Recurrence Options -->
+              <div class="space-y-3 pt-3 border-t border-border">
+                <div class="flex items-center gap-2">
+                  <input
+                    v-model="campaign.isRecurring"
+                    type="checkbox"
+                    id="isRecurring"
+                    class="w-4 h-4 rounded border-gray-300"
+                  />
+                  <label for="isRecurring" class="text-sm font-medium cursor-pointer">
+                    Activer la récurrence
+                  </label>
+                </div>
+
+                <div v-if="campaign.isRecurring" class="space-y-3 pl-6">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">Fréquence</label>
+                    <select
+                      v-model="campaign.frequency"
+                      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="daily">Quotidienne</option>
+                      <option value="weekly">Hebdomadaire</option>
+                      <option value="monthly">Mensuelle</option>
+                    </select>
+                  </div>
+
+                  <div v-if="campaign.frequency === 'weekly'" class="space-y-2">
+                    <label class="text-sm font-medium">Jours d'envoi</label>
+                    <div class="flex flex-wrap gap-2">
+                      <label
+                        v-for="(day, index) in weekDays"
+                        :key="index"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border cursor-pointer transition-colors"
+                        :class="campaign.weekDays.includes(index + 1) ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-input hover:bg-accent'"
+                      >
+                        <input
+                          type="checkbox"
+                          :value="index + 1"
+                          v-model="campaign.weekDays"
+                          class="sr-only"
+                        />
+                        <span class="text-sm">{{ day }}</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div v-if="campaign.frequency === 'monthly'" class="space-y-2">
+                    <label class="text-sm font-medium">Jour du mois</label>
+                    <select
+                      v-model="campaign.dayOfMonth"
+                      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option v-for="d in 28" :key="d" :value="d">{{ d }}</option>
+                    </select>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">Date de fin (optionnel)</label>
+                    <input
+                      v-model="campaign.endDate"
+                      type="date"
+                      :min="campaign.sendDate"
+                      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -176,6 +248,63 @@
                   class="text-xs px-3 py-1.5 rounded-md bg-background hover:bg-primary hover:text-primary-foreground border border-border hover:border-primary transition-colors font-mono"
                 >
                   {{ variable }}
+                </button>
+              </div>
+            </div>
+
+            <!-- A/B Testing Section -->
+            <div class="space-y-3 pt-4 border-t">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <input
+                    v-model="campaign.enableABTest"
+                    type="checkbox"
+                    id="enableABTest"
+                    class="w-4 h-4 rounded border-gray-300"
+                  />
+                  <label for="enableABTest" class="text-sm font-medium cursor-pointer">
+                    Activer le test A/B
+                  </label>
+                </div>
+                <BeakerIcon class="w-5 h-5 text-muted-foreground" />
+              </div>
+
+              <div v-if="campaign.enableABTest" class="space-y-4 pl-6">
+                <p class="text-sm text-muted-foreground">
+                  Créez des variantes de votre message pour tester différentes versions.
+                  Chaque variante sera envoyée à une portion égale de vos destinataires.
+                </p>
+
+                <div v-for="(variant, index) in campaign.variants" :key="index" class="space-y-2 p-3 bg-background rounded-lg border">
+                  <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium">Variante {{ String.fromCharCode(65 + index) }}</label>
+                    <button
+                      v-if="campaign.variants.length > 2"
+                      @click="removeVariant(index)"
+                      class="text-destructive hover:bg-destructive/10 rounded p-1"
+                    >
+                      <TrashIcon class="w-4 h-4" />
+                    </button>
+                  </div>
+                  <textarea
+                    v-model="variant.message"
+                    :placeholder="`Message variante ${String.fromCharCode(65 + index)}...`"
+                    rows="3"
+                    class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none font-mono"
+                  ></textarea>
+                  <div class="flex justify-between text-xs text-muted-foreground">
+                    <span>{{ variant.message.length }}/160 caractères</span>
+                    <span>{{ Math.ceil(100 / campaign.variants.length) }}% des destinataires</span>
+                  </div>
+                </div>
+
+                <button
+                  v-if="campaign.variants.length < 4"
+                  @click="addVariant"
+                  class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-dashed border-input bg-background hover:bg-accent hover:text-accent-foreground h-10"
+                >
+                  <PlusIconOutline class="w-4 h-4" />
+                  <span>Ajouter une variante ({{ campaign.variants.length }}/4)</span>
                 </button>
               </div>
             </div>
@@ -270,11 +399,20 @@
                   <p class="text-xs text-muted-foreground uppercase">Type d'envoi</p>
                   <p class="text-base font-semibold flex items-center gap-2">
                     <BoltIcon v-if="campaign.sendType === 'immediate'" class="w-5 h-5 text-primary" />
+                    <ArrowPathIcon v-else-if="campaign.isRecurring" class="w-5 h-5 text-primary" />
                     <CalendarIcon v-else class="w-5 h-5 text-primary" />
-                    <span>{{ campaign.sendType === 'immediate' ? 'Envoi immédiat' : 'Campagne planifiée' }}</span>
+                    <span>{{ campaign.sendType === 'immediate' ? 'Envoi immédiat' : (campaign.isRecurring ? 'Campagne récurrente' : 'Campagne planifiée') }}</span>
                   </p>
                   <p v-if="campaign.sendType === 'scheduled'" class="text-sm text-muted-foreground">
-                    Programmé pour le {{ campaign.sendDate }} à {{ campaign.sendTime }}
+                    {{ campaign.isRecurring ? 'Début:' : 'Programmé pour le' }} {{ campaign.sendDate }} à {{ campaign.sendTime }}
+                  </p>
+                  <p v-if="campaign.isRecurring" class="text-sm text-muted-foreground">
+                    Fréquence: {{ { daily: 'Quotidienne', weekly: 'Hebdomadaire', monthly: 'Mensuelle' }[campaign.frequency] }}
+                    <span v-if="campaign.frequency === 'weekly'"> ({{ campaign.weekDays.map(d => weekDays[d-1]).join(', ') }})</span>
+                    <span v-if="campaign.frequency === 'monthly'"> (le {{ campaign.dayOfMonth }} de chaque mois)</span>
+                  </p>
+                  <p v-if="campaign.isRecurring && campaign.endDate" class="text-sm text-muted-foreground">
+                    Fin: {{ campaign.endDate }}
                   </p>
                 </div>
               </div>
@@ -289,6 +427,26 @@
                 <p class="text-xs text-muted-foreground uppercase">Message</p>
                 <div class="p-3 bg-background rounded border font-mono text-sm whitespace-pre-wrap">{{ campaign.message || 'Aucun message' }}</div>
                 <p class="text-xs text-muted-foreground">{{ messageLength }} caractères • {{ smsCount }} SMS</p>
+              </div>
+
+              <!-- A/B Testing Summary -->
+              <div v-if="campaign.enableABTest" class="p-4 bg-muted/30 rounded-lg space-y-3">
+                <p class="text-xs text-muted-foreground uppercase flex items-center gap-2">
+                  <BeakerIcon class="w-4 h-4" />
+                  Test A/B activé
+                </p>
+                <div class="space-y-2">
+                  <div
+                    v-for="(variant, index) in campaign.variants"
+                    :key="index"
+                    class="p-3 bg-background rounded border"
+                  >
+                    <p class="text-xs font-medium text-primary mb-1">
+                      Variante {{ String.fromCharCode(65 + index) }} ({{ Math.ceil(100 / campaign.variants.length) }}%)
+                    </p>
+                    <p class="font-mono text-sm whitespace-pre-wrap">{{ variant.message || 'Aucun message' }}</p>
+                  </div>
+                </div>
               </div>
 
               <div class="p-4 bg-muted/30 rounded-lg space-y-2">
@@ -379,7 +537,11 @@ import {
   CalendarIcon,
   ExclamationTriangleIcon,
   UsersIcon,
-  TagIcon
+  TagIcon,
+  ArrowPathIcon,
+  BeakerIcon,
+  TrashIcon,
+  PlusIcon as PlusIconOutline
 } from '@heroicons/vue/24/outline'
 import { campaignService } from '@/services/campaignService'
 import { templateService, type Template } from '@/services/templateService'
@@ -398,17 +560,32 @@ const variables = ['{{name}}', '{{email}}', '{{phone}}', '{{code}}']
 const templates = ref<Template[]>([])
 const contacts = ref<any[]>([])
 const groups = ref<any[]>([])
+const weekDays = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+
+const minDate = computed(() => {
+  const today = new Date()
+  return today.toISOString().split('T')[0]
+})
 
 const campaign = ref({
   name: '',
   description: '',
   sendType: 'immediate', // immediate ou scheduled
   sendDate: '',
-  sendTime: '',
+  sendTime: '09:00',
   templateId: '',
   message: '',
   recipientType: 'all',
-  groupId: ''
+  groupId: '',
+  // Recurrence options
+  isRecurring: false,
+  frequency: 'weekly' as 'daily' | 'weekly' | 'monthly',
+  weekDays: [1, 2, 3, 4, 5] as number[], // Lun-Ven par défaut
+  dayOfMonth: 1,
+  endDate: '',
+  // A/B Testing options
+  enableABTest: false,
+  variants: [{ message: '' }, { message: '' }] as { message: string }[]
 })
 
 const messageLength = computed(() => campaign.value.message.length)
@@ -477,6 +654,18 @@ function insertVariable(variable: string) {
   campaign.value.message += variable
 }
 
+function addVariant() {
+  if (campaign.value.variants.length < 4) {
+    campaign.value.variants.push({ message: '' })
+  }
+}
+
+function removeVariant(index: number) {
+  if (campaign.value.variants.length > 2) {
+    campaign.value.variants.splice(index, 1)
+  }
+}
+
 async function saveDraft() {
   submitting.value = true
   try {
@@ -510,17 +699,23 @@ async function launchCampaign() {
     return
   }
 
-  const confirmTitle = campaign.value.sendType === 'immediate' ? 'Envoyer maintenant' : 'Planifier la campagne'
-  const confirmMessage = campaign.value.sendType === 'immediate'
-    ? `Envoyer immédiatement ${estimatedRecipients.value} SMS ?`
-    : `Planifier l'envoi de ${estimatedRecipients.value} SMS pour le ${campaign.value.sendDate} à ${campaign.value.sendTime} ?`
+  let confirmMessage = ''
+  if (campaign.value.sendType === 'immediate') {
+    confirmMessage = `Envoyer immédiatement ${estimatedRecipients.value} SMS ?`
+  } else if (campaign.value.isRecurring) {
+    const freqLabel = { daily: 'quotidienne', weekly: 'hebdomadaire', monthly: 'mensuelle' }[campaign.value.frequency]
+    confirmMessage = `Planifier une campagne ${freqLabel} à partir du ${campaign.value.sendDate} à ${campaign.value.sendTime} ?`
+  } else {
+    confirmMessage = `Planifier l'envoi de ${estimatedRecipients.value} SMS pour le ${campaign.value.sendDate} à ${campaign.value.sendTime} ?`
+  }
 
+  const confirmTitle = campaign.value.sendType === 'immediate' ? 'Envoyer maintenant' : 'Planifier la campagne'
   const confirmed = await showConfirm(confirmTitle, confirmMessage)
   if (!confirmed) return
 
   submitting.value = true
   try {
-    const data = {
+    const data: any = {
       name: campaign.value.name,
       description: campaign.value.description,
       message: campaign.value.message,
@@ -530,13 +725,36 @@ async function launchCampaign() {
       scheduled_at: campaign.value.sendType === 'scheduled' && campaign.value.sendDate
         ? `${campaign.value.sendDate} ${campaign.value.sendTime || '09:00'}`
         : null,
-      messages_sent: campaign.value.sendType === 'immediate' ? estimatedRecipients.value : 0
+      messages_sent: campaign.value.sendType === 'immediate' ? estimatedRecipients.value : 0,
+      // A/B Testing
+      ab_testing_enabled: campaign.value.enableABTest,
+      variants: campaign.value.enableABTest
+        ? campaign.value.variants.filter(v => v.message.trim()).map((v, i) => ({
+            name: `Variante ${String.fromCharCode(65 + i)}`,
+            message: v.message
+          }))
+        : null
     }
 
     const createdCampaign = await campaignService.create(data)
 
+    // If recurring, create schedule
+    if (campaign.value.sendType === 'scheduled' && campaign.value.isRecurring && createdCampaign.id) {
+      const scheduleData = {
+        frequency: campaign.value.frequency,
+        time: campaign.value.sendTime,
+        days_of_week: campaign.value.frequency === 'weekly' ? campaign.value.weekDays : null,
+        day_of_month: campaign.value.frequency === 'monthly' ? campaign.value.dayOfMonth : null,
+        start_date: campaign.value.sendDate,
+        end_date: campaign.value.endDate || null
+      }
+      await campaignService.createSchedule(createdCampaign.id, scheduleData)
+    }
+
     if (campaign.value.sendType === 'immediate') {
       showSuccess(`${estimatedRecipients.value} SMS envoyés avec succès !`)
+    } else if (campaign.value.isRecurring) {
+      showSuccess('Campagne récurrente planifiée avec succès !')
     } else {
       showSuccess('Campagne planifiée avec succès !')
     }
@@ -554,6 +772,11 @@ function canGoNext(): boolean {
     return campaign.value.sendType === 'immediate' || (!!campaign.value.sendDate && !!campaign.value.sendTime)
   }
   if (currentStep.value === 1) {
+    // Check main message or A/B variants
+    if (campaign.value.enableABTest) {
+      // All variants must have a message
+      return campaign.value.variants.every(v => v.message.trim().length > 0)
+    }
     return campaign.value.message.length > 0
   }
   if (currentStep.value === 2) {

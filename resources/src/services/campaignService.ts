@@ -55,5 +55,26 @@ export const campaignService = {
   async getStats(): Promise<any> {
     const response = await apiClient.get('/campaigns/stats')
     return response.data
+  },
+
+  async createSchedule(campaignId: number, scheduleData: {
+    frequency: 'daily' | 'weekly' | 'monthly'
+    time: string
+    days_of_week?: number[] | null
+    day_of_month?: number | null
+    start_date: string
+    end_date?: string | null
+  }): Promise<any> {
+    const response = await apiClient.post(`/campaigns/${campaignId}/schedule`, scheduleData)
+    return response.data.data || response.data
+  },
+
+  async getSchedule(campaignId: number): Promise<any> {
+    const response = await apiClient.get(`/campaigns/${campaignId}/schedule`)
+    return response.data.data || response.data
+  },
+
+  async deleteSchedule(campaignId: number): Promise<void> {
+    await apiClient.delete(`/campaigns/${campaignId}/schedule`)
   }
 }
