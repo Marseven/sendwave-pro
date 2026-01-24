@@ -4,11 +4,20 @@ export interface ApiKey {
   id: number
   name: string
   key: string
+  full_key?: string | null
   type: 'production' | 'test'
   status: 'active' | 'revoked'
-  last_used_at?: string
-  created_at?: string
-  updated_at?: string
+  permissions: string[]
+  rate_limit: number
+  last_used_at?: string | null
+  created_at: string
+}
+
+export interface CreateApiKeyRequest {
+  name: string
+  type?: 'production' | 'test'
+  permissions?: string[]
+  rate_limit?: number
 }
 
 export const apiKeyService = {
@@ -22,13 +31,24 @@ export const apiKeyService = {
     return response.data.data || response.data
   },
 
-  async create(apiKey: Partial<ApiKey>): Promise<ApiKey> {
+  async create(apiKey: CreateApiKeyRequest): Promise<ApiKey> {
     const response = await apiClient.post('/api-keys', apiKey)
     return response.data.data || response.data
   },
 
-  async revoke(id: number): Promise<void> {
-    await apiClient.post(`/api-keys/${id}/revoke`)
+  async update(id: number, data: Partial<CreateApiKeyRequest>): Promise<ApiKey> {
+    const response = await apiClient.put(`/api-keys/${id}`, data)
+    return response.data.data || response.data
+  },
+
+  async revoke(id: number): Promise<ApiKey> {
+    const response = await apiClient.post(`/api-keys/${id}/revoke`)
+    return response.data.data || response.data
+  },
+
+  async regenerate(id: number): Promise<ApiKey> {
+    const response = await apiClient.post(`/api-keys/${id}/regenerate`)
+    return response.data.data || response.data
   },
 
   async delete(id: number): Promise<void> {

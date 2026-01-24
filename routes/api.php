@@ -76,6 +76,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // API Keys (réservé au compte parent uniquement)
     Route::apiResource('api-keys', ApiKeyController::class);
+    Route::post('api-keys/{id}/revoke', [ApiKeyController::class, 'revoke']);
+    Route::post('api-keys/{id}/regenerate', [ApiKeyController::class, 'regenerate']);
 
     // SMS Providers & Configurations (réservé au compte parent uniquement)
     Route::get('sms-providers', [SmsProviderController::class, 'index']);

@@ -12,6 +12,8 @@ class ApiKey extends Model
         'name',
         'key',
         'provider',
+        'permissions',
+        'rate_limit',
         'last_used',
         'is_active',
     ];
@@ -19,10 +21,38 @@ class ApiKey extends Model
     protected $casts = [
         'last_used' => 'datetime',
         'is_active' => 'boolean',
+        'permissions' => 'array',
+        'rate_limit' => 'integer',
+    ];
+
+    /**
+     * Available permissions
+     */
+    public const PERMISSIONS = [
+        'send_sms' => 'Envoyer des SMS',
+        'view_history' => 'Voir l\'historique',
+        'manage_contacts' => 'Gérer les contacts',
+        'view_balance' => 'Voir le solde',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Check if the key has a specific permission
+     */
+    public function hasPermission(string $permission): bool
+    {
+        return in_array($permission, $this->permissions ?? []);
+    }
+
+    /**
+     * Update last used timestamp
+     */
+    public function markAsUsed(): void
+    {
+        $this->update(['last_used' => now()]);
     }
 }
