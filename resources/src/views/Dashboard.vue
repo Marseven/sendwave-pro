@@ -283,8 +283,43 @@ async function loadDashboardData() {
       analyticsService.getDashboard(selectedPeriod.value),
       campaignService.getAll()
     ])
-    analytics.value = analyticsData.data
-    recentCampaigns.value = campaignsData.slice(0, 3)
+
+    // Mapper les données de l'API au format attendu par le template
+    const data = analyticsData.data
+    analytics.value = {
+      total_sent: data.overview?.sms_sent || 0,
+      total_delivered: data.overview?.sms_delivered || 0,
+      total_failed: data.overview?.sms_failed || 0,
+      delivery_rate: data.overview?.success_rate || 0,
+      total_cost: data.overview?.total_cost || 0,
+      campaigns_executed: data.overview?.campaigns_executed || 0,
+      contacts_added: data.overview?.contacts_added || 0,
+      trends: {
+        sent: data.trends?.sms_sent_change || 0,
+        delivered: data.trends?.success_rate_change || 0,
+        cost: data.trends?.cost_change || 0,
+        campaigns: data.trends?.campaigns_change || 0
+      },
+      by_provider: {
+        Airtel: {
+          sent: data.providers?.airtel?.count || 0,
+          delivered_rate: data.providers?.airtel?.percentage || 0,
+          total_cost: data.cost_analysis?.airtel_cost || 0
+        },
+        Moov: {
+          sent: data.providers?.moov?.count || 0,
+          delivered_rate: data.providers?.moov?.percentage || 0,
+          total_cost: data.cost_analysis?.moov_cost || 0
+        }
+      },
+      credits_remaining: user.value?.credits || 0,
+      initial_credits: user.value?.initial_credits || user.value?.credits || 1000
+    }
+
+    // Utiliser les campagnes de l'API analytics si disponibles, sinon les campagnes récentes
+    recentCampaigns.value = data.campaigns?.length > 0
+      ? data.campaigns.slice(0, 3)
+      : campaignsData.slice(0, 3)
 
     // Générer les activités récentes
     recentActivities.value = generateRecentActivities(campaignsData)
