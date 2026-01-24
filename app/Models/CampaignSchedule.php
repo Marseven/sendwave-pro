@@ -23,7 +23,6 @@ class CampaignSchedule extends Model
     ];
 
     protected $casts = [
-        'time' => 'datetime',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'next_run_at' => 'datetime',
@@ -35,11 +34,47 @@ class CampaignSchedule extends Model
     ];
 
     /**
+     * Map day_of_week integer to Carbon day constant
+     * 1 = Monday, 7 = Sunday (ISO-8601)
+     */
+    protected const DAY_MAP = [
+        1 => Carbon::MONDAY,
+        2 => Carbon::TUESDAY,
+        3 => Carbon::WEDNESDAY,
+        4 => Carbon::THURSDAY,
+        5 => Carbon::FRIDAY,
+        6 => Carbon::SATURDAY,
+        7 => Carbon::SUNDAY,
+    ];
+
+    /**
      * Get the campaign that owns the schedule
      */
     public function campaign(): BelongsTo
     {
         return $this->belongsTo(Campaign::class);
+    }
+
+    /**
+     * Parse the time field (stored as HH:MM:SS string) into hour and minute
+     */
+    protected function parseTime(): array
+    {
+        $timeParts = explode(':', $this->time ?? '09:00:00');
+        return [
+            'hour' => (int) ($timeParts[0] ?? 9),
+            'minute' => (int) ($timeParts[1] ?? 0),
+            'second' => (int) ($timeParts[2] ?? 0),
+        ];
+    }
+
+    /**
+     * Set time on a Carbon instance from the schedule's time field
+     */
+    protected function setScheduleTime(Carbon $date): Carbon
+    {
+        $time = $this->parseTime();
+        return $date->setTime($time['hour'], $time['minute'], $time['second']);
     }
 
     /**
@@ -52,52 +87,87 @@ class CampaignSchedule extends Model
         }
 
         $now = Carbon::now();
-        $time = Carbon::parse($this->time);
 
-        // Check if we're within the schedule window
-        if ($this->start_date && $now->lt($this->start_date)) {
-            $next = Carbon::parse($this->start_date)->setTimeFrom($time);
-            return $next;
-        }
-
+        // Check if we're past the end date
         if ($this->end_date && $now->gt($this->end_date)) {
             return null;
         }
 
+        // Check if we're before the start date
+        if ($this->start_date && $now->lt($this->start_date)) {
+            return $this->setScheduleTime(Carbon::parse($this->start_date));
+        }
+
+        $next = null;
+
         switch ($this->frequency) {
             case 'once':
-                return $this->next_run_at ?? Carbon::now()->setTimeFrom($time);
+                // For one-time schedules, use existing next_run_at or calculate from start_date
+                if ($this->next_run_at && $this->next_run_at->gt($now)) {
+                    return $this->next_run_at;
+                }
+                if ($this->start_date) {
+                    $next = $this->setScheduleTime(Carbon::parse($this->start_date));
+                    return $next->gt($now) ? $next : null;
+                }
+                return null;
 
             case 'daily':
-                $next = Carbon::now()->setTimeFrom($time);
+                $next = $this->setScheduleTime(Carbon::today());
                 if ($next->lte($now)) {
                     $next->addDay();
                 }
-                return $next;
+                break;
 
             case 'weekly':
-                if (!$this->day_of_week) {
+                if (!$this->day_of_week || !isset(self::DAY_MAP[$this->day_of_week])) {
                     return null;
                 }
-                $next = Carbon::now()->next($this->day_of_week)->setTimeFrom($time);
-                if ($next->lte($now)) {
-                    $next->addWeek();
+                $carbonDay = self::DAY_MAP[$this->day_of_week];
+                $next = Carbon::now()->next($carbonDay);
+                $next = $this->setScheduleTime($next);
+
+                // If the calculated day is today and time hasn't passed, use today
+                if (Carbon::now()->dayOfWeekIso === $this->day_of_week) {
+                    $todayAtTime = $this->setScheduleTime(Carbon::today());
+                    if ($todayAtTime->gt($now)) {
+                        $next = $todayAtTime;
+                    }
                 }
-                return $next;
+                break;
 
             case 'monthly':
-                if (!$this->day_of_month) {
+                if (!$this->day_of_month || $this->day_of_month < 1 || $this->day_of_month > 31) {
                     return null;
                 }
-                $next = Carbon::now()->day($this->day_of_month)->setTimeFrom($time);
+
+                // Handle months with fewer days
+                $daysInMonth = Carbon::now()->daysInMonth;
+                $targetDay = min($this->day_of_month, $daysInMonth);
+
+                $next = Carbon::now()->day($targetDay);
+                $next = $this->setScheduleTime($next);
+
                 if ($next->lte($now)) {
+                    // Move to next month
                     $next->addMonth();
+                    // Recalculate target day for new month
+                    $daysInNextMonth = $next->daysInMonth;
+                    $targetDay = min($this->day_of_month, $daysInNextMonth);
+                    $next->day($targetDay);
                 }
-                return $next;
+                break;
 
             default:
                 return null;
         }
+
+        // Final check: ensure next run is within the schedule window
+        if ($next && $this->end_date && $next->gt($this->end_date)) {
+            return null;
+        }
+
+        return $next;
     }
 
     /**

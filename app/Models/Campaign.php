@@ -10,6 +10,7 @@ class Campaign extends Model
 {
     protected $fillable = [
         'user_id',
+        'group_id',
         'name',
         'status',
         'messages_sent',
@@ -38,6 +39,11 @@ class Campaign extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(ContactGroup::class, 'group_id');
     }
 
     public function messages(): HasMany

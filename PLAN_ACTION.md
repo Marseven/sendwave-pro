@@ -17,9 +17,11 @@
   - Campagnes: `draft` -> `scheduled` -> `sending` -> `completed` | `failed` | `cancelled`
   - Frontend mis a jour pour compatibilite avec anciens statuts
 
-- [ ] **1.1.3** Implementer CampaignSchedule::calculateNextRun()
-  - Fichier: `app/Models/CampaignSchedule.php`
-  - Ajouter la methode manquante
+- [x] **1.1.3** Implementer CampaignSchedule::calculateNextRun() ✅
+  - Corrige: `app/Models/CampaignSchedule.php` - Methode reecrite avec gestion correcte
+  - Cree: `app/Console/Commands/ProcessScheduledCampaigns.php` - Commande pour executer les campagnes
+  - Configure: `routes/console.php` - Scheduler toutes les minutes
+  - Migration: Ajout `group_id` aux campagnes + mise a jour statuts legacy
 
 - [ ] **1.1.4** Fixer contact_id dans Message
   - Fichier: `app/Http/Controllers/Api/MessageController.php`
@@ -189,11 +191,11 @@
 
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
-| Phase 1 | 10 | 2 | 20% |
+| Phase 1 | 10 | 3 | 30% |
 | Phase 2 | 7 | 0 | 0% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **37** | **2** | **5%** |
+| **Total** | **37** | **3** | **8%** |
 
 ---
 
