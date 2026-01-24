@@ -157,7 +157,7 @@ const menuItems = [
   { path: '/blacklist', label: 'Liste noire', icon: NoSymbolIcon },
   { path: '/accounts', label: 'Comptes', icon: CreditCardIcon },
   { path: '/sms-config', label: 'Config. Opérateurs', icon: SignalIcon },
-  { path: '/api', label: 'Clés API', icon: CodeBracketIcon },
+  { path: '/api-keys', label: 'Clés API', icon: CodeBracketIcon },
   { path: '/webhooks', label: 'Webhooks', icon: LinkIcon },
   { path: '/audit-logs', label: 'Journal d\'audit', icon: ClipboardDocumentListIcon },
   { path: '/settings', label: 'Paramètres', icon: Cog6ToothIcon },
