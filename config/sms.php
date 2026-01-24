@@ -34,7 +34,7 @@ return [
         'port' => (int) env('MOOV_SMPP_PORT', 12775),
         'system_id' => env('MOOV_SMPP_SYSTEM_ID', ''),
         'password' => env('MOOV_SMPP_PASSWORD', ''),
-        'source_addr' => env('MOOV_SOURCE_ADDR', 'SENDWAVE'),
+        'source_addr' => env('MOOV_SMPP_SOURCE_ADDR', 'SENDWAVE'),
         'enabled' => env('MOOV_ENABLED', false),
         'cost_per_sms' => env('MOOV_COST_PER_SMS', 20),
     ],
