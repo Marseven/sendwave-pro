@@ -50,35 +50,45 @@ class AirtelService
                 'origin' => $this->originAddr
             ]);
 
-            $response = Http::get($this->apiUrl, [
-                'REQUESTTYPE' => 'SMSSubmitReq',
-                'MOBILENO' => $cleanNumber,
-                'USERNAME' => $this->username,
-                'PASSWORD' => $this->password,
-                'ORIGIN_ADDR' => $this->originAddr,
-                'TYPE' => '0',
-                'MESSAGE' => $message,
-            ]);
+            $response = Http::withoutVerifying()
+                ->timeout(30)
+                ->get($this->apiUrl, [
+                    'REQUESTTYPE' => 'SMSSubmitReq',
+                    'MOBILENO' => $cleanNumber,
+                    'USERNAME' => $this->username,
+                    'PASSWORD' => $this->password,
+                    'ORIGIN_ADDR' => $this->originAddr,
+                    'TYPE' => '0',
+                    'MESSAGE' => $message,
+                ]);
 
-            if ($response->successful()) {
+            $body = $response->body();
+
+            // Airtel retourne "+OK|messageId|Success|timestamp" en cas de succès
+            if ($response->successful() && str_starts_with($body, '+OK')) {
                 Log::info('Airtel SMS - Succès', [
                     'phone' => $cleanNumber,
-                    'response' => $response->body()
+                    'response' => $body
                 ]);
+
+                // Extraire le message ID de la réponse
+                $parts = explode('|', $body);
+                $messageId = $parts[1] ?? null;
 
                 return [
                     'success' => true,
                     'message' => 'SMS envoyé avec succès',
                     'provider' => 'airtel',
                     'phone' => $cleanNumber,
-                    'response' => $response->body(),
+                    'message_id' => $messageId,
+                    'response' => $body,
                 ];
             }
 
             Log::error('Airtel SMS - Échec', [
                 'phone' => $cleanNumber,
                 'status' => $response->status(),
-                'response' => $response->body()
+                'response' => $body
             ]);
 
             return [
@@ -86,7 +96,7 @@ class AirtelService
                 'message' => 'Erreur lors de l\'envoi du SMS',
                 'provider' => 'airtel',
                 'phone' => $cleanNumber,
-                'error' => $response->body(),
+                'error' => $body,
             ];
         } catch (\Exception $e) {
             Log::error('Airtel SMS - Exception', [
