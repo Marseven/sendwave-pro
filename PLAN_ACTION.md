@@ -36,9 +36,11 @@
 
 ### 1.2 Securite Immediate
 
-- [ ] **1.2.1** Chiffrer les credentials SMS
+- [x] **1.2.1** Chiffrer les credentials SMS ✅
   - Fichier: `app/Models/SmsConfig.php`
-  - Utiliser `encrypt()` / `decrypt()` pour password
+  - Mutateurs setPasswordAttribute/getPasswordAttribute avec Crypt::encryptString
+  - Support rétrocompatible pour mots de passe legacy non-chiffrés
+  - Créé: `app/Console/Commands/EncryptSmsPasswords.php` pour migration
 
 - [x] **1.2.2** Ameliorer generation mot de passe sub-accounts ✅
   - Resolu: Le fichier avec `uniqid()` (Api/SubAccountController.php) a ete supprime
@@ -193,11 +195,11 @@
 
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
-| Phase 1 | 10 | 6 | 60% |
+| Phase 1 | 10 | 7 | 70% |
 | Phase 2 | 7 | 0 | 0% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **37** | **6** | **16%** |
+| **Total** | **37** | **7** | **19%** |
 
 ---
 
