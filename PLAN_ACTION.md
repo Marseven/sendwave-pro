@@ -29,10 +29,10 @@
   - Cache des contacts pour optimiser les envois en masse
   - `contact_id` et `recipient_name` maintenant remplis automatiquement
 
-- [ ] **1.1.5** Merger les 2 SubAccountControllers
-  - Supprimer: `app/Http/Controllers/Api/SubAccountController.php`
-  - Garder: `app/Http/Controllers/SubAccountController.php`
-  - Mettre a jour les routes
+- [x] **1.1.5** Merger les 2 SubAccountControllers ✅
+  - Supprime: `app/Http/Controllers/Api/SubAccountController.php` (version simple)
+  - Garde: `app/Http/Controllers/SubAccountController.php` (version complete)
+  - Routes mises a jour dans `routes/api.php`
 
 ### 1.2 Securite Immediate
 
@@ -40,9 +40,9 @@
   - Fichier: `app/Models/SmsConfig.php`
   - Utiliser `encrypt()` / `decrypt()` pour password
 
-- [ ] **1.2.2** Ameliorer generation mot de passe sub-accounts
-  - Fichier: `app/Http/Controllers/SubAccountController.php`
-  - Remplacer `uniqid()` par `Str::random(16)`
+- [x] **1.2.2** Ameliorer generation mot de passe sub-accounts ✅
+  - Resolu: Le fichier avec `uniqid()` (Api/SubAccountController.php) a ete supprime
+  - Le SubAccountController garde utilise Hash::make() avec mot de passe fourni par l'utilisateur
 
 - [ ] **1.2.3** Configurer CORS
   - Fichier: `config/cors.php`
@@ -193,11 +193,11 @@
 
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
-| Phase 1 | 10 | 4 | 40% |
+| Phase 1 | 10 | 6 | 60% |
 | Phase 2 | 7 | 0 | 0% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **37** | **4** | **11%** |
+| **Total** | **37** | **6** | **16%** |
 
 ---
 
