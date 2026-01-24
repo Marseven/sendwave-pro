@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Campaigns (permission: create_campaigns)
     Route::middleware('permission:create_campaigns')->group(function () {
         Route::post('campaigns/{id}/send', [CampaignController::class, 'send']);
+        Route::post('campaigns/{id}/clone', [CampaignController::class, 'clone']);
         Route::post('campaigns/{id}/schedule', [CampaignController::class, 'storeSchedule']);
         Route::get('campaigns/{id}/schedule', [CampaignController::class, 'getSchedule']);
         Route::delete('campaigns/{id}/schedule', [CampaignController::class, 'deleteSchedule']);
@@ -92,9 +93,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('messages/stats', [MessageHistoryController::class, 'stats']);
     });
 
-    // Message Export (permission: export_data)
+    // Message and Contacts Export (permission: export_data)
     Route::middleware('permission:export_data')->group(function () {
         Route::get('messages/export', [MessageHistoryController::class, 'export']);
+        Route::get('contacts/export', [ContactController::class, 'export']);
     });
 
     // Messages Send (permission: send_sms)

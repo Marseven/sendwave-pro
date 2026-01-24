@@ -42,6 +42,11 @@ export const campaignService = {
     await apiClient.delete(`/campaigns/${id}`)
   },
 
+  async clone(id: number): Promise<Campaign> {
+    const response = await apiClient.post(`/campaigns/${id}/clone`)
+    return response.data.data || response.data
+  },
+
   async launch(id: number): Promise<Campaign> {
     const response = await apiClient.post(`/campaigns/${id}/launch`)
     return response.data.data || response.data

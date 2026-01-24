@@ -99,13 +99,24 @@
               </div>
               <p class="text-sm text-muted-foreground line-clamp-2">{{ campaign.message }}</p>
             </div>
-            <button
-              @click="viewDetails(campaign)"
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-            >
-              <EyeIcon class="w-4 h-4" />
-              <span>Détails</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                @click="cloneCampaign(campaign)"
+                :disabled="cloning === campaign.id"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+                title="Dupliquer"
+              >
+                <DocumentDuplicateIcon v-if="cloning !== campaign.id" class="w-4 h-4" />
+                <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              </button>
+              <button
+                @click="viewDetails(campaign)"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+              >
+                <EyeIcon class="w-4 h-4" />
+                <span>Détails</span>
+              </button>
+            </div>
           </div>
 
           <div class="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t">
@@ -258,9 +269,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import MainLayout from '@/components/MainLayout.vue'
 import { campaignHistoryService } from '@/services/campaignHistoryService'
-import { showError } from '@/utils/notifications'
+import { campaignService } from '@/services/campaignService'
+import { showSuccess, showError } from '@/utils/notifications'
 import {
   ClockIcon,
   PlusIcon,
@@ -273,7 +286,8 @@ import {
   BanknotesIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  XMarkIcon
+  XMarkIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/vue/24/outline'
 
 interface Campaign {
@@ -290,8 +304,10 @@ interface Campaign {
   groups?: { id: number; name: string }[]
 }
 
+const router = useRouter()
 const campaigns = ref<Campaign[]>([])
 const loading = ref(false)
+const cloning = ref<number | null>(null)
 const selectedCampaign = ref<Campaign | null>(null)
 const currentPage = ref(1)
 const itemsPerPage = 10
@@ -402,6 +418,20 @@ function formatDate(date: string | undefined) {
 
 function viewDetails(campaign: Campaign) {
   selectedCampaign.value = campaign
+}
+
+async function cloneCampaign(campaign: Campaign) {
+  cloning.value = campaign.id
+  try {
+    const clonedCampaign = await campaignService.clone(campaign.id)
+    showSuccess(`Campagne "${clonedCampaign.name}" créée avec succès`)
+    router.push('/campaign/create')
+  } catch (error: any) {
+    console.error('Error cloning campaign:', error)
+    showError(error.response?.data?.message || 'Erreur lors du clonage de la campagne')
+  } finally {
+    cloning.value = null
+  }
 }
 
 async function loadCampaigns() {

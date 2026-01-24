@@ -130,6 +130,75 @@ class ContactController extends Controller
     }
 
     /**
+     * Export contacts to CSV
+     */
+    public function export(Request $request)
+    {
+        $format = $request->get('format', 'csv');
+        $group = $request->get('group');
+        $status = $request->get('status');
+
+        $query = Contact::where('user_id', $request->user()->id);
+
+        if ($group) {
+            $query->where('group', $group);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $contacts = $query->orderBy('name')->get();
+
+        if ($format === 'csv') {
+            $headers = ['name', 'email', 'phone', 'group', 'status', 'created_at'];
+            $csvContent = implode(',', $headers) . "\n";
+
+            foreach ($contacts as $contact) {
+                $row = [
+                    $this->escapeCsv($contact->name),
+                    $this->escapeCsv($contact->email),
+                    $this->escapeCsv($contact->phone),
+                    $this->escapeCsv($contact->group ?? ''),
+                    $this->escapeCsv($contact->status),
+                    $this->escapeCsv($contact->created_at->format('Y-m-d H:i:s')),
+                ];
+                $csvContent .= implode(',', $row) . "\n";
+            }
+
+            $filename = 'contacts_' . now()->format('Y-m-d_His') . '.csv';
+
+            return response($csvContent)
+                ->header('Content-Type', 'text/csv')
+                ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
+        }
+
+        // JSON format
+        return response()->json([
+            'data' => $contacts,
+            'total' => $contacts->count(),
+            'exported_at' => now()->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Escape a value for CSV output
+     */
+    protected function escapeCsv(?string $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        // If the value contains comma, newline, or quote, wrap in quotes and escape quotes
+        if (preg_match('/[,"\n\r]/', $value)) {
+            return '"' . str_replace('"', '""', $value) . '"';
+        }
+
+        return $value;
+    }
+
+    /**
      * Import contacts from CSV
      */
     public function import(Request $request)

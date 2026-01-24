@@ -16,6 +16,15 @@
             <span>Ajouter à un groupe ({{ selectedContactIds.length }})</span>
           </button>
           <button
+            @click="exportContacts"
+            :disabled="exporting"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+          >
+            <ArrowUpTrayIcon v-if="!exporting" class="w-4 h-4" />
+            <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+            <span>Exporter</span>
+          </button>
+          <button
             @click="showImportModal = true"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
           >
@@ -587,6 +596,7 @@ import { ref, computed, onMounted } from 'vue'
 import MainLayout from '@/components/MainLayout.vue'
 import {
   ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
   PlusIcon,
   PencilIcon,
   TrashIcon,
@@ -624,6 +634,7 @@ const selectedContactIds = ref<number[]>([])
 const selectedGroupId = ref<number | null>(null)
 const loading = ref(false)
 const saving = ref(false)
+const exporting = ref(false)
 const error = ref('')
 const addingToGroup = ref(false)
 
@@ -727,6 +738,21 @@ async function loadContacts() {
     console.error('Error loading contacts:', err)
   } finally {
     loading.value = false
+  }
+}
+
+async function exportContacts() {
+  exporting.value = true
+  try {
+    const blob = await contactService.exportCsv()
+    const filename = `contacts_${new Date().toISOString().slice(0, 10)}.csv`
+    contactService.downloadFile(blob, filename)
+    showSuccess('Contacts exportés avec succès')
+  } catch (err: any) {
+    console.error('Error exporting contacts:', err)
+    showError(err.response?.data?.message || 'Erreur lors de l\'export des contacts')
+  } finally {
+    exporting.value = false
   }
 }
 

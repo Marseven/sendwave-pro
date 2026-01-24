@@ -110,6 +110,49 @@ class CampaignController extends Controller
     }
 
     /**
+     * Clone an existing campaign
+     */
+    public function clone(Request $request, string $id)
+    {
+        $campaign = Campaign::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        // Clone the campaign with a new name
+        $clone = $campaign->replicate();
+        $clone->name = $campaign->name . ' (copie)';
+        $clone->status = CampaignStatus::DRAFT->value;
+        $clone->messages_sent = 0;
+        $clone->recipients_count = 0;
+        $clone->cost = 0;
+        $clone->sent_at = null;
+        $clone->scheduled_at = null;
+        $clone->created_at = now();
+        $clone->updated_at = now();
+        $clone->save();
+
+        // Clone variants if they exist
+        foreach ($campaign->variants as $variant) {
+            $variantClone = $variant->replicate();
+            $variantClone->campaign_id = $clone->id;
+            $variantClone->messages_sent = 0;
+            $variantClone->delivered = 0;
+            $variantClone->failed = 0;
+            $variantClone->save();
+        }
+
+        Log::info('Campaign cloned', [
+            'original_id' => $campaign->id,
+            'clone_id' => $clone->id,
+            'user_id' => $request->user()->id,
+        ]);
+
+        return response()->json([
+            'message' => 'Campagne clonée avec succès',
+            'data' => $clone->load('variants')
+        ], 201);
+    }
+
+    /**
      * Envoyer une campagne SMS
      */
     public function send(Request $request, string $id)

@@ -43,5 +43,28 @@ export const contactService = {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
     return response.data
+  },
+
+  async exportCsv(group?: string, status?: string): Promise<Blob> {
+    const params: Record<string, string> = { format: 'csv' }
+    if (group) params.group = group
+    if (status) params.status = status
+
+    const response = await apiClient.get('/contacts/export', {
+      params,
+      responseType: 'blob'
+    })
+    return response.data
+  },
+
+  downloadFile(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   }
 }

@@ -202,13 +202,17 @@
 
 ### 4.2 Features Additionnelles
 
-- [ ] **4.2.1** Clonage de campagnes
+- [x] **4.2.1** Clonage de campagnes ✅
   - Endpoint `POST /campaigns/{id}/clone`
-  - Bouton UI
+  - Clone variantes A/B avec la campagne
+  - Bouton dans l'historique des campagnes
+  - Méthode clone() dans campaignService.ts
 
-- [ ] **4.2.2** Export contacts
-  - Endpoint `GET /contacts/export`
-  - Format CSV/Excel
+- [x] **4.2.2** Export contacts ✅
+  - Endpoint `GET /contacts/export` avec filtres (group, status)
+  - Format CSV avec escape automatique
+  - Bouton export dans la page Contacts
+  - Méthode exportCsv() dans contactService.ts
 
 - [ ] **4.2.3** Templates partages
   - Systeme de permissions
@@ -234,8 +238,8 @@
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
 | Phase 3 | 10 | 10 | 100% |
-| Phase 4 | 10 | 3 | 30% |
-| **Total** | **35** | **28** | **80%** |
+| Phase 4 | 10 | 5 | 50% |
+| **Total** | **35** | **30** | **86%** |
 
 ---
 
