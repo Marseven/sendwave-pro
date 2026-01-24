@@ -156,15 +156,18 @@
   - Preview en temps réel avec remplacement par exemples
   - Affichage nombre de caractères et SMS dans l'aperçu
 
-- [ ] **3.2.4** UI Export Analytics
+- [x] **3.2.4** UI Export Analytics ✅
   - Fichier: `resources/src/views/Reports.vue`
-  - Boutons export PDF/Excel
-  - Selection periode
+  - Boutons export PDF/Excel/CSV
+  - Sélection période (date début/fin)
+  - Service analyticsService avec méthodes export
+  - Téléchargement automatique des fichiers
 
-- [ ] **3.2.5** Completer page Settings
+- [x] **3.2.5** Completer page Settings ✅
   - Fichier: `resources/src/views/Settings.vue`
-  - Preferences notifications
-  - Configuration compte
+  - Notifications: alertes campagnes, crédit faible
+  - Préférences régionales: langue, fuseau horaire
+  - Préférences SMS: signature, seuil alerte crédit
 
 - [ ] **3.2.6** Completer page Calendar
   - Fichier: `resources/src/views/Calendar.vue`
@@ -222,9 +225,9 @@
 |-------|-------|-----------|---|
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
-| Phase 3 | 10 | 6 | 60% |
+| Phase 3 | 10 | 8 | 80% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **35** | **21** | **60%** |
+| **Total** | **35** | **23** | **66%** |
 
 ---
 

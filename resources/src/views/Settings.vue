@@ -100,6 +100,90 @@
                 <div class="text-xs text-muted-foreground mt-1">Recevoir les statistiques chaque lundi matin</div>
               </div>
             </label>
+            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/50 transition-colors">
+              <input v-model="formData.campaign_alerts" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <ExclamationTriangleIcon class="w-4 h-4 text-muted-foreground" />
+                  <div class="font-medium text-sm">Alertes campagnes</div>
+                </div>
+                <div class="text-xs text-muted-foreground mt-1">Être notifié en cas d'échec ou d'anomalie</div>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/50 transition-colors">
+              <input v-model="formData.low_credit_alert" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <CreditCardIcon class="w-4 h-4 text-muted-foreground" />
+                  <div class="font-medium text-sm">Alerte crédit faible</div>
+                </div>
+                <div class="text-xs text-muted-foreground mt-1">Être notifié quand le solde est bas</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-card p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <GlobeAltIcon class="w-5 h-5 text-primary" />
+            <h3 class="font-semibold">Préférences régionales</h3>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-sm font-medium">Langue</label>
+              <select
+                v-model="formData.language"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium">Fuseau horaire</label>
+              <select
+                v-model="formData.timezone"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="Africa/Libreville">Africa/Libreville (WAT)</option>
+                <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
+                <option value="Africa/Douala">Africa/Douala (WAT)</option>
+                <option value="Europe/Paris">Europe/Paris (CET)</option>
+                <option value="UTC">UTC</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-lg border bg-card p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <DocumentTextIcon class="w-5 h-5 text-primary" />
+            <h3 class="font-semibold">Préférences SMS</h3>
+          </div>
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <label class="text-sm font-medium">Signature par défaut</label>
+              <input
+                v-model="formData.default_signature"
+                type="text"
+                placeholder="Ex: - JOBS SMS"
+                maxlength="30"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              />
+              <p class="text-xs text-muted-foreground">Ajoutée automatiquement à la fin de vos messages (max 30 caractères)</p>
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium">Seuil alerte crédit (FCFA)</label>
+              <input
+                v-model.number="formData.credit_alert_threshold"
+                type="number"
+                min="0"
+                step="1000"
+                placeholder="5000"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              />
+              <p class="text-xs text-muted-foreground">Recevoir une alerte quand le solde passe en dessous de ce montant</p>
+            </div>
           </div>
         </div>
 
@@ -146,7 +230,11 @@ import {
   ChartBarIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  CreditCardIcon,
+  GlobeAltIcon,
+  DocumentTextIcon
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
 import apiClient from '@/services/api'
@@ -158,6 +246,12 @@ interface SettingsForm {
   password_confirmation: string
   email_notifications: boolean
   weekly_reports: boolean
+  campaign_alerts: boolean
+  low_credit_alert: boolean
+  language: string
+  timezone: string
+  default_signature: string
+  credit_alert_threshold: number
 }
 
 const authStore = useAuthStore()
@@ -172,7 +266,13 @@ const formData = ref<SettingsForm>({
   password: '',
   password_confirmation: '',
   email_notifications: true,
-  weekly_reports: true
+  weekly_reports: true,
+  campaign_alerts: true,
+  low_credit_alert: true,
+  language: 'fr',
+  timezone: 'Africa/Libreville',
+  default_signature: '',
+  credit_alert_threshold: 5000
 })
 
 const originalData = ref<SettingsForm>({
@@ -181,7 +281,13 @@ const originalData = ref<SettingsForm>({
   password: '',
   password_confirmation: '',
   email_notifications: true,
-  weekly_reports: true
+  weekly_reports: true,
+  campaign_alerts: true,
+  low_credit_alert: true,
+  language: 'fr',
+  timezone: 'Africa/Libreville',
+  default_signature: '',
+  credit_alert_threshold: 5000
 })
 
 async function loadSettings() {
@@ -196,7 +302,13 @@ async function loadSettings() {
       password: '',
       password_confirmation: '',
       email_notifications: user.email_notifications ?? true,
-      weekly_reports: user.weekly_reports ?? true
+      weekly_reports: user.weekly_reports ?? true,
+      campaign_alerts: user.campaign_alerts ?? true,
+      low_credit_alert: user.low_credit_alert ?? true,
+      language: user.language || 'fr',
+      timezone: user.timezone || 'Africa/Libreville',
+      default_signature: user.default_signature || '',
+      credit_alert_threshold: user.credit_alert_threshold || 5000
     }
 
     originalData.value = { ...formData.value }
@@ -229,7 +341,13 @@ async function saveSettings() {
       name: formData.value.name,
       email: formData.value.email,
       email_notifications: formData.value.email_notifications,
-      weekly_reports: formData.value.weekly_reports
+      weekly_reports: formData.value.weekly_reports,
+      campaign_alerts: formData.value.campaign_alerts,
+      low_credit_alert: formData.value.low_credit_alert,
+      language: formData.value.language,
+      timezone: formData.value.timezone,
+      default_signature: formData.value.default_signature,
+      credit_alert_threshold: formData.value.credit_alert_threshold
     }
 
     // Only include password if it's set
