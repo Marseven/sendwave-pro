@@ -96,13 +96,14 @@
 
 ### 2.3 Analytics Automatiques
 
-- [ ] **2.3.1** Creer Job UpdateDailyAnalytics
+- [x] **2.3.1** Creer Job UpdateDailyAnalytics ✅
   - Fichier: `app/Jobs/UpdateDailyAnalytics.php`
-  - Calculer stats quotidiennes automatiquement
+  - Itère sur tous les utilisateurs et met à jour leurs analytics
+  - 3 tentatives avec backoff de 60 secondes
 
-- [ ] **2.3.2** Configurer scheduler
-  - Fichier: `app/Console/Kernel.php`
-  - Executer job chaque jour a minuit
+- [x] **2.3.2** Configurer scheduler ✅
+  - Fichier: `routes/console.php` (Laravel 11)
+  - Exécution quotidienne à 00:05
 
 ---
 
@@ -212,10 +213,10 @@
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
 | Phase 1 | 8 | 8 | 100% |
-| Phase 2 | 7 | 5 | 71% |
+| Phase 2 | 7 | 7 | 100% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **35** | **13** | **37%** |
+| **Total** | **35** | **15** | **43%** |
 
 ---
 
