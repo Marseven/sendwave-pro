@@ -46,9 +46,12 @@
   - Resolu: Le fichier avec `uniqid()` (Api/SubAccountController.php) a ete supprime
   - Le SubAccountController garde utilise Hash::make() avec mot de passe fourni par l'utilisateur
 
-- [ ] **1.2.3** Configurer CORS
+- [x] **1.2.3** Configurer CORS ✅
   - Fichier: `config/cors.php`
-  - Limiter aux domaines autorises
+  - Méthodes HTTP explicitement listées (pas de wildcard)
+  - Headers explicitement listés (Accept, Authorization, Content-Type, X-Requested-With, CSRF)
+  - Wildcard '*' uniquement en environnement local quand CORS_ALLOWED_ORIGINS est vide
+  - Production requiert CORS_ALLOWED_ORIGINS explicite
 
 ---
 
@@ -195,11 +198,11 @@
 
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
-| Phase 1 | 10 | 7 | 70% |
+| Phase 1 | 10 | 8 | 80% |
 | Phase 2 | 7 | 0 | 0% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **37** | **7** | **19%** |
+| **Total** | **37** | **8** | **22%** |
 
 ---
 
