@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Campaign;
 use App\Models\CampaignSchedule;
+use App\Models\Contact;
 use App\Models\Message;
 use App\Enums\CampaignStatus;
 use App\Enums\MessageStatus;
@@ -88,18 +89,30 @@ class ProcessScheduledCampaigns extends Command
             // Send SMS via router
             $result = $this->smsRouter->sendBulkSms($recipients, $message);
 
-            // Save message records
+            // Save message records with contact association
             $totalCost = 0;
+            $contactCache = [];
+
             foreach ($result['details'] as $detail) {
                 $smsCount = ceil(strlen($message) / 160);
                 $costPerSms = config("sms.{$detail['provider']}.cost_per_sms", 20);
                 $cost = $smsCount * $costPerSms;
                 $totalCost += $cost;
 
+                $recipientPhone = $detail['phone'] ?? '';
+
+                // Trouver le contact associé (avec cache)
+                if (!isset($contactCache[$recipientPhone]) && $recipientPhone) {
+                    $contactCache[$recipientPhone] = $this->findContactByPhone($campaign->user_id, $recipientPhone);
+                }
+                $contact = $contactCache[$recipientPhone] ?? null;
+
                 Message::create([
                     'user_id' => $campaign->user_id,
                     'campaign_id' => $campaign->id,
-                    'recipient_phone' => $detail['phone'] ?? '',
+                    'contact_id' => $contact?->id,
+                    'recipient_name' => $contact?->name,
+                    'recipient_phone' => $recipientPhone,
                     'content' => $message,
                     'type' => 'sms',
                     'status' => $detail['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
@@ -178,5 +191,22 @@ class ProcessScheduledCampaigns extends Command
         }
 
         return array_filter($recipients);
+    }
+
+    /**
+     * Trouver un contact par numéro de téléphone
+     */
+    protected function findContactByPhone(int $userId, string $phone): ?Contact
+    {
+        $cleaned = preg_replace('/[^0-9]/', '', $phone);
+
+        return Contact::where('user_id', $userId)
+            ->where(function ($query) use ($cleaned, $phone) {
+                $query->where('phone', $phone)
+                    ->orWhere('phone', $cleaned)
+                    ->orWhere('phone', '+' . $cleaned)
+                    ->orWhere('phone', 'LIKE', '%' . substr($cleaned, -8));
+            })
+            ->first();
     }
 }

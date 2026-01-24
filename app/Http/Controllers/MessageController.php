@@ -37,6 +37,58 @@ class MessageController extends Controller
     }
 
     /**
+     * Normaliser un numéro de téléphone pour la recherche
+     * Supprime les espaces, tirets, et préfixe +
+     */
+    protected function normalizePhoneNumber(string $phone): string
+    {
+        // Supprimer tous les caractères non numériques
+        $cleaned = preg_replace('/[^0-9]/', '', $phone);
+
+        // Si commence par 00, remplacer par rien (format international sans +)
+        if (str_starts_with($cleaned, '00')) {
+            $cleaned = substr($cleaned, 2);
+        }
+
+        return $cleaned;
+    }
+
+    /**
+     * Trouver un contact par numéro de téléphone
+     */
+    protected function findContactByPhone(int $userId, string $phone): ?Contact
+    {
+        $normalizedPhone = $this->normalizePhoneNumber($phone);
+
+        // Recherche avec différentes variations du numéro
+        return Contact::where('user_id', $userId)
+            ->where(function ($query) use ($normalizedPhone, $phone) {
+                // Numéro exact
+                $query->where('phone', $phone)
+                    // Numéro nettoyé
+                    ->orWhere('phone', $normalizedPhone)
+                    // Avec préfixe +
+                    ->orWhere('phone', '+' . $normalizedPhone)
+                    // Format Gabon: 241XXXXXXXX
+                    ->orWhere('phone', 'LIKE', '%' . substr($normalizedPhone, -8));
+            })
+            ->first();
+    }
+
+    /**
+     * Construire les données du contact pour le message
+     */
+    protected function getContactData(int $userId, string $phone): array
+    {
+        $contact = $this->findContactByPhone($userId, $phone);
+
+        return [
+            'contact_id' => $contact?->id,
+            'recipient_name' => $contact?->name,
+        ];
+    }
+
+    /**
      * Enregistrer un message dans l'historique
      */
     protected function saveMessageToHistory(array $data): Message
@@ -94,10 +146,16 @@ class MessageController extends Controller
                 // Calculer le coût
                 $cost = $this->calculateCost($message, $result['provider'] ?? 'airtel');
 
+                // Trouver le contact associé au numéro
+                $recipientPhone = $result['phone'] ?? $recipients[0];
+                $contactData = $this->getContactData($request->user()->id, $recipientPhone);
+
                 // Enregistrer dans l'historique
                 $messageRecord = $this->saveMessageToHistory([
                     'user_id' => $request->user()->id,
-                    'recipient_phone' => $result['phone'] ?? $recipients[0],
+                    'contact_id' => $contactData['contact_id'],
+                    'recipient_name' => $contactData['recipient_name'],
+                    'recipient_phone' => $recipientPhone,
                     'content' => $message,
                     'status' => $result['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
                     'provider' => $result['provider'] ?? 'unknown',
@@ -150,13 +208,27 @@ class MessageController extends Controller
                 $totalCost = 0;
                 $messageIds = [];
 
+                // Pré-charger les contacts pour tous les numéros (optimisation)
+                $userId = $request->user()->id;
+                $contactCache = [];
+
                 foreach ($result['details'] as $detail) {
                     $cost = $this->calculateCost($message, $detail['provider'] ?? 'airtel');
                     $totalCost += $cost;
 
+                    $recipientPhone = $detail['phone'] ?? '';
+
+                    // Utiliser le cache ou chercher le contact
+                    if (!isset($contactCache[$recipientPhone])) {
+                        $contactCache[$recipientPhone] = $this->getContactData($userId, $recipientPhone);
+                    }
+                    $contactData = $contactCache[$recipientPhone];
+
                     $messageRecord = $this->saveMessageToHistory([
-                        'user_id' => $request->user()->id,
-                        'recipient_phone' => $detail['phone'] ?? '',
+                        'user_id' => $userId,
+                        'contact_id' => $contactData['contact_id'],
+                        'recipient_name' => $contactData['recipient_name'],
+                        'recipient_phone' => $recipientPhone,
                         'content' => $message,
                         'status' => $detail['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
                         'provider' => $detail['provider'] ?? 'unknown',

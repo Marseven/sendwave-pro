@@ -23,9 +23,11 @@
   - Configure: `routes/console.php` - Scheduler toutes les minutes
   - Migration: Ajout `group_id` aux campagnes + mise a jour statuts legacy
 
-- [ ] **1.1.4** Fixer contact_id dans Message
-  - Fichier: `app/Http/Controllers/Api/MessageController.php`
-  - Associer le contact lors de l'envoi si numero correspond
+- [x] **1.1.4** Fixer contact_id dans Message ✅
+  - Ajoute: `findContactByPhone()` dans MessageController, CampaignController, ProcessScheduledCampaigns
+  - Recherche flexible: numero exact, nettoye, avec +, ou 8 derniers chiffres
+  - Cache des contacts pour optimiser les envois en masse
+  - `contact_id` et `recipient_name` maintenant remplis automatiquement
 
 - [ ] **1.1.5** Merger les 2 SubAccountControllers
   - Supprimer: `app/Http/Controllers/Api/SubAccountController.php`
@@ -191,11 +193,11 @@
 
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
-| Phase 1 | 10 | 3 | 30% |
+| Phase 1 | 10 | 4 | 40% |
 | Phase 2 | 7 | 0 | 0% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **37** | **3** | **8%** |
+| **Total** | **37** | **4** | **11%** |
 
 ---
 

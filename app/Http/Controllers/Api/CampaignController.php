@@ -26,6 +26,23 @@ class CampaignController extends Controller
         $this->smsRouter = new SmsRouter();
         $this->webhookService = $webhookService;
     }
+
+    /**
+     * Trouver un contact par numéro de téléphone
+     */
+    protected function findContactByPhone(int $userId, string $phone): ?Contact
+    {
+        $cleaned = preg_replace('/[^0-9]/', '', $phone);
+
+        return Contact::where('user_id', $userId)
+            ->where(function ($query) use ($cleaned, $phone) {
+                $query->where('phone', $phone)
+                    ->orWhere('phone', $cleaned)
+                    ->orWhere('phone', '+' . $cleaned)
+                    ->orWhere('phone', 'LIKE', '%' . substr($cleaned, -8));
+            })
+            ->first();
+    }
     public function index(Request $request)
     {
         $campaigns = Campaign::where('user_id', $request->user()->id)
@@ -130,16 +147,30 @@ class CampaignController extends Controller
             $totalCost = 0;
             $messageIds = [];
 
+            // Cache des contacts pour optimisation
+            $userId = $request->user()->id;
+            $contactCache = [];
+
             foreach ($result['details'] as $detail) {
                 $smsCount = ceil(strlen($message) / 160);
                 $costPerSms = config("sms.{$detail['provider']}.cost_per_sms", 20);
                 $cost = $smsCount * $costPerSms;
                 $totalCost += $cost;
 
+                $recipientPhone = $detail['phone'] ?? '';
+
+                // Trouver le contact associé (avec cache)
+                if (!isset($contactCache[$recipientPhone]) && $recipientPhone) {
+                    $contactCache[$recipientPhone] = $this->findContactByPhone($userId, $recipientPhone);
+                }
+                $contact = $contactCache[$recipientPhone] ?? null;
+
                 $messageRecord = Message::create([
-                    'user_id' => $request->user()->id,
+                    'user_id' => $userId,
                     'campaign_id' => $campaign->id,
-                    'recipient_phone' => $detail['phone'] ?? '',
+                    'contact_id' => $contact?->id,
+                    'recipient_name' => $contact?->name,
+                    'recipient_phone' => $recipientPhone,
                     'content' => $message,
                     'type' => 'sms',
                     'status' => $detail['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
