@@ -78,13 +78,21 @@
 
 ### 2.2 Middleware & Permissions
 
-- [ ] **2.2.1** Creer middleware CheckSubAccountPermission
+- [x] **2.2.1** Creer middleware CheckSubAccountPermission ✅
   - Fichier: `app/Http/Middleware/CheckSubAccountPermission.php`
-  - Verifier permissions avant acces aux routes
+  - Vérifie: statut actif + permission spécifique
+  - Alias: `permission` enregistré dans bootstrap/app.php
 
-- [ ] **2.2.2** Appliquer middleware aux routes concernees
-  - Fichier: `routes/api.php`
-  - Proteger les endpoints sensibles
+- [x] **2.2.2** Appliquer middleware aux routes concernees ✅
+  - Routes Contacts: permission:manage_contacts
+  - Routes Groups: permission:manage_groups
+  - Routes Campaigns: permission:create_campaigns
+  - Routes Messages: permission:send_sms
+  - Routes History: permission:view_history
+  - Routes Analytics: permission:view_analytics
+  - Routes Templates: permission:manage_templates
+  - Routes Export: permission:export_data
+  - Routes Admin (sub-accounts, api-keys, webhooks, blacklist, audit-logs, sms-configs): compte parent uniquement
 
 ### 2.3 Analytics Automatiques
 
@@ -204,10 +212,10 @@
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
 | Phase 1 | 8 | 8 | 100% |
-| Phase 2 | 7 | 3 | 43% |
+| Phase 2 | 7 | 5 | 71% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **35** | **11** | **31%** |
+| **Total** | **35** | **13** | **37%** |
 
 ---
 
