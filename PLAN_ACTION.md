@@ -6,9 +6,10 @@
 
 ### 1.1 Bugs Bloquants
 
-- [ ] **1.1.1** Fixer MoovService - Implementer API ou desactiver proprement
+- [x] **1.1.1** Fixer MoovService - Implementer SMPP ✅
   - Fichier: `app/Services/SMS/Operators/MoovService.php`
-  - Bug: Retourne toujours erreur, substr($cleaned, 0) sans effet
+  - Cree: `app/Services/SMS/SmppClient.php` (client SMPP v3.4 natif PHP)
+  - Protocole SMPP sur port 12775, host 172.16.59.66
 
 - [ ] **1.1.2** Harmoniser les statuses de messages
   - Fichiers: `MessageController.php`, `CampaignController.php`, `MessageHistoryController.php`
@@ -186,11 +187,11 @@
 
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
-| Phase 1 | 10 | 0 | 0% |
+| Phase 1 | 10 | 1 | 10% |
 | Phase 2 | 7 | 0 | 0% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **37** | **0** | **0%** |
+| **Total** | **37** | **1** | **3%** |
 
 ---
 

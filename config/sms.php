@@ -28,10 +28,15 @@ return [
         'cost_per_sms' => env('AIRTEL_COST_PER_SMS', 20), // Coût spécifique Airtel
     ],
 
-    // Configuration Moov Gabon (à configurer ultérieurement)
+    // Configuration Moov Gabon (SMPP)
     'moov' => [
-        'enabled' => env('MOOV_ENABLED', false), // Désactivé par défaut (API non disponible)
-        'cost_per_sms' => env('MOOV_COST_PER_SMS', 20), // Coût spécifique Moov
+        'host' => env('MOOV_SMPP_HOST', '172.16.59.66'),
+        'port' => (int) env('MOOV_SMPP_PORT', 12775),
+        'system_id' => env('MOOV_SMPP_SYSTEM_ID', ''),
+        'password' => env('MOOV_SMPP_PASSWORD', ''),
+        'source_addr' => env('MOOV_SOURCE_ADDR', 'SENDWAVE'),
+        'enabled' => env('MOOV_ENABLED', false),
+        'cost_per_sms' => env('MOOV_COST_PER_SMS', 20),
     ],
 
     /*

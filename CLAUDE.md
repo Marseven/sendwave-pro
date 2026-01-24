@@ -153,8 +153,9 @@ sendwave-pro/
 
 ### Moov Gabon
 - **Prefixes**: 60, 62, 65, 66
-- **API**: HTTP REST
-- **Config env**: `MOOV_API_URL`, `MOOV_USERNAME`, `MOOV_PASSWORD`
+- **Protocole**: SMPP v3.4
+- **Config env**: `MOOV_SMPP_HOST`, `MOOV_SMPP_PORT`, `MOOV_SMPP_SYSTEM_ID`, `MOOV_SMPP_PASSWORD`, `MOOV_SOURCE_ADDR`
+- **Service**: `app/Services/SMS/SmppClient.php` (client SMPP natif PHP)
 
 ### Detection automatique
 Le `OperatorDetector` detecte l'operateur via le prefixe du numero et le `SmsRouter` route automatiquement vers le bon provider.
@@ -400,10 +401,12 @@ AIRTEL_PASSWORD=password
 AIRTEL_ORIGIN_ADDR=SENDWAVE
 AIRTEL_ENABLED=true
 
-# Moov Gabon
-MOOV_API_URL=
-MOOV_USERNAME=
-MOOV_PASSWORD=
+# Moov Gabon (SMPP)
+MOOV_SMPP_HOST=172.16.59.66
+MOOV_SMPP_PORT=12775
+MOOV_SMPP_SYSTEM_ID=
+MOOV_SMPP_PASSWORD=
+MOOV_SOURCE_ADDR=SENDWAVE
 MOOV_ENABLED=false
 
 # Cout SMS (FCFA)

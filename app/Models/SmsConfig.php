@@ -9,6 +9,7 @@ class SmsConfig extends Model
     protected $fillable = [
         'provider',
         'api_url',
+        'port',
         'username',
         'password',
         'origin_addr',
@@ -18,6 +19,7 @@ class SmsConfig extends Model
     ];
 
     protected $casts = [
+        'port' => 'integer',
         'is_active' => 'boolean',
         'cost_per_sms' => 'integer',
         'additional_config' => 'array',
