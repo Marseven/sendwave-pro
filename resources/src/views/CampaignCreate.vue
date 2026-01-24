@@ -524,7 +524,7 @@ async function launchCampaign() {
       name: campaign.value.name,
       description: campaign.value.description,
       message: campaign.value.message,
-      status: campaign.value.sendType === 'immediate' ? 'Actif' : 'Planifié',
+      status: campaign.value.sendType === 'immediate' ? 'sending' : 'scheduled',
       recipient_type: campaign.value.recipientType,
       group_id: campaign.value.groupId || null,
       scheduled_at: campaign.value.sendType === 'scheduled' && campaign.value.sendDate

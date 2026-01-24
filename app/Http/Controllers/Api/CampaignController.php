@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\CampaignStatus;
+use App\Enums\MessageStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Models\CampaignSchedule;
@@ -12,6 +14,7 @@ use App\Services\SMS\SmsRouter;
 use App\Services\WebhookService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class CampaignController extends Controller
 {
@@ -36,18 +39,19 @@ class CampaignController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'status' => 'nullable|in:Actif,Terminé,Planifié',
+            'status' => ['nullable', Rule::in(CampaignStatus::values())],
             'messages_sent' => 'nullable|integer',
             'delivery_rate' => 'nullable|numeric|min:0|max:100',
             'ctr' => 'nullable|numeric|min:0|max:100',
-            'sms_provider' => 'nullable|in:msg91,smsala,wapi',
+            'sms_provider' => 'nullable|string',
             'message_content' => 'nullable|string',
             'scheduled_at' => 'nullable|date',
         ]);
 
         $campaign = Campaign::create([
             'user_id' => $request->user()->id,
-            ...$validated
+            'status' => $validated['status'] ?? CampaignStatus::DRAFT->value,
+            ...collect($validated)->except('status')->toArray()
         ]);
 
         return response()->json($campaign, 201);
@@ -68,11 +72,11 @@ class CampaignController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'status' => 'sometimes|in:Actif,Terminé,Planifié',
+            'status' => ['sometimes', Rule::in(CampaignStatus::values())],
             'messages_sent' => 'sometimes|integer',
             'delivery_rate' => 'sometimes|numeric|min:0|max:100',
             'ctr' => 'sometimes|numeric|min:0|max:100',
-            'sms_provider' => 'sometimes|in:msg91,smsala,wapi',
+            'sms_provider' => 'sometimes|string',
             'message_content' => 'sometimes|string',
             'scheduled_at' => 'nullable|date',
         ]);
@@ -138,7 +142,7 @@ class CampaignController extends Controller
                     'recipient_phone' => $detail['phone'] ?? '',
                     'content' => $message,
                     'type' => 'sms',
-                    'status' => $detail['success'] ? 'sent' : 'failed',
+                    'status' => $detail['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
                     'provider' => $detail['provider'] ?? 'unknown',
                     'cost' => $cost,
                     'error_message' => $detail['success'] ? null : ($detail['message'] ?? 'Erreur inconnue'),
@@ -150,8 +154,11 @@ class CampaignController extends Controller
             }
 
             // Mettre à jour la campagne
+            $finalStatus = $result['failed'] === 0 ? CampaignStatus::COMPLETED->value :
+                          ($result['sent'] === 0 ? CampaignStatus::FAILED->value : CampaignStatus::COMPLETED->value);
+
             $campaign->update([
-                'status' => 'Actif',
+                'status' => $finalStatus,
                 'messages_sent' => $result['sent'],
                 'recipients_count' => count($recipients),
                 'sms_count' => ceil(strlen($message) / 160),

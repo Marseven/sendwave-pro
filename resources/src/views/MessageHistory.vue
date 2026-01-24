@@ -359,7 +359,7 @@ const filters = ref({
 const stats = computed(() => {
   return {
     total: messages.value.length,
-    delivered: messages.value.filter(m => m.status === 'delivered').length,
+    delivered: messages.value.filter(m => m.status === 'delivered' || m.status === 'sent').length,
     failed: messages.value.filter(m => m.status === 'failed').length,
     totalCost: messages.value.reduce((sum, m) => sum + m.cost, 0)
   }
@@ -378,7 +378,12 @@ const filteredMessages = computed(() => {
   }
 
   if (filters.value.status) {
-    filtered = filtered.filter(m => m.status === filters.value.status)
+    // 'delivered' filter should match both 'sent' and 'delivered' statuses
+    if (filters.value.status === 'delivered') {
+      filtered = filtered.filter(m => m.status === 'delivered' || m.status === 'sent')
+    } else {
+      filtered = filtered.filter(m => m.status === filters.value.status)
+    }
   }
 
   if (filters.value.type) {
@@ -407,7 +412,9 @@ const totalPages = computed(() => {
         m.recipient_phone.includes(search) ||
         (m.recipient_name && m.recipient_name.toLowerCase().includes(search)) ||
         m.content.toLowerCase().includes(search)
-      const matchStatus = !filters.value.status || m.status === filters.value.status
+      // 'delivered' filter should match both 'sent' and 'delivered' statuses
+      const matchStatus = !filters.value.status ||
+        (filters.value.status === 'delivered' ? (m.status === 'delivered' || m.status === 'sent') : m.status === filters.value.status)
       const matchType = !filters.value.type || m.type === filters.value.type
       const matchDateFrom = !filters.value.dateFrom || m.sent_at >= filters.value.dateFrom
       const matchDateTo = !filters.value.dateTo || m.sent_at <= filters.value.dateTo
@@ -417,31 +424,40 @@ const totalPages = computed(() => {
   return Math.ceil(filtered.length / itemsPerPage)
 })
 
+// Normalize message status: 'sent' and 'delivered' are both considered as delivered
+function normalizeMessageStatus(status: string): string {
+  if (status === 'sent' || status === 'delivered') return 'delivered'
+  return status
+}
+
 function getStatusClass(status: string) {
-  const classes = {
+  const normalized = normalizeMessageStatus(status)
+  const classes: Record<string, string> = {
     delivered: 'bg-success/10 text-success',
     pending: 'bg-warning/10 text-warning',
     failed: 'bg-destructive/10 text-destructive'
   }
-  return classes[status as keyof typeof classes] || 'bg-muted text-muted-foreground'
+  return classes[normalized] || 'bg-muted text-muted-foreground'
 }
 
 function getStatusLabel(status: string) {
-  const labels = {
+  const normalized = normalizeMessageStatus(status)
+  const labels: Record<string, string> = {
     delivered: 'Livré',
     pending: 'En attente',
     failed: 'Échoué'
   }
-  return labels[status as keyof typeof labels] || status
+  return labels[normalized] || status
 }
 
 function getStatusIcon(status: string) {
-  const icons = {
+  const normalized = normalizeMessageStatus(status)
+  const icons: Record<string, any> = {
     delivered: CheckCircleIcon,
     pending: ClockIcon,
     failed: XCircleIcon
   }
-  return icons[status as keyof typeof icons] || ClockIcon
+  return icons[normalized] || ClockIcon
 }
 
 function formatDate(date: string) {

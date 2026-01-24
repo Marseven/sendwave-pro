@@ -329,15 +329,22 @@ function formatNumber(num: number): string {
 }
 
 function getStatusClass(status: string): string {
-  const statusLower = status.toLowerCase()
-  if (statusLower === 'actif' || statusLower === 'active' || statusLower === 'completed') {
+  const statusLower = (status || '').toLowerCase()
+  // Completed statuses
+  if (['completed', 'terminé', 'termine'].includes(statusLower)) {
     return 'bg-success/10 text-success'
   }
-  if (statusLower === 'planifié' || statusLower === 'scheduled' || statusLower === 'pending') {
+  // In progress / sending
+  if (['actif', 'active', 'sending'].includes(statusLower)) {
+    return 'bg-blue-100 text-blue-700'
+  }
+  // Scheduled / pending
+  if (['planifié', 'planifie', 'scheduled', 'pending', 'draft'].includes(statusLower)) {
     return 'bg-warning/10 text-warning'
   }
-  if (statusLower === 'terminé' || statusLower === 'sent') {
-    return 'bg-blue-100 text-blue-700'
+  // Failed
+  if (['failed', 'error', 'échoué'].includes(statusLower)) {
+    return 'bg-destructive/10 text-destructive'
   }
   return 'bg-muted text-muted-foreground'
 }

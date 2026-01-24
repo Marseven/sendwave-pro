@@ -11,9 +11,11 @@
   - Cree: `app/Services/SMS/SmppClient.php` (client SMPP v3.4 natif PHP)
   - Protocole SMPP sur port 12775, host 172.16.59.66
 
-- [ ] **1.1.2** Harmoniser les statuses de messages
-  - Fichiers: `MessageController.php`, `CampaignController.php`, `MessageHistoryController.php`
-  - Standard: `pending` -> `sent` -> `delivered` | `failed`
+- [x] **1.1.2** Harmoniser les statuses de messages ✅
+  - Cree: `app/Enums/MessageStatus.php` et `app/Enums/CampaignStatus.php`
+  - Messages: `pending` -> `sent` -> `delivered` | `failed`
+  - Campagnes: `draft` -> `scheduled` -> `sending` -> `completed` | `failed` | `cancelled`
+  - Frontend mis a jour pour compatibilite avec anciens statuts
 
 - [ ] **1.1.3** Implementer CampaignSchedule::calculateNextRun()
   - Fichier: `app/Models/CampaignSchedule.php`
@@ -187,11 +189,11 @@
 
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
-| Phase 1 | 10 | 1 | 10% |
+| Phase 1 | 10 | 2 | 20% |
 | Phase 2 | 7 | 0 | 0% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **37** | **1** | **3%** |
+| **Total** | **37** | **2** | **5%** |
 
 ---
 

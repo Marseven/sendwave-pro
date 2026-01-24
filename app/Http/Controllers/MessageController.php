@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\MessageStatus;
 use App\Services\SMS\SmsRouter;
 use App\Services\SMS\OperatorDetector;
 use App\Services\WebhookService;
@@ -40,6 +41,9 @@ class MessageController extends Controller
      */
     protected function saveMessageToHistory(array $data): Message
     {
+        $status = $data['status'];
+        $isSent = $status === MessageStatus::SENT->value || $status === 'sent';
+
         return Message::create([
             'user_id' => $data['user_id'],
             'campaign_id' => $data['campaign_id'] ?? null,
@@ -48,11 +52,11 @@ class MessageController extends Controller
             'recipient_phone' => $data['recipient_phone'],
             'content' => $data['content'],
             'type' => $data['type'] ?? 'sms',
-            'status' => $data['status'], // 'sent', 'failed', 'pending'
-            'provider' => $data['provider'], // 'airtel', 'moov'
+            'status' => $status,
+            'provider' => $data['provider'],
             'cost' => $data['cost'],
             'error_message' => $data['error_message'] ?? null,
-            'sent_at' => $data['status'] === 'sent' ? now() : null,
+            'sent_at' => $isSent ? now() : null,
             'provider_response' => $data['provider_response'] ?? null,
         ]);
     }
@@ -95,7 +99,7 @@ class MessageController extends Controller
                     'user_id' => $request->user()->id,
                     'recipient_phone' => $result['phone'] ?? $recipients[0],
                     'content' => $message,
-                    'status' => $result['success'] ? 'sent' : 'failed',
+                    'status' => $result['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
                     'provider' => $result['provider'] ?? 'unknown',
                     'cost' => $cost,
                     'error_message' => $result['success'] ? null : ($result['message'] ?? 'Erreur inconnue'),
@@ -154,7 +158,7 @@ class MessageController extends Controller
                         'user_id' => $request->user()->id,
                         'recipient_phone' => $detail['phone'] ?? '',
                         'content' => $message,
-                        'status' => $detail['success'] ? 'sent' : 'failed',
+                        'status' => $detail['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
                         'provider' => $detail['provider'] ?? 'unknown',
                         'cost' => $cost,
                         'error_message' => $detail['success'] ? null : ($detail['message'] ?? 'Erreur inconnue'),

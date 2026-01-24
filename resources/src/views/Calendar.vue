@@ -198,8 +198,9 @@ const editForm = ref({
 })
 
 const scheduledCampaigns = computed(() => {
+  const scheduledStatuses = ['Planifié', 'planifié', 'scheduled', 'draft']
   return campaigns.value
-    .filter(c => c.status === 'Planifié' || c.status === 'scheduled')
+    .filter(c => scheduledStatuses.includes(c.status?.toLowerCase() || '') || scheduledStatuses.includes(c.status || ''))
     .filter(c => c.scheduled_at)
     .sort((a, b) => new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime())
 })

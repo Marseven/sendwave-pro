@@ -34,10 +34,12 @@
             class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <option value="">Tous les statuts</option>
-            <option value="completed">Envoyé</option>
+            <option value="draft">Brouillon</option>
             <option value="scheduled">Planifié</option>
-            <option value="cancelled">Annulé</option>
+            <option value="sending">En cours</option>
+            <option value="completed">Terminé</option>
             <option value="failed">Échoué</option>
+            <option value="cancelled">Annulé</option>
           </select>
         </div>
         <div>
@@ -313,7 +315,7 @@ const filteredCampaigns = computed(() => {
   }
 
   if (filters.value.status) {
-    filtered = filtered.filter(c => c.status === filters.value.status)
+    filtered = filtered.filter(c => normalizeStatus(c.status) === filters.value.status)
   }
 
   if (filters.value.dateFrom) {
@@ -343,7 +345,7 @@ const totalPages = computed(() => {
       const matchSearch = !filters.value.search ||
         c.name.toLowerCase().includes(search) ||
         c.message.toLowerCase().includes(search)
-      const matchStatus = !filters.value.status || c.status === filters.value.status
+      const matchStatus = !filters.value.status || normalizeStatus(c.status) === filters.value.status
       const matchDateFrom = !filters.value.dateFrom || (c.sent_at || c.scheduled_at || '') >= filters.value.dateFrom
       const matchDateTo = !filters.value.dateTo || (c.sent_at || c.scheduled_at || '') <= filters.value.dateTo
       return matchSearch && matchStatus && matchDateFrom && matchDateTo
@@ -352,24 +354,39 @@ const totalPages = computed(() => {
   return Math.ceil(filtered.length / itemsPerPage)
 })
 
+function normalizeStatus(status: string): string {
+  const statusLower = status?.toLowerCase() || ''
+  // Map legacy French statuses to new English ones
+  if (statusLower === 'actif' || statusLower === 'sending') return 'sending'
+  if (statusLower === 'terminé' || statusLower === 'termine') return 'completed'
+  if (statusLower === 'planifié' || statusLower === 'planifie') return 'scheduled'
+  return statusLower
+}
+
 function getStatusClass(status: string) {
-  const classes = {
-    completed: 'bg-success/10 text-success',
+  const normalized = normalizeStatus(status)
+  const classes: Record<string, string> = {
+    draft: 'bg-muted text-muted-foreground',
     scheduled: 'bg-primary/10 text-primary',
-    cancelled: 'bg-muted text-muted-foreground',
-    failed: 'bg-destructive/10 text-destructive'
+    sending: 'bg-warning/10 text-warning',
+    completed: 'bg-success/10 text-success',
+    failed: 'bg-destructive/10 text-destructive',
+    cancelled: 'bg-muted text-muted-foreground'
   }
-  return classes[status as keyof typeof classes] || 'bg-muted text-muted-foreground'
+  return classes[normalized] || 'bg-muted text-muted-foreground'
 }
 
 function getStatusLabel(status: string) {
-  const labels = {
-    completed: 'Envoyé',
+  const normalized = normalizeStatus(status)
+  const labels: Record<string, string> = {
+    draft: 'Brouillon',
     scheduled: 'Planifié',
-    cancelled: 'Annulé',
-    failed: 'Échoué'
+    sending: 'En cours',
+    completed: 'Terminé',
+    failed: 'Échoué',
+    cancelled: 'Annulé'
   }
-  return labels[status as keyof typeof labels] || status
+  return labels[normalized] || status
 }
 
 function formatDate(date: string | undefined) {

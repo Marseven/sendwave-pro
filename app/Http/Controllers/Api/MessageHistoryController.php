@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\MessageStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use Illuminate\Http\Request;
@@ -95,11 +96,18 @@ class MessageHistoryController extends Controller
     {
         $userId = Auth::id();
 
+        // Count 'sent' and 'delivered' together as 'delivered' for stats display
         $stats = [
             'total' => Message::where('user_id', $userId)->count(),
-            'delivered' => Message::where('user_id', $userId)->where('status', 'delivered')->count(),
-            'pending' => Message::where('user_id', $userId)->where('status', 'pending')->count(),
-            'failed' => Message::where('user_id', $userId)->where('status', 'failed')->count(),
+            'delivered' => Message::where('user_id', $userId)
+                ->whereIn('status', [MessageStatus::SENT->value, MessageStatus::DELIVERED->value])
+                ->count(),
+            'pending' => Message::where('user_id', $userId)
+                ->where('status', MessageStatus::PENDING->value)
+                ->count(),
+            'failed' => Message::where('user_id', $userId)
+                ->where('status', MessageStatus::FAILED->value)
+                ->count(),
             'totalCost' => Message::where('user_id', $userId)->sum('cost'),
         ];
 
