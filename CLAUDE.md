@@ -459,6 +459,14 @@ Les fichiers de documentation detaillee sont dans `/docs/` (non commite):
 5. **Detection operateur**: Basee sur le prefixe du numero de telephone
 6. **Devise**: Tous les montants sont en FCFA
 
+## 15. Plan d'Action
+
+Voir `PLAN_ACTION.md` pour le plan de corrections et ameliorations:
+- **Phase 1**: Bugs critiques et securite (10 items)
+- **Phase 2**: Coherence backend (7 items)
+- **Phase 3**: Interfaces manquantes (10 items)
+- **Phase 4**: Ameliorations (10 items)
+
 ---
 
 *Derniere mise a jour: Janvier 2026*
