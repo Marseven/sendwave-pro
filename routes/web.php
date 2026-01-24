@@ -2,8 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Route pour servir le frontend Vue
-// Exclut les fichiers statiques (build/, assets, etc.)
-Route::get('/{any}', function () {
+// Route catch-all pour le frontend Vue (SPA)
+// Cette route capture toutes les requêtes et renvoie la vue Vue.js
+// Les routes API sont définies dans routes/api.php et préfixées par /api
+Route::get('/{any?}', function () {
     return view('app');
-})->where('any', '^(?!build|api|storage|favicon).*$');
+})->where('any', '.*');
