@@ -18,14 +18,11 @@ class ProcessScheduledCampaigns extends Command
     protected $signature = 'campaigns:process-scheduled';
     protected $description = 'Process scheduled campaigns that are ready to run';
 
-    protected SmsRouter $smsRouter;
-    protected WebhookService $webhookService;
-
-    public function __construct(WebhookService $webhookService)
-    {
+    public function __construct(
+        protected SmsRouter $smsRouter,
+        protected WebhookService $webhookService
+    ) {
         parent::__construct();
-        $this->smsRouter = new SmsRouter();
-        $this->webhookService = $webhookService;
     }
 
     public function handle(): int

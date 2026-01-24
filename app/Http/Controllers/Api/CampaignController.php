@@ -18,14 +18,10 @@ use Illuminate\Validation\Rule;
 
 class CampaignController extends Controller
 {
-    protected SmsRouter $smsRouter;
-    protected WebhookService $webhookService;
-
-    public function __construct(WebhookService $webhookService)
-    {
-        $this->smsRouter = new SmsRouter();
-        $this->webhookService = $webhookService;
-    }
+    public function __construct(
+        protected SmsRouter $smsRouter,
+        protected WebhookService $webhookService
+    ) {}
 
     /**
      * Trouver un contact par numéro de téléphone

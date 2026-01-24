@@ -13,14 +13,10 @@ use Illuminate\Support\Facades\Log;
 
 class MessageController extends Controller
 {
-    protected SmsRouter $smsRouter;
-    protected WebhookService $webhookService;
-
-    public function __construct(WebhookService $webhookService)
-    {
-        $this->smsRouter = new SmsRouter();
-        $this->webhookService = $webhookService;
-    }
+    public function __construct(
+        protected SmsRouter $smsRouter,
+        protected WebhookService $webhookService
+    ) {}
 
     /**
      * Calculer le coût d'un SMS

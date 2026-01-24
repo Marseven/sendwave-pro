@@ -59,9 +59,10 @@
 
 ### 2.1 Nettoyage Code
 
-- [ ] **2.1.1** Supprimer code mort et TODO obsoletes
-  - Scanner tous les fichiers pour `// TODO`
-  - Nettoyer les imports inutilises
+- [x] **2.1.1** Supprimer code mort et TODO obsoletes ✅
+  - Aucun TODO trouvé dans app/ et resources/src/
+  - Syntaxe PHP validée sur tous les fichiers
+  - Code propre
 
 - [x] **2.1.2** Centraliser les constantes ✅
   - Créé: `app/Enums/MessageStatus.php` ✅
@@ -71,8 +72,9 @@
   - Créé: `app/Enums/SubAccountPermission.php` ✅
   - Modèles Webhook et SubAccount mis à jour pour utiliser les enums
 
-- [ ] **2.1.3** Refactorer SmsRouter injection
-  - Utiliser dependency injection au lieu de `new SmsRouter()`
+- [x] **2.1.3** Refactorer SmsRouter injection ✅
+  - MessageController, CampaignController, ProcessScheduledCampaigns
+  - Constructor promotion PHP 8 avec injection de SmsRouter et WebhookService
 
 ### 2.2 Middleware & Permissions
 
@@ -202,10 +204,10 @@
 | Phase | Items | Completes | % |
 |-------|-------|-----------|---|
 | Phase 1 | 8 | 8 | 100% |
-| Phase 2 | 7 | 1 | 14% |
+| Phase 2 | 7 | 3 | 43% |
 | Phase 3 | 10 | 0 | 0% |
 | Phase 4 | 10 | 0 | 0% |
-| **Total** | **35** | **9** | **26%** |
+| **Total** | **35** | **11** | **31%** |
 
 ---
 
