@@ -7,25 +7,62 @@ use App\Models\Message;
 use App\Models\Campaign;
 use App\Models\Contact;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AnalyticsService
 {
     /**
-     * Get dashboard widgets data
+     * Cache TTL in seconds (5 minutes for dashboard, longer for reports)
+     */
+    protected const CACHE_TTL_DASHBOARD = 300; // 5 minutes
+    protected const CACHE_TTL_REPORT = 900; // 15 minutes
+
+    /**
+     * Get dashboard widgets data with caching
      */
     public function getDashboardWidgets(int $userId, string $period = 'today')
     {
-        $dates = $this->getPeriodDates($period);
+        $cacheKey = "analytics:dashboard:{$userId}:{$period}";
 
-        return [
-            'overview' => $this->getOverviewStats($userId, $dates),
-            'trends' => $this->getTrendStats($userId, $dates),
-            'providers' => $this->getProviderDistribution($userId, $dates),
-            'campaigns' => $this->getTopCampaigns($userId, $dates),
-            'cost_analysis' => $this->getCostAnalysis($userId, $dates),
-            'hourly_distribution' => $this->getHourlyDistribution($userId, $dates),
-        ];
+        return Cache::remember($cacheKey, self::CACHE_TTL_DASHBOARD, function () use ($userId, $period) {
+            $dates = $this->getPeriodDates($period);
+
+            return [
+                'overview' => $this->getOverviewStats($userId, $dates),
+                'trends' => $this->getTrendStats($userId, $dates),
+                'providers' => $this->getProviderDistribution($userId, $dates),
+                'campaigns' => $this->getTopCampaigns($userId, $dates),
+                'cost_analysis' => $this->getCostAnalysis($userId, $dates),
+                'hourly_distribution' => $this->getHourlyDistribution($userId, $dates),
+            ];
+        });
+    }
+
+    /**
+     * Invalidate dashboard cache for a user
+     */
+    public function invalidateDashboardCache(int $userId): void
+    {
+        $periods = ['today', 'yesterday', 'week', 'month', 'last_month', 'year', 'last_7_days', 'last_30_days'];
+
+        foreach ($periods as $period) {
+            Cache::forget("analytics:dashboard:{$userId}:{$period}");
+            Cache::forget("analytics:chart:{$userId}:{$period}");
+        }
+
+        // Also invalidate report caches (pattern-based)
+        Cache::forget("analytics:report:{$userId}");
+    }
+
+    /**
+     * Invalidate all analytics caches for all users
+     */
+    public function invalidateAllCaches(): void
+    {
+        // This requires cache tagging or a list of users
+        // For file/redis cache, we can use cache tags if available
+        Cache::flush(); // Use with caution in production
     }
 
     /**
@@ -193,61 +230,71 @@ class AnalyticsService
     }
 
     /**
-     * Get daily chart data
+     * Get daily chart data with caching
      */
     public function getDailyChartData(int $userId, string $period = 'week')
     {
-        $dates = $this->getPeriodDates($period);
+        $cacheKey = "analytics:chart:{$userId}:{$period}";
 
-        $analytics = DailyAnalytic::byUser($userId)
-            ->dateRange($dates['start'], $dates['end'])
-            ->orderBy('date')
-            ->get();
+        return Cache::remember($cacheKey, self::CACHE_TTL_DASHBOARD, function () use ($userId, $period) {
+            $dates = $this->getPeriodDates($period);
 
-        return [
-            'labels' => $analytics->pluck('date')->map(fn($date) => $date->format('Y-m-d'))->toArray(),
-            'datasets' => [
-                [
-                    'label' => 'SMS Envoyés',
-                    'data' => $analytics->pluck('sms_sent')->toArray(),
-                    'backgroundColor' => 'rgba(59, 130, 246, 0.5)',
-                    'borderColor' => 'rgb(59, 130, 246)',
+            $analytics = DailyAnalytic::byUser($userId)
+                ->dateRange($dates['start'], $dates['end'])
+                ->orderBy('date')
+                ->get();
+
+            return [
+                'labels' => $analytics->pluck('date')->map(fn($date) => $date->format('Y-m-d'))->toArray(),
+                'datasets' => [
+                    [
+                        'label' => 'SMS Envoyés',
+                        'data' => $analytics->pluck('sms_sent')->toArray(),
+                        'backgroundColor' => 'rgba(59, 130, 246, 0.5)',
+                        'borderColor' => 'rgb(59, 130, 246)',
+                    ],
+                    [
+                        'label' => 'SMS Délivrés',
+                        'data' => $analytics->pluck('sms_delivered')->toArray(),
+                        'backgroundColor' => 'rgba(34, 197, 94, 0.5)',
+                        'borderColor' => 'rgb(34, 197, 94)',
+                    ],
+                    [
+                        'label' => 'SMS Échoués',
+                        'data' => $analytics->pluck('sms_failed')->toArray(),
+                        'backgroundColor' => 'rgba(239, 68, 68, 0.5)',
+                        'borderColor' => 'rgb(239, 68, 68)',
+                    ],
                 ],
-                [
-                    'label' => 'SMS Délivrés',
-                    'data' => $analytics->pluck('sms_delivered')->toArray(),
-                    'backgroundColor' => 'rgba(34, 197, 94, 0.5)',
-                    'borderColor' => 'rgb(34, 197, 94)',
-                ],
-                [
-                    'label' => 'SMS Échoués',
-                    'data' => $analytics->pluck('sms_failed')->toArray(),
-                    'backgroundColor' => 'rgba(239, 68, 68, 0.5)',
-                    'borderColor' => 'rgb(239, 68, 68)',
-                ],
-            ],
-        ];
+            ];
+        });
     }
 
     /**
-     * Get comprehensive report data
+     * Get comprehensive report data with caching
      */
     public function getComprehensiveReport(int $userId, array $dates)
     {
-        return [
-            'summary' => $this->getOverviewStats($userId, $dates),
-            'trends' => $this->getTrendStats($userId, $dates),
-            'provider_breakdown' => $this->getProviderDistribution($userId, $dates),
-            'top_campaigns' => $this->getTopCampaigns($userId, $dates),
-            'cost_analysis' => $this->getCostAnalysis($userId, $dates),
-            'daily_breakdown' => $this->getDailyBreakdown($userId, $dates),
-            'hourly_distribution' => $this->getHourlyDistribution($userId, $dates),
-            'period' => [
-                'start' => $dates['start']->format('Y-m-d'),
-                'end' => $dates['end']->format('Y-m-d'),
-                'days' => $dates['start']->diffInDays($dates['end']) + 1,
-            ],
-        ];
+        $startStr = $dates['start']->format('Y-m-d');
+        $endStr = $dates['end']->format('Y-m-d');
+        $cacheKey = "analytics:report:{$userId}:{$startStr}:{$endStr}";
+
+        return Cache::remember($cacheKey, self::CACHE_TTL_REPORT, function () use ($userId, $dates) {
+            return [
+                'summary' => $this->getOverviewStats($userId, $dates),
+                'trends' => $this->getTrendStats($userId, $dates),
+                'provider_breakdown' => $this->getProviderDistribution($userId, $dates),
+                'top_campaigns' => $this->getTopCampaigns($userId, $dates),
+                'cost_analysis' => $this->getCostAnalysis($userId, $dates),
+                'daily_breakdown' => $this->getDailyBreakdown($userId, $dates),
+                'hourly_distribution' => $this->getHourlyDistribution($userId, $dates),
+                'period' => [
+                    'start' => $dates['start']->format('Y-m-d'),
+                    'end' => $dates['end']->format('Y-m-d'),
+                    'days' => $dates['start']->diffInDays($dates['end']) + 1,
+                ],
+            ];
+        });
     }
 
     /**
@@ -318,6 +365,9 @@ class AnalyticsService
                 'contacts_added' => $contacts,
             ]
         );
+
+        // Invalidate cache after updating analytics
+        $this->invalidateDashboardCache($userId);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\TriggerWebhookJob;
 use App\Models\Webhook;
 use App\Models\WebhookLog;
 use Illuminate\Support\Facades\Http;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class WebhookService
 {
     /**
-     * Trigger webhooks for a specific event
+     * Trigger webhooks for a specific event (synchronous)
      */
     public function trigger(string $event, int $userId, array $data): void
     {
@@ -21,6 +22,21 @@ class WebhookService
 
         foreach ($webhooks as $webhook) {
             $this->dispatch($webhook, $event, $data);
+        }
+    }
+
+    /**
+     * Trigger webhooks asynchronously via queue
+     */
+    public function triggerAsync(string $event, int $userId, array $data): void
+    {
+        $webhooks = Webhook::byUser($userId)
+            ->active()
+            ->forEvent($event)
+            ->get();
+
+        foreach ($webhooks as $webhook) {
+            TriggerWebhookJob::dispatch($webhook->id, $event, $data);
         }
     }
 
