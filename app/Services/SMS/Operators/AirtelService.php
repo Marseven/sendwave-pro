@@ -151,6 +151,7 @@ class AirtelService
 
     /**
      * Nettoyer le numéro de téléphone
+     * Format attendu par Airtel: 24174XXXXXXX (avec préfixe pays 241)
      *
      * @param string $phoneNumber
      * @return string
@@ -160,12 +161,18 @@ class AirtelService
         // Enlever tous les caractères non numériques
         $cleaned = preg_replace('/[^0-9]/', '', $phoneNumber);
 
-        // Si le numéro commence par +241, enlever le +
-        if (str_starts_with($phoneNumber, '+241')) {
-            $cleaned = substr($cleaned, 0);
+        // Si le numéro commence par 241, c'est bon
+        if (str_starts_with($cleaned, '241')) {
+            return $cleaned;
         }
 
-        return $cleaned;
+        // Si le numéro commence par 74, 77, 76 (Airtel), ajouter 241
+        if (preg_match('/^(74|77|76)/', $cleaned)) {
+            return '241' . $cleaned;
+        }
+
+        // Sinon, ajouter 241 par défaut
+        return '241' . $cleaned;
     }
 
     /**
