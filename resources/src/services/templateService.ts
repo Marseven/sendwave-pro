@@ -2,12 +2,15 @@ import apiClient from './api'
 
 export interface Template {
   id: number
+  user_id?: number
   name: string
   category: string
   message: string
   icon?: string
   status: 'active' | 'inactive'
+  is_public?: boolean
   uses?: number
+  usage_count?: number
   length?: number
   created_at?: string
   updated_at?: string
@@ -60,5 +63,11 @@ export const templateService = {
 
   async delete(id: number): Promise<void> {
     await apiClient.delete(`/templates/${id}`)
+  },
+
+  async togglePublic(id: number): Promise<Template> {
+    const response = await apiClient.post(`/templates/${id}/toggle-public`)
+    const data = response.data.data || response.data
+    return mapToFrontend(data)
   }
 }

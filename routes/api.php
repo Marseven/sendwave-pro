@@ -63,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('templates/categories', [MessageTemplateController::class, 'categories']);
         Route::post('templates/{id}/use', [MessageTemplateController::class, 'use']);
         Route::post('templates/{id}/preview', [MessageTemplateController::class, 'preview']);
+        Route::post('templates/{id}/toggle-public', [MessageTemplateController::class, 'togglePublic']);
         Route::apiResource('templates', MessageTemplateController::class);
     });
 

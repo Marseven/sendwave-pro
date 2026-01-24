@@ -214,9 +214,11 @@
   - Bouton export dans la page Contacts
   - Méthode exportCsv() dans contactService.ts
 
-- [ ] **4.2.3** Templates partages
-  - Systeme de permissions
-  - Templates publics/prives
+- [x] **4.2.3** Templates partages ✅
+  - Champ `is_public` dans MessageTemplate
+  - Endpoint `POST /templates/{id}/toggle-public`
+  - Liste incluant templates publics d'autres utilisateurs
+  - Méthode togglePublic() dans templateService.ts
 
 - [ ] **4.2.4** Rapports planifies par email
   - Configuration frequence
@@ -238,8 +240,8 @@
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
 | Phase 3 | 10 | 10 | 100% |
-| Phase 4 | 10 | 5 | 50% |
-| **Total** | **35** | **30** | **86%** |
+| Phase 4 | 10 | 6 | 60% |
+| **Total** | **35** | **31** | **89%** |
 
 ---
 

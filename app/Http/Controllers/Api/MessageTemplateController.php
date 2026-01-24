@@ -85,11 +85,39 @@ class MessageTemplateController extends Controller
             'name' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
             'category' => 'sometimes|string|max:100',
+            'is_public' => 'sometimes|boolean',
         ]);
 
         $template->update($validated);
 
-        return response()->json($template);
+        // Re-extract variables if content changed
+        if (isset($validated['content'])) {
+            $template->extractVariables();
+        }
+
+        return response()->json([
+            'message' => 'Modèle mis à jour',
+            'data' => $template
+        ]);
+    }
+
+    /**
+     * Toggle template public/private status
+     */
+    public function togglePublic(Request $request, string $id)
+    {
+        $template = MessageTemplate::where('user_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $template->is_public = !$template->is_public;
+        $template->save();
+
+        return response()->json([
+            'message' => $template->is_public
+                ? 'Modèle partagé avec tous les utilisateurs'
+                : 'Modèle rendu privé',
+            'data' => $template
+        ]);
     }
 
     public function destroy(Request $request, string $id)
