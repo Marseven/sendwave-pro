@@ -220,9 +220,11 @@
   - Liste incluant templates publics d'autres utilisateurs
   - Méthode togglePublic() dans templateService.ts
 
-- [ ] **4.2.4** Rapports planifies par email
-  - Configuration frequence
-  - Selection metriques
+- [x] **4.2.4** Rapports planifies par email ✅
+  - Job `SendScheduledReportJob` avec fréquence configurable
+  - Rapports hebdomadaires (lundi 8h) et mensuels (1er du mois)
+  - Email formaté avec résumé, opérateurs, top campagnes
+  - Basé sur préférence `weekly_reports` de l'utilisateur
 
 ### 4.3 Tests
 
@@ -240,8 +242,8 @@
 | Phase 1 | 8 | 8 | 100% |
 | Phase 2 | 7 | 7 | 100% |
 | Phase 3 | 10 | 10 | 100% |
-| Phase 4 | 10 | 6 | 60% |
-| **Total** | **35** | **31** | **89%** |
+| Phase 4 | 10 | 7 | 70% |
+| **Total** | **35** | **32** | **91%** |
 
 ---
 
