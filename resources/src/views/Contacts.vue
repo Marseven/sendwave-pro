@@ -1,80 +1,87 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold">Contacts</h1>
-          <p class="text-muted-foreground mt-2">Gérez votre liste de contacts</p>
-        </div>
-        <div class="flex gap-3">
-          <button
-            v-if="hasSelectedContacts"
-            @click="openGroupModal"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-          >
-            <UserGroupIcon class="w-4 h-4" />
-            <span>Ajouter à un groupe ({{ selectedContactIds.length }})</span>
-          </button>
-          <button
-            @click="exportContacts"
-            :disabled="exporting"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-          >
-            <ArrowUpTrayIcon v-if="!exporting" class="w-4 h-4" />
-            <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-            <span>Exporter</span>
-          </button>
-          <button
-            @click="showImportModal = true"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-          >
-            <ArrowDownTrayIcon class="w-4 h-4" />
-            <span>Importer</span>
-          </button>
-          <button
-            @click="openAddModal"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            <PlusIcon class="w-4 h-4" />
-            <span>Nouveau contact</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Statistiques -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Total contacts</div>
-          <div class="text-2xl font-bold mt-1">{{ totalContacts }}</div>
-        </div>
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Actifs</div>
-          <div class="text-2xl font-bold mt-1 text-success">{{ activeContacts }}</div>
-        </div>
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Inactifs</div>
-          <div class="text-2xl font-bold mt-1 text-muted-foreground">{{ inactiveContacts }}</div>
-        </div>
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Nouveaux (30j)</div>
-          <div class="text-2xl font-bold mt-1 text-primary">{{ newContacts }}</div>
+    <div class="p-4 sm:p-6 lg:p-8">
+      <!-- Header responsive -->
+      <div class="mb-4 sm:mb-6 lg:mb-8">
+        <div class="flex flex-col gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold">Contacts</h1>
+            <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Gérez votre liste de contacts</p>
+          </div>
+          <!-- Buttons - wrap on mobile -->
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-if="hasSelectedContacts"
+              @click="openGroupModal"
+              class="inline-flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2"
+            >
+              <UserGroupIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Ajouter à un groupe</span>
+              <span class="sm:hidden">Groupe</span>
+              <span>({{ selectedContactIds.length }})</span>
+            </button>
+            <button
+              @click="exportContacts"
+              :disabled="exporting"
+              class="inline-flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2 disabled:opacity-50"
+            >
+              <ArrowUpTrayIcon v-if="!exporting" class="w-4 h-4" />
+              <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              <span class="hidden sm:inline">Exporter</span>
+            </button>
+            <button
+              @click="showImportModal = true"
+              class="inline-flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2"
+            >
+              <ArrowDownTrayIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Importer</span>
+            </button>
+            <button
+              @click="openAddModal"
+              class="inline-flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
+            >
+              <PlusIcon class="w-4 h-4" />
+              <span class="hidden sm:inline">Nouveau contact</span>
+              <span class="sm:hidden">Nouveau</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Filtres et recherche -->
-      <div class="rounded-lg border bg-card shadow-sm mb-6 p-6">
-        <div class="flex gap-4">
+      <!-- Statistiques - 2x2 sur mobile, 4 colonnes sur desktop -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Total contacts</div>
+          <div class="text-xl sm:text-2xl font-bold mt-1">{{ totalContacts }}</div>
+        </div>
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Actifs</div>
+          <div class="text-xl sm:text-2xl font-bold mt-1 text-success">{{ activeContacts }}</div>
+        </div>
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Inactifs</div>
+          <div class="text-xl sm:text-2xl font-bold mt-1 text-muted-foreground">{{ inactiveContacts }}</div>
+        </div>
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Nouveaux (30j)</div>
+          <div class="text-xl sm:text-2xl font-bold mt-1 text-primary">{{ newContacts }}</div>
+        </div>
+      </div>
+
+      <!-- Filtres et recherche - Stack on mobile -->
+      <div class="rounded-lg border bg-card shadow-sm mb-4 sm:mb-6 p-3 sm:p-4 lg:p-6">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div class="flex-1">
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Rechercher par nom, email ou téléphone..."
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Rechercher..."
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
           <select
             v-model="filterStatus"
-            class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            class="flex h-9 sm:h-10 rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="all">Tous les statuts</option>
             <option value="active">Actifs</option>
@@ -85,98 +92,102 @@
 
       <!-- Liste des contacts -->
       <div class="rounded-lg border bg-card shadow-sm">
-        <div v-if="loading" class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div v-if="loading" class="flex items-center justify-center py-8 sm:py-12">
+          <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary"></div>
         </div>
-        <div v-else-if="filteredContacts.length === 0" class="flex flex-col items-center justify-center py-12">
-          <UsersIcon class="w-16 h-16 text-muted-foreground mb-4" />
-          <p class="text-lg font-medium">Aucun contact trouvé</p>
-          <p class="text-sm text-muted-foreground mt-1">Commencez par ajouter ou importer des contacts</p>
+        <div v-else-if="filteredContacts.length === 0" class="flex flex-col items-center justify-center py-8 sm:py-12 px-4">
+          <UsersIcon class="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mb-3 sm:mb-4" />
+          <p class="text-base sm:text-lg font-medium text-center">Aucun contact trouvé</p>
+          <p class="text-xs sm:text-sm text-muted-foreground mt-1 text-center">Commencez par ajouter ou importer des contacts</p>
         </div>
-        <div v-else class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="border-b bg-muted/50">
-              <tr>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    :checked="allSelected"
-                    @change="toggleSelectAll"
-                    class="rounded border-gray-300 cursor-pointer"
-                  />
-                </th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nom</th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Email</th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Téléphone</th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Statut</th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date d'ajout</th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="contact in filteredContacts"
-                :key="contact.id"
-                class="border-b transition-colors hover:bg-muted/50"
-              >
-                <td class="p-4">
-                  <input
-                    type="checkbox"
-                    :checked="isContactSelected(contact.id)"
-                    @change="toggleContact(contact.id)"
-                    class="rounded border-gray-300 cursor-pointer"
-                  />
-                </td>
-                <td class="p-4 font-medium">{{ contact.name }}</td>
-                <td class="p-4 text-sm text-muted-foreground">{{ contact.email }}</td>
-                <td class="p-4 text-sm">{{ contact.phone }}</td>
-                <td class="p-4">
-                  <span
-                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                    :class="contact.status === 'active' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'"
-                  >
-                    {{ contact.status === 'active' ? 'Actif' : 'Inactif' }}
-                  </span>
-                </td>
-                <td class="p-4 text-sm text-muted-foreground">{{ formatDate(contact.created_at) }}</td>
-                <td class="p-4">
-                  <div class="flex gap-2">
-                    <button
-                      @click="openEditModal(contact)"
-                      class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
-                      title="Modifier"
-                    >
-                      <PencilIcon class="w-4 h-4" />
-                    </button>
-                    <button
-                      @click="deleteContact(contact)"
-                      class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-destructive/10 hover:text-destructive h-8 w-8"
-                      title="Supprimer"
-                    >
-                      <TrashIcon class="w-4 h-4" />
-                    </button>
+        <div v-else>
+          <!-- Desktop Table -->
+          <div class="hidden md:block overflow-x-auto">
+            <table class="w-full">
+              <thead class="border-b bg-muted/50">
+                <tr>
+                  <th class="h-10 sm:h-12 px-3 sm:px-4 text-left align-middle font-medium text-muted-foreground text-xs sm:text-sm">
+                    <input type="checkbox" :checked="allSelected" @change="toggleSelectAll" class="rounded border-gray-300 cursor-pointer" />
+                  </th>
+                  <th class="h-10 sm:h-12 px-3 sm:px-4 text-left align-middle font-medium text-muted-foreground text-xs sm:text-sm">Nom</th>
+                  <th class="h-10 sm:h-12 px-3 sm:px-4 text-left align-middle font-medium text-muted-foreground text-xs sm:text-sm">Email</th>
+                  <th class="h-10 sm:h-12 px-3 sm:px-4 text-left align-middle font-medium text-muted-foreground text-xs sm:text-sm">Téléphone</th>
+                  <th class="h-10 sm:h-12 px-3 sm:px-4 text-left align-middle font-medium text-muted-foreground text-xs sm:text-sm">Statut</th>
+                  <th class="h-10 sm:h-12 px-3 sm:px-4 text-left align-middle font-medium text-muted-foreground text-xs sm:text-sm hidden lg:table-cell">Date d'ajout</th>
+                  <th class="h-10 sm:h-12 px-3 sm:px-4 text-left align-middle font-medium text-muted-foreground text-xs sm:text-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="contact in filteredContacts" :key="contact.id" class="border-b transition-colors hover:bg-muted/50">
+                  <td class="p-3 sm:p-4">
+                    <input type="checkbox" :checked="isContactSelected(contact.id)" @change="toggleContact(contact.id)" class="rounded border-gray-300 cursor-pointer" />
+                  </td>
+                  <td class="p-3 sm:p-4 font-medium text-sm">{{ contact.name }}</td>
+                  <td class="p-3 sm:p-4 text-xs sm:text-sm text-muted-foreground truncate max-w-[150px]">{{ contact.email }}</td>
+                  <td class="p-3 sm:p-4 text-xs sm:text-sm">{{ contact.phone }}</td>
+                  <td class="p-3 sm:p-4">
+                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold" :class="contact.status === 'active' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'">
+                      {{ contact.status === 'active' ? 'Actif' : 'Inactif' }}
+                    </span>
+                  </td>
+                  <td class="p-3 sm:p-4 text-xs sm:text-sm text-muted-foreground hidden lg:table-cell">{{ formatDate(contact.created_at) }}</td>
+                  <td class="p-3 sm:p-4">
+                    <div class="flex gap-1">
+                      <button @click="openEditModal(contact)" class="inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground h-8 w-8" title="Modifier">
+                        <PencilIcon class="w-4 h-4" />
+                      </button>
+                      <button @click="deleteContact(contact)" class="inline-flex items-center justify-center rounded-md hover:bg-destructive/10 hover:text-destructive h-8 w-8" title="Supprimer">
+                        <TrashIcon class="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Card Layout -->
+          <div class="md:hidden divide-y">
+            <div v-for="contact in filteredContacts" :key="contact.id" class="p-3 sm:p-4 hover:bg-muted/30">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3 flex-1 min-w-0">
+                  <input type="checkbox" :checked="isContactSelected(contact.id)" @change="toggleContact(contact.id)" class="rounded border-gray-300 cursor-pointer mt-1" />
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-sm truncate">{{ contact.name }}</p>
+                    <p class="text-xs text-muted-foreground truncate">{{ contact.phone }}</p>
+                    <p class="text-xs text-muted-foreground truncate">{{ contact.email }}</p>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                      <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold" :class="contact.status === 'active' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'">
+                        {{ contact.status === 'active' ? 'Actif' : 'Inactif' }}
+                      </span>
+                      <span class="text-xs text-muted-foreground">{{ formatDate(contact.created_at) }}</span>
+                    </div>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+                <div class="flex gap-1 flex-shrink-0">
+                  <button @click="openEditModal(contact)" class="p-2 hover:bg-accent rounded">
+                    <PencilIcon class="w-4 h-4" />
+                  </button>
+                  <button @click="deleteContact(contact)" class="p-2 hover:bg-destructive/10 text-destructive rounded">
+                    <TrashIcon class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Pagination -->
-      <div class="flex items-center justify-between mt-6">
-        <p class="text-sm text-muted-foreground">
-          Affichage de 1 à {{ filteredContacts.length }} sur {{ contacts.length }} contacts
+      <!-- Pagination responsive -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 sm:mt-6">
+        <p class="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+          {{ filteredContacts.length }} sur {{ contacts.length }} contacts
         </p>
         <div class="flex gap-2">
-          <button
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-          >
+          <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs sm:text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3">
             Précédent
           </button>
-          <button
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
-          >
+          <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs sm:text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3">
             Suivant
           </button>
         </div>
@@ -186,10 +197,10 @@
     <!-- Modal Ajout/Modification Contact -->
     <div
       v-if="showAddModal || showEditModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       @click.self="closeContactModal"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-md p-6">
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-bold">{{ editingContact ? 'Modifier le contact' : 'Nouveau contact' }}</h2>
           <button @click="closeContactModal" class="hover:bg-accent rounded-full p-1">
@@ -322,10 +333,10 @@
     <!-- Modal Import CSV -->
     <div
       v-if="showImportModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       @click.self="closeImportModal"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <div class="flex items-center justify-between mb-6">
           <div>
             <h2 class="text-xl font-bold">Importer des contacts</h2>
@@ -531,10 +542,10 @@
     <!-- Modal Ajouter à un Groupe -->
     <div
       v-if="showGroupModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       @click.self="closeGroupModal"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-md">
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-md">
         <div class="border-b p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold">Ajouter à un groupe</h2>

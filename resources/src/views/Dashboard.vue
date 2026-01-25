@@ -1,89 +1,93 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex justify-between items-center">
-        <div>
-          <h1 class="text-3xl font-bold text-foreground">Tableau de bord</h1>
-          <p class="text-muted-foreground mt-2">Bienvenue {{ user?.name }}</p>
-        </div>
-        <div class="flex gap-2">
-          <button
-            v-for="period in periods"
-            :key="period.value"
-            @click="selectedPeriod = period.value"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            :class="selectedPeriod === period.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
-          >
-            {{ period.label }}
-          </button>
+    <div class="p-4 sm:p-6 lg:p-8">
+      <!-- Header responsive -->
+      <div class="mb-4 sm:mb-6 lg:mb-8">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-foreground">Tableau de bord</h1>
+            <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Bienvenue {{ user?.name }}</p>
+          </div>
+          <!-- Period buttons - wrap on mobile -->
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="period in periods"
+              :key="period.value"
+              @click="selectedPeriod = period.value"
+              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap"
+              :class="selectedPeriod === period.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
+            >
+              {{ period.label }}
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Chargement -->
-      <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div v-if="loading" class="flex items-center justify-center py-8 sm:py-12">
+        <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary"></div>
       </div>
 
       <div v-else>
         <!-- Statistiques principales -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-medium text-muted-foreground">Messages Envoyés</h3>
-              <PaperAirplaneIcon class="w-8 h-8 text-primary" />
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-3 sm:p-4 lg:p-6">
+            <div class="flex items-center justify-between mb-1 sm:mb-2">
+              <h3 class="text-xs sm:text-sm font-medium text-muted-foreground">Messages Envoyés</h3>
+              <PaperAirplaneIcon class="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-primary flex-shrink-0" />
             </div>
-            <p class="text-3xl font-bold mt-2">{{ formatNumber(analytics?.total_sent || 0) }}</p>
-            <p class="text-xs mt-2" :class="getTrendClass(analytics?.trends?.sent)">
+            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">{{ formatNumber(analytics?.total_sent || 0) }}</p>
+            <p class="text-xs mt-1 sm:mt-2 hidden sm:block" :class="getTrendClass(analytics?.trends?.sent)">
               {{ getTrendLabel(analytics?.trends?.sent) }}
             </p>
           </div>
 
-          <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-medium text-muted-foreground">Messages Livrés</h3>
-              <CheckCircleIcon class="w-8 h-8 text-success" />
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-3 sm:p-4 lg:p-6">
+            <div class="flex items-center justify-between mb-1 sm:mb-2">
+              <h3 class="text-xs sm:text-sm font-medium text-muted-foreground">Messages Livrés</h3>
+              <CheckCircleIcon class="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-success flex-shrink-0" />
             </div>
-            <p class="text-3xl font-bold mt-2">{{ formatNumber(analytics?.total_delivered || 0) }}</p>
-            <p class="text-xs mt-2" :class="getTrendClass(analytics?.trends?.delivered)">
+            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">{{ formatNumber(analytics?.total_delivered || 0) }}</p>
+            <p class="text-xs mt-1 sm:mt-2 hidden sm:block" :class="getTrendClass(analytics?.trends?.delivered)">
               {{ getTrendLabel(analytics?.trends?.delivered) }}
             </p>
           </div>
 
-          <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-medium text-muted-foreground">Taux de Livraison</h3>
-              <ChartBarIcon class="w-8 h-8 text-primary" />
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-3 sm:p-4 lg:p-6">
+            <div class="flex items-center justify-between mb-1 sm:mb-2">
+              <h3 class="text-xs sm:text-sm font-medium text-muted-foreground">Taux Livraison</h3>
+              <ChartBarIcon class="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-primary flex-shrink-0" />
             </div>
-            <p class="text-3xl font-bold mt-2">{{ analytics?.delivery_rate?.toFixed(1) || 0 }}%</p>
-            <p class="text-xs mt-2" :class="getDeliveryRateClass(analytics?.delivery_rate)">
+            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">{{ analytics?.delivery_rate?.toFixed(1) || 0 }}%</p>
+            <p class="text-xs mt-1 sm:mt-2 hidden sm:block" :class="getDeliveryRateClass(analytics?.delivery_rate)">
               {{ getDeliveryRateLabel(analytics?.delivery_rate) }}
             </p>
           </div>
 
-          <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-medium text-muted-foreground">Coût Total</h3>
-              <CreditCardIcon class="w-8 h-8 text-primary" />
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-3 sm:p-4 lg:p-6">
+            <div class="flex items-center justify-between mb-1 sm:mb-2">
+              <h3 class="text-xs sm:text-sm font-medium text-muted-foreground">Coût Total</h3>
+              <CreditCardIcon class="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-primary flex-shrink-0" />
             </div>
-            <p class="text-3xl font-bold mt-2">{{ formatCurrency(analytics?.total_cost || 0) }}</p>
-            <p class="text-xs mt-2" :class="getTrendClass(analytics?.trends?.cost)">
+            <p class="text-xl sm:text-2xl lg:text-3xl font-bold">{{ formatCurrency(analytics?.total_cost || 0) }}</p>
+            <p class="text-xs mt-1 sm:mt-2 hidden sm:block" :class="getTrendClass(analytics?.trends?.cost)">
               {{ getTrendLabel(analytics?.trends?.cost) }}
             </p>
           </div>
         </div>
 
         <!-- Statistiques par fournisseur -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <div class="rounded-lg border bg-card shadow-sm">
-            <div class="p-6 border-b border-border">
-              <h2 class="text-xl font-semibold">Répartition par Fournisseur</h2>
+            <div class="p-4 sm:p-6 border-b border-border">
+              <h2 class="text-base sm:text-lg lg:text-xl font-semibold">Répartition par Fournisseur</h2>
             </div>
-            <div class="p-6">
-              <div v-if="analytics?.by_provider && Object.keys(analytics.by_provider).length > 0" class="space-y-4">
-                <div v-for="(data, provider) in analytics.by_provider" :key="provider" class="space-y-2">
-                  <div class="flex items-center justify-between">
-                    <span class="font-medium">{{ provider }}</span>
-                    <span class="text-sm text-muted-foreground">{{ formatNumber(data.sent) }} messages</span>
+            <div class="p-4 sm:p-6">
+              <div v-if="analytics?.by_provider && Object.keys(analytics.by_provider).length > 0" class="space-y-3 sm:space-y-4">
+                <div v-for="(data, provider) in analytics.by_provider" :key="provider" class="space-y-1.5 sm:space-y-2">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                    <span class="font-medium text-sm sm:text-base">{{ provider }}</span>
+                    <span class="text-xs sm:text-sm text-muted-foreground">{{ formatNumber(data.sent) }} messages</span>
                   </div>
                   <div class="w-full bg-muted rounded-full h-2">
                     <div
@@ -92,104 +96,104 @@
                       :style="{ width: `${(data.sent / analytics.total_sent * 100).toFixed(1)}%` }"
                     ></div>
                   </div>
-                  <div class="flex justify-between text-xs text-muted-foreground">
+                  <div class="flex flex-col sm:flex-row sm:justify-between gap-1 text-xs text-muted-foreground">
                     <span>Livrés: {{ data.delivered_rate?.toFixed(1) }}%</span>
                     <span>Coût: {{ formatCurrency(data.total_cost) }}</span>
                   </div>
                 </div>
               </div>
-              <div v-else class="text-center text-muted-foreground py-8">
-                <p class="text-sm">Aucune donnée disponible</p>
+              <div v-else class="text-center text-muted-foreground py-6 sm:py-8">
+                <p class="text-xs sm:text-sm">Aucune donnée disponible</p>
               </div>
             </div>
           </div>
 
           <div class="rounded-lg border bg-card shadow-sm">
-            <div class="p-6 border-b border-border">
-              <h2 class="text-xl font-semibold">Crédits Restants</h2>
+            <div class="p-4 sm:p-6 border-b border-border">
+              <h2 class="text-base sm:text-lg lg:text-xl font-semibold">Crédits Restants</h2>
             </div>
-            <div class="p-6">
-              <div v-if="analytics?.credits_remaining !== undefined" class="space-y-4">
+            <div class="p-4 sm:p-6">
+              <div v-if="analytics?.credits_remaining !== undefined" class="space-y-3 sm:space-y-4">
                 <div class="text-center">
-                  <p class="text-5xl font-bold text-primary">{{ formatNumber(analytics.credits_remaining) }}</p>
-                  <p class="text-sm text-muted-foreground mt-2">crédits disponibles</p>
+                  <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary">{{ formatNumber(analytics.credits_remaining) }}</p>
+                  <p class="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">crédits disponibles</p>
                 </div>
-                <div class="w-full bg-muted rounded-full h-3">
+                <div class="w-full bg-muted rounded-full h-2 sm:h-3">
                   <div
-                    class="h-3 rounded-full transition-all"
+                    class="h-full rounded-full transition-all"
                     :class="getCreditBarClass(analytics.credits_remaining, analytics.initial_credits)"
                     :style="{ width: `${getCreditPercentage(analytics.credits_remaining, analytics.initial_credits)}%` }"
                   ></div>
                 </div>
-                <div class="flex justify-between text-xs text-muted-foreground">
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-1 text-xs text-muted-foreground">
                   <span>Utilisés: {{ formatNumber((analytics.initial_credits || 0) - analytics.credits_remaining) }}</span>
                   <span>Total: {{ formatNumber(analytics.initial_credits || 0) }}</span>
                 </div>
               </div>
-              <div v-else class="text-center text-muted-foreground py-8">
-                <p class="text-sm">Aucune donnée disponible</p>
+              <div v-else class="text-center text-muted-foreground py-6 sm:py-8">
+                <p class="text-xs sm:text-sm">Aucune donnée disponible</p>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Campagnes récentes et activité -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Campagnes récentes -->
-        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-          <div class="p-6 border-b border-border">
-            <h2 class="text-xl font-semibold">Campagnes Récentes</h2>
-          </div>
-          <div class="p-6">
-            <div v-if="recentCampaigns.length > 0">
-              <div v-for="campaign in recentCampaigns" :key="campaign.id" class="mb-4 last:mb-0 pb-4 last:pb-0 border-b last:border-b-0 border-border">
-                <div class="flex items-center justify-between mb-2">
-                  <h3 class="font-medium">{{ campaign.name }}</h3>
-                  <span
-                    class="text-xs px-2 py-1 rounded-full"
-                    :class="getCampaignStatusClass(campaign.status)"
-                  >
-                    {{ getCampaignStatusLabel(campaign.status) }}
-                  </span>
-                </div>
-                <div class="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span class="flex items-center gap-1">
-                    <PaperAirplaneIcon class="w-4 h-4" />
-                    {{ campaign.messages_sent || campaign.sent || 0 }} envoyés
-                  </span>
-                  <span class="flex items-center gap-1">
-                    <CheckCircleIcon class="w-4 h-4" />
-                    {{ campaign.delivery_rate || campaign.delivered || 0 }}% livrés
-                  </span>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+          <!-- Campagnes récentes -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-4 sm:p-6 border-b border-border">
+              <h2 class="text-base sm:text-lg lg:text-xl font-semibold">Campagnes Récentes</h2>
+            </div>
+            <div class="p-4 sm:p-6">
+              <div v-if="recentCampaigns.length > 0">
+                <div v-for="campaign in recentCampaigns" :key="campaign.id" class="mb-3 sm:mb-4 last:mb-0 pb-3 sm:pb-4 last:pb-0 border-b last:border-b-0 border-border">
+                  <div class="flex items-start justify-between gap-2 mb-1 sm:mb-2">
+                    <h3 class="font-medium text-sm sm:text-base truncate">{{ campaign.name }}</h3>
+                    <span
+                      class="text-xs px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0"
+                      :class="getCampaignStatusClass(campaign.status)"
+                    >
+                      {{ getCampaignStatusLabel(campaign.status) }}
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                    <span class="flex items-center gap-1">
+                      <PaperAirplaneIcon class="w-3 h-3 sm:w-4 sm:h-4" />
+                      {{ campaign.messages_sent || campaign.sent || 0 }} envoyés
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <CheckCircleIcon class="w-3 h-3 sm:w-4 sm:h-4" />
+                      {{ campaign.delivery_rate || campaign.delivered || 0 }}% livrés
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div v-else class="text-center text-muted-foreground py-8">
-              <p class="text-sm">Aucune campagne récente</p>
+              <div v-else class="text-center text-muted-foreground py-6 sm:py-8">
+                <p class="text-xs sm:text-sm">Aucune campagne récente</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Activité récente -->
-        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-          <div class="p-6 border-b border-border">
-            <h2 class="text-xl font-semibold">Activité Récente</h2>
-          </div>
-          <div class="p-6">
-            <div v-if="recentActivities.length > 0">
-              <div v-for="activity in recentActivities" :key="activity.id" class="mb-4 last:mb-0 flex items-start gap-3">
-                <component :is="activity.icon" class="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <div class="flex-1">
-                  <p class="text-sm font-medium">{{ activity.title }}</p>
-                  <p class="text-xs text-muted-foreground mt-1">{{ activity.time }}</p>
+          <!-- Activité récente -->
+          <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-4 sm:p-6 border-b border-border">
+              <h2 class="text-base sm:text-lg lg:text-xl font-semibold">Activité Récente</h2>
+            </div>
+            <div class="p-4 sm:p-6">
+              <div v-if="recentActivities.length > 0">
+                <div v-for="activity in recentActivities" :key="activity.id" class="mb-3 sm:mb-4 last:mb-0 flex items-start gap-2 sm:gap-3">
+                  <component :is="activity.icon" class="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs sm:text-sm font-medium truncate">{{ activity.title }}</p>
+                    <p class="text-xs text-muted-foreground mt-0.5 sm:mt-1">{{ activity.time }}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div v-else class="text-center text-muted-foreground py-8">
-              <p class="text-sm">Aucune activité récente</p>
+              <div v-else class="text-center text-muted-foreground py-6 sm:py-8">
+                <p class="text-xs sm:text-sm">Aucune activité récente</p>
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
