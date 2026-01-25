@@ -536,13 +536,43 @@ Les fichiers de documentation detaillee sont dans `/docs/` (non commite):
 
 ## 16. Plan d'Action
 
-Voir `PLAN_ACTION.md` pour le plan de corrections et ameliorations:
+### Version 3.0 (Complété)
+Voir `PLAN_ACTION.md` pour le plan initial:
 - **Phase 1**: Bugs critiques et securite ✅
 - **Phase 2**: Coherence backend ✅
 - **Phase 3**: Interfaces manquantes ✅
 - **Phase 4**: Ameliorations ✅
 
-**Statut**: 100% complété
+### Version 3.1 (En cours)
+Voir `PLAN_ACTION_V2.md` pour les nouvelles fonctionnalités:
+
+#### Phase 1 - Comptabilité Analytique (Priorité Haute)
+- [ ] Table `sms_analytics` - Traçabilité complète par SMS
+- [ ] Table `period_closures` - Clôture mensuelle automatique
+- [ ] `BudgetService` - Plafonds mensuels par sous-compte
+- [ ] API Keys rattachées aux sous-comptes
+
+#### Phase 2 - Refonte Interfaces (Priorité Moyenne)
+- [ ] Interface SendSms avec 3 onglets (Send SMS | Send Opt SMS | SMS From File)
+- [ ] Section Transactional avec 4 onglets (Sender Id | Templates | Drafts | Routes)
+- [ ] Section Database avec 3 onglets (My Groups | Import | Export)
+- [ ] Section Reports avec 5 onglets (Campaign | Delivery | Schedule | Archived | Credit)
+
+#### Phase 3 - Fonctionnalités Avancées
+- [ ] Fallback automatique entre passerelles
+- [ ] Gestion STOP automatique (blacklist auto)
+- [ ] Support international (normalisation E.164)
+
+### Design (Basé sur maquettes OrbiTel)
+```css
+--primary-blue: #1E40AF;
+--primary-blue-light: #3B82F6;
+--success-green: #22C55E;
+--warning-yellow: #EAB308;
+--danger-red: #EF4444;
+--bg-sidebar: #1F2937;
+--bg-main: #F9FAFB;
+```
 
 ---
 
