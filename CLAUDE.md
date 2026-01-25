@@ -8,7 +8,7 @@
 
 | Info | Valeur |
 |------|--------|
-| Version | 3.0 (Production Ready) |
+| Version | 3.1 (Production Ready) |
 | Marche cible | Gabon (Airtel, Moov) |
 | Devise | FCFA |
 | Langue par defaut | Francais |
@@ -34,27 +34,19 @@
 - **Pinia** (state management)
 - **Vue Router 4**
 - **Axios** (HTTP client)
+- **Heroicons** (icones)
 
 ## 3. Structure du projet
 
 ```
 sendwave-pro/
 ├── app/
-│   ├── Http/Controllers/Api/     # 14 controleurs API
-│   │   ├── AuthController.php
-│   │   ├── ContactController.php
-│   │   ├── ContactGroupController.php
-│   │   ├── CampaignController.php
+│   ├── Http/Controllers/          # Controleurs
+│   │   ├── Api/                   # 14 controleurs API
 │   │   ├── MessageController.php
-│   │   ├── TemplateController.php
-│   │   ├── SubAccountController.php
-│   │   ├── ApiKeyController.php
-│   │   ├── SmsConfigController.php
-│   │   ├── BlacklistController.php
-│   │   ├── AuditLogController.php
-│   │   ├── WebhookController.php
-│   │   └── AnalyticsController.php
-│   ├── Models/                    # 18 modeles Eloquent
+│   │   ├── BudgetController.php
+│   │   └── SmsAnalyticsController.php
+│   ├── Models/                    # 19 modeles Eloquent
 │   │   ├── User.php
 │   │   ├── Contact.php
 │   │   ├── ContactGroup.php
@@ -66,73 +58,75 @@ sendwave-pro/
 │   │   ├── SubAccount.php
 │   │   ├── ApiKey.php
 │   │   ├── SmsConfig.php
+│   │   ├── SmsProvider.php
 │   │   ├── Blacklist.php
 │   │   ├── AuditLog.php
 │   │   ├── Webhook.php
 │   │   ├── WebhookLog.php
-│   │   └── DailyAnalytics.php
-│   ├── Services/
-│   │   ├── MessageVariableService.php   # Variables dynamiques
-│   │   ├── WebhookService.php           # Gestion webhooks
-│   │   ├── AnalyticsService.php         # Analytics & rapports
+│   │   ├── DailyAnalytic.php
+│   │   ├── SmsAnalytics.php
+│   │   └── PeriodClosure.php
+│   ├── Services/                  # 16 services
+│   │   ├── AnalyticsService.php
+│   │   ├── AnalyticsRecordService.php
+│   │   ├── BudgetService.php
+│   │   ├── MessageVariableService.php
+│   │   ├── PeriodClosureService.php
+│   │   ├── PhoneNormalizationService.php
+│   │   ├── StopWordService.php
+│   │   ├── WebhookService.php
 │   │   └── SMS/
-│   │       ├── SmsRouter.php            # Routage intelligent
+│   │       ├── SmsRouter.php            # Routage intelligent + fallback
 │   │       ├── OperatorDetector.php     # Detection operateur
+│   │       ├── SmppClient.php           # Client SMPP natif
 │   │       └── Operators/
-│   │           ├── AirtelGabonProvider.php
-│   │           └── MoovGabonProvider.php
-│   └── Providers/
+│   │           ├── AirtelService.php
+│   │           └── MoovService.php
+│   ├── Enums/                     # 5 enums
+│   │   ├── CampaignStatus.php
+│   │   ├── MessageStatus.php
+│   │   ├── SubAccountRole.php
+│   │   ├── SubAccountPermission.php
+│   │   └── WebhookEvent.php
+│   ├── Events/                    # Evenements budget
+│   │   ├── BudgetAlertEvent.php
+│   │   └── BudgetExceededEvent.php
+│   ├── Jobs/                      # 4 jobs
+│   │   ├── SendSmsJob.php
+│   │   ├── TriggerWebhookJob.php
+│   │   ├── SendScheduledReportJob.php
+│   │   └── UpdateDailyAnalytics.php
+│   └── Console/Commands/
+│       └── ClosePeriodCommand.php
 ├── database/
-│   ├── migrations/                # 27 migrations
-│   ├── factories/
-│   └── seeders/
+│   └── migrations/                # 37 migrations
 ├── routes/
 │   ├── api.php                    # 102+ endpoints API
-│   └── web.php
+│   ├── web.php
+│   └── console.php                # Scheduler
 ├── resources/
 │   └── src/                       # Frontend Vue 3
-│       ├── views/                 # 22 composants pages
-│       │   ├── Login.vue
-│       │   ├── Dashboard.vue
-│       │   ├── Contacts.vue
-│       │   ├── ContactGroups.vue
-│       │   ├── CampaignCreate.vue
-│       │   ├── CampaignHistory.vue
-│       │   ├── SendMessage.vue
-│       │   ├── MessageHistory.vue
-│       │   ├── Templates.vue
-│       │   ├── Webhooks.vue
-│       │   ├── Reports.vue
-│       │   ├── Calendar.vue
-│       │   ├── Accounts.vue
-│       │   ├── ApiConfiguration.vue   # Ancienne config (deprecated)
-│       │   ├── ApiIntegrations.vue    # Clés API clients (/api-keys)
-│       │   ├── SmsConfig.vue          # Config opérateurs (/sms-config)
-│       │   ├── Blacklist.vue          # Liste noire
-│       │   ├── AuditLogs.vue          # Journal d'audit
-│       │   ├── Profile.vue
-│       │   ├── Settings.vue
-│       │   └── NotFound.vue
-│       ├── components/            # Composants reutilisables
-│       ├── services/              # Services API
-│       ├── router/                # Configuration routes
+│       ├── views/                 # 24 pages
+│       ├── components/            # 50+ composants UI
+│       ├── services/              # 10 services API
 │       ├── stores/                # Pinia stores
-│       └── main.ts                # Point d'entree
-├── config/                        # Configuration Laravel
-├── public/                        # Fichiers publics
-├── storage/                       # Logs, cache, uploads
-├── docs/                          # Documentation (non commite)
+│       └── router/
+├── config/
+│   └── sms.php                    # Config SMS (fallback, couts)
+├── tests/
+│   ├── Unit/Services/             # Tests unitaires
+│   └── Feature/Services/          # Tests integration
 ├── CLAUDE.md                      # Ce fichier
-└── README.md                      # README principal
+└── README.md
 ```
 
-## 4. Base de donnees (20 tables)
+## 4. Base de donnees (20+ tables)
 
 ### Tables principales
 | Table | Description |
 |-------|-------------|
 | `users` | Comptes utilisateurs principaux |
-| `sub_accounts` | Sous-comptes avec roles |
+| `sub_accounts` | Sous-comptes avec roles et budgets |
 | `contacts` | Contacts avec champs personnalises (JSON) |
 | `contact_groups` | Groupes de contacts |
 | `contact_group_members` | Pivot contacts-groupes |
@@ -141,21 +135,24 @@ sendwave-pro/
 | `campaign_variants` | Variantes A/B testing |
 | `messages` | Historique des messages |
 | `message_templates` | Modeles de messages |
-| `blacklist` | Numeros bloques |
+| `blacklist` | Numeros bloques (avec source) |
 | `audit_logs` | Logs d'audit |
 | `webhooks` | Configuration webhooks |
 | `webhook_logs` | Logs de livraison webhooks |
 | `sms_configs` | Configuration operateurs SMS |
-| `api_keys` | Cles API |
+| `sms_providers` | Definitions des providers |
+| `api_keys` | Cles API (avec sub_account_id) |
 | `daily_analytics` | Statistiques quotidiennes |
+| `sms_analytics` | Analytique detaillee par SMS |
+| `period_closures` | Clotures mensuelles |
 
 ## 5. Operateurs SMS (Gabon)
 
 ### Airtel Gabon
 - **Prefixes**: 74, 76, 77
-- **API**: HTTP REST (avec SSL bypass car certificat auto-signé)
+- **API**: HTTP REST (avec SSL bypass car certificat auto-signe)
 - **Service**: `app/Services/SMS/Operators/AirtelService.php`
-- **Format numéro**: Le système ajoute automatiquement le préfixe `241` (ex: `77123456` -> `24177123456`)
+- **Format numero**: Le systeme ajoute automatiquement le prefixe `241`
 - **Config env**: `AIRTEL_API_URL`, `AIRTEL_USERNAME`, `AIRTEL_PASSWORD`, `AIRTEL_ORIGIN_ADDR`
 
 ### Moov Gabon
@@ -163,21 +160,67 @@ sendwave-pro/
 - **Protocole**: SMPP v3.4
 - **Service**: `app/Services/SMS/Operators/MoovService.php`
 - **Client SMPP**: `app/Services/SMS/SmppClient.php` (client natif PHP)
-- **Note**: Nécessite VPN pour accéder au serveur SMPP (IP privée)
-- **Config env**: `MOOV_SMPP_HOST`, `MOOV_SMPP_PORT`, `MOOV_SMPP_SYSTEM_ID`, `MOOV_SMPP_PASSWORD`, `MOOV_SOURCE_ADDR`
+- **Note**: Necessite VPN pour acceder au serveur SMPP (IP privee)
+- **Config env**: `MOOV_SMPP_HOST`, `MOOV_SMPP_PORT`, `MOOV_SMPP_SYSTEM_ID`, `MOOV_SMPP_PASSWORD`
 
-### Detection et routage automatique
-- `OperatorDetector::detect($phone)` - Détecte l'opérateur via le préfixe
-- `SmsRouter::sendSms($phone, $message)` - Route automatiquement vers le bon provider
-- **Vérification activation**: Avant chaque envoi, le système vérifie si l'opérateur est activé (DB puis .env)
-- **Codes d'erreur**: `OPERATOR_DISABLED`, `UNKNOWN_OPERATOR`
+### Routage automatique avec Fallback
+```php
+// Detection operateur
+$operator = OperatorDetector::detect($phone); // 'airtel', 'moov', 'unknown'
+
+// Envoi avec fallback automatique
+$result = $smsRouter->sendSms($phone, $message, allowFallback: true);
+// Si Airtel echoue -> tente Moov automatiquement (et vice versa)
+```
+
+**Codes d'erreur recoverables** (declenchent fallback):
+- `CONNECTION_ERROR`, `TIMEOUT`, `SERVICE_UNAVAILABLE`
+- `GATEWAY_ERROR`, `RATE_LIMIT`, `OPERATOR_DISABLED`
 
 ### Configuration dynamique
-Les opérateurs peuvent être configurés via:
-1. **Interface admin** (`/sms-config`) - Prioritaire
-2. **Fichier .env** - Fallback
+Priorite: **Database (SmsConfig)** > **Fichier .env**
 
-## 6. API Endpoints (102+)
+## 6. Fonctionnalites Phase 3
+
+### 6.1 Fallback Automatique
+- Active par defaut (`SMS_FALLBACK_ENABLED=true`)
+- Airtel -> Moov si erreur recuperable
+- Moov -> Airtel si erreur recuperable
+- Logs detailles des tentatives
+
+### 6.2 Gestion STOP Automatique
+**Service**: `StopWordService.php`
+
+Mots-cles detectes (16):
+```
+STOP, ARRET, ARRÊT, UNSUB, UNSUBSCRIBE, DESABONNER, DÉSABONNER,
+DESINSCRIPTION, DÉSINSCRIPTION, ANNULER, REMOVE, QUIT, END,
+CANCEL, OPTOUT, OPT-OUT
+```
+
+- Detection avec normalisation accents
+- Ajout automatique a la blacklist (source: `auto_stop`)
+- Filtrage avant envoi dans `MessageController`
+
+### 6.3 Normalisation E.164
+**Service**: `PhoneNormalizationService.php`
+
+Pays supportes:
+| Code | Pays | Prefixe | Longueur locale |
+|------|------|---------|-----------------|
+| GA | Gabon | 241 | 8 |
+| CM | Cameroun | 237 | 9 |
+| CG | Congo | 242 | 9 |
+| CI | Cote d'Ivoire | 225 | 10 |
+| SN | Senegal | 221 | 9 |
+
+```php
+$service->normalize('77123456'); // +24177123456
+$service->normalize('+237650123456'); // Detection auto CM
+$service->normalizeMany($phones); // Groupement par pays/operateur
+```
+
+## 7. API Endpoints (102+)
 
 ### Authentication
 ```
@@ -189,120 +232,112 @@ GET    /api/user/profile
 PUT    /api/user/profile
 ```
 
-### Contacts
+### Messages
 ```
-GET    /api/contacts
-POST   /api/contacts
-GET    /api/contacts/{id}
-PUT    /api/contacts/{id}
-DELETE /api/contacts/{id}
-POST   /api/contacts/import
+POST   /api/messages/send           # Rate limited, filtre blacklist
+POST   /api/messages/analyze
+POST   /api/messages/number-info
+GET    /api/messages/history
+GET    /api/messages/export
+GET    /api/messages/stats
 ```
 
-### Groupes de contacts
+### Contacts & Groupes
 ```
-GET    /api/contact-groups
-POST   /api/contact-groups
-GET    /api/contact-groups/{id}
-PUT    /api/contact-groups/{id}
-DELETE /api/contact-groups/{id}
-GET    /api/contact-groups/{id}/contacts
-POST   /api/contact-groups/{id}/contacts/add
-POST   /api/contact-groups/{id}/contacts/remove
+# Contacts
+GET|POST      /api/contacts
+GET|PUT|DEL   /api/contacts/{id}
+POST          /api/contacts/import
+GET           /api/contacts/export
+
+# Groupes
+GET|POST      /api/contact-groups
+GET|PUT|DEL   /api/contact-groups/{id}
+GET           /api/contact-groups/{id}/contacts
+POST          /api/contact-groups/{id}/contacts/add
+POST          /api/contact-groups/{id}/contacts/remove
 ```
 
 ### Campagnes
 ```
-GET    /api/campaigns
-POST   /api/campaigns
-GET    /api/campaigns/{id}
-PUT    /api/campaigns/{id}
-DELETE /api/campaigns/{id}
-POST   /api/campaigns/{id}/send
-POST   /api/campaigns/{id}/schedule
-GET    /api/campaigns/{id}/schedule
-DELETE /api/campaigns/{id}/schedule
-POST   /api/campaigns/{id}/variants
-GET    /api/campaigns/{id}/variants
-DELETE /api/campaigns/{id}/variants/{variantId}
+GET|POST      /api/campaigns
+GET|PUT|DEL   /api/campaigns/{id}
+POST          /api/campaigns/{id}/send
+POST          /api/campaigns/{id}/schedule
+GET|DEL       /api/campaigns/{id}/schedule
+POST          /api/campaigns/{id}/variants
+GET|DEL       /api/campaigns/{id}/variants
+GET           /api/campaigns/history
+GET           /api/campaigns/stats
 ```
 
-### Messages
+### SMS Analytics & Budgets
 ```
-POST   /api/messages/send           # Rate limited
-POST   /api/messages/analyze
-POST   /api/messages/number-info
-GET    /api/messages/history
-GET    /api/messages/history/export
-GET    /api/messages/stats
+GET    /api/sms-analytics
+GET    /api/sms-analytics/overview
+GET    /api/sms-analytics/periods
+GET    /api/sms-analytics/closures
+GET    /api/sms-analytics/closures/{periodKey}
+POST   /api/sms-analytics/report
+GET    /api/sms-analytics/export
+
+GET    /api/budgets/status/{subAccountId?}
+GET    /api/budgets/all
+PUT    /api/budgets/{subAccountId}
+POST   /api/budgets/check-send
+GET    /api/budgets/history/{subAccountId?}
 ```
 
-### Templates
+### Blacklist & STOP
 ```
-GET    /api/templates
-POST   /api/templates
-GET    /api/templates/{id}
-PUT    /api/templates/{id}
-DELETE /api/templates/{id}
-GET    /api/templates/categories
-POST   /api/templates/{id}/use
-POST   /api/templates/{id}/preview
-```
-
-### Sous-comptes
-```
-GET    /api/sub-accounts
-POST   /api/sub-accounts
-GET    /api/sub-accounts/{id}
-PUT    /api/sub-accounts/{id}
-DELETE /api/sub-accounts/{id}
-POST   /api/sub-accounts/login      # Public
-POST   /api/sub-accounts/{id}/credits
-POST   /api/sub-accounts/{id}/permissions
-POST   /api/sub-accounts/{id}/suspend
-POST   /api/sub-accounts/{id}/activate
-```
-
-### Webhooks
-```
-GET    /api/webhooks
-POST   /api/webhooks
-GET    /api/webhooks/{id}
-PUT    /api/webhooks/{id}
-DELETE /api/webhooks/{id}
-GET    /api/webhooks/events
-GET    /api/webhooks/{id}/logs
-GET    /api/webhooks/{id}/stats
-POST   /api/webhooks/{id}/test
-POST   /api/webhooks/{id}/toggle
-```
-
-### Analytics
-```
-GET    /api/analytics/dashboard
-GET    /api/analytics/chart
-GET    /api/analytics/report
-GET    /api/analytics/export/pdf
-GET    /api/analytics/export/excel
-GET    /api/analytics/export/csv
-GET    /api/analytics/providers
-GET    /api/analytics/top-campaigns
-POST   /api/analytics/update
-```
-
-### Autres
-```
-# Blacklist
 GET    /api/blacklist
 POST   /api/blacklist
 DELETE /api/blacklist/{id}
 POST   /api/blacklist/check
+GET    /api/blacklist/stats
+GET    /api/blacklist/stop-keywords
+```
 
-# Audit Logs
-GET    /api/audit-logs
-GET    /api/audit-logs/actions
-GET    /api/audit-logs/{id}
+### Phone Normalization
+```
+GET    /api/phone/countries          # Public
+POST   /api/phone/normalize
+POST   /api/phone/normalize-many
+```
 
+### Incoming SMS Webhooks (Public)
+```
+POST   /api/webhooks/incoming/sms      # Generique
+POST   /api/webhooks/incoming/airtel   # Format Airtel
+POST   /api/webhooks/incoming/moov     # Format Moov
+```
+
+### Webhooks (Configuration)
+```
+GET|POST      /api/webhooks
+GET|PUT|DEL   /api/webhooks/{id}
+GET           /api/webhooks/events
+GET           /api/webhooks/{id}/logs
+GET           /api/webhooks/{id}/stats
+POST          /api/webhooks/{id}/test
+POST          /api/webhooks/{id}/toggle
+```
+
+### Analytics & Exports
+```
+GET    /api/analytics/dashboard
+GET    /api/analytics/chart
+GET    /api/analytics/report
+GET    /api/analytics/providers
+GET    /api/analytics/top-campaigns
+POST   /api/analytics/update
+GET    /api/analytics/export/pdf
+GET    /api/analytics/export/excel
+GET    /api/analytics/export/csv
+```
+
+### Configuration
+```
 # SMS Config
 GET    /api/sms-configs
 GET    /api/sms-configs/{provider}
@@ -312,28 +347,59 @@ POST   /api/sms-configs/{provider}/toggle
 POST   /api/sms-configs/{provider}/reset
 
 # API Keys
-GET    /api/api-keys
-POST   /api/api-keys
-GET    /api/api-keys/{id}
-PUT    /api/api-keys/{id}
-DELETE /api/api-keys/{id}
-POST   /api/api-keys/{id}/revoke
-POST   /api/api-keys/{id}/regenerate
+GET|POST      /api/api-keys
+GET|PUT|DEL   /api/api-keys/{id}
+POST          /api/api-keys/{id}/revoke
+POST          /api/api-keys/{id}/regenerate
+
+# Sous-comptes
+GET|POST      /api/sub-accounts
+GET|PUT|DEL   /api/sub-accounts/{id}
+POST          /api/sub-accounts/login    # Public
+POST          /api/sub-accounts/{id}/credits
+POST          /api/sub-accounts/{id}/permissions
+POST          /api/sub-accounts/{id}/suspend
+POST          /api/sub-accounts/{id}/activate
 ```
 
-## 7. Roles et permissions
+## 8. Roles et permissions
 
 ### Roles sous-comptes
-| Role | Description |
-|------|-------------|
-| `admin` | Acces complet aux ressources assignees |
-| `manager` | Gestion campagnes et contacts |
-| `sender` | Envoi SMS uniquement |
-| `viewer` | Lecture seule |
+| Role | Permissions par defaut |
+|------|------------------------|
+| `admin` | Toutes |
+| `manager` | send_sms, view_history, manage_contacts, manage_groups, create_campaigns, view_analytics |
+| `sender` | send_sms, view_history |
+| `viewer` | view_history |
 
-## 8. Variables de messages
+### Permissions disponibles (8)
+```php
+SEND_SMS, VIEW_HISTORY, MANAGE_CONTACTS, MANAGE_GROUPS,
+CREATE_CAMPAIGNS, VIEW_ANALYTICS, MANAGE_TEMPLATES, EXPORT_DATA
+```
 
-Le `MessageVariableService` supporte les variables dynamiques:
+## 9. Webhooks (14 evenements)
+
+```
+message.sent
+message.delivered
+message.failed
+message.received          # Nouveau (reponse SMS)
+campaign.started
+campaign.completed
+campaign.failed
+contact.created
+contact.updated
+contact.deleted
+contact.unsubscribed      # Nouveau (STOP recu)
+sub_account.created
+sub_account.suspended
+blacklist.added
+```
+
+Securite: Signature **HMAC-SHA256** dans header `X-Webhook-Signature`
+
+## 10. Variables de messages
 
 ```
 {nom}           -> Contact.last_name
@@ -343,28 +409,32 @@ Le `MessageVariableService` supporte les variables dynamiques:
 {custom.field}  -> Contact.custom_fields.field
 ```
 
-## 9. Webhooks
+## 11. Routes Vue.js (SPA)
 
-### Evenements disponibles (12)
-```
-message.sent
-message.delivered
-message.failed
-campaign.created
-campaign.started
-campaign.completed
-contact.created
-contact.updated
-contact.deleted
-sub_account.created
-blacklist.added
-blacklist.removed
-```
+| Route | Page | Description |
+|-------|------|-------------|
+| `/dashboard` | Dashboard.vue | Tableau de bord |
+| `/send-sms` | SendSms.vue | Envoi SMS (3 onglets) |
+| `/transactional` | Transactional.vue | Sender ID, Templates, Drafts, Routes |
+| `/contacts` | Contacts.vue | Gestion contacts |
+| `/database` | Database.vue | Groupes, Import, Export |
+| `/contact-groups` | ContactGroups.vue | Groupes de contacts |
+| `/templates` | Templates.vue | Modeles de messages |
+| `/campaign/create` | CampaignCreate.vue | Creation campagne |
+| `/campaigns/history` | CampaignHistory.vue | Historique campagnes |
+| `/messages/history` | MessageHistory.vue | Historique messages |
+| `/calendar` | Calendar.vue | Calendrier |
+| `/reports` | Reports.vue | Rapports (5 onglets) |
+| `/accounts` | Accounts.vue | Sous-comptes |
+| `/sms-config` | SmsConfig.vue | Config operateurs SMS |
+| `/api-keys` | ApiIntegrations.vue | Cles API clients |
+| `/webhooks` | Webhooks.vue | Configuration webhooks |
+| `/blacklist` | Blacklist.vue | Liste noire |
+| `/audit-logs` | AuditLogs.vue | Journal d'audit |
+| `/profile` | Profile.vue | Profil utilisateur |
+| `/settings` | Settings.vue | Parametres |
 
-### Signature HMAC-SHA256
-Chaque webhook inclut un header `X-Webhook-Signature` pour verification.
-
-## 10. Commandes utiles
+## 12. Commandes utiles
 
 ### Developpement
 ```bash
@@ -377,12 +447,11 @@ php artisan migrate
 
 # Demarrage
 composer dev              # Serveur complet (Laravel + Vite + Queue)
-# ou
-php artisan serve         # Backend uniquement
-npm run dev               # Frontend uniquement
 
 # Tests
-php artisan test
+php artisan test                              # Tous les tests
+php artisan test tests/Unit/Services/         # Tests unitaires services
+php artisan test --group=integration          # Tests integration (MySQL requis)
 ```
 
 ### Production
@@ -394,34 +463,42 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-### Deploiement (serveur)
+### Commandes specifiques
 ```bash
-cd /var/www/sendwave-pro
-git pull
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
-```
+# Cloture mensuelle manuelle
+php artisan sms:close-period --period=2026-01
 
-### Commandes utiles
-```bash
-# Recalculer les analytics (si données manquantes)
+# Recalculer analytics
 php artisan analytics:update --days=30
-php artisan analytics:update --user=1 --days=7
 
-# Vider tous les caches
+# Vider caches
 php artisan optimize:clear
 ```
 
-### Cron (campagnes recurrentes et analytics)
+### Scheduler (routes/console.php)
+```php
+// Campagnes planifiees - chaque minute
+Schedule::command('campaigns:process-scheduled')->everyMinute();
+
+// Analytics quotidiennes - 00:05
+Schedule::job(new UpdateDailyAnalytics())->dailyAt('00:05');
+
+// Rapports hebdomadaires - Lundi 08:00
+Schedule::job(new SendScheduledReportJob('weekly'))->weeklyOn(1, '08:00');
+
+// Rapports mensuels - 1er du mois 08:00
+Schedule::job(new SendScheduledReportJob('monthly'))->monthlyOn(1, '08:00');
+
+// Cloture mensuelle - 1er du mois 00:30
+Schedule::command('sms:close-period')->monthlyOn(1, '00:30')->timezone('Africa/Libreville');
+```
+
+### Cron
 ```bash
 * * * * * cd /path/to/sendwave-pro && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-### Jobs planifiés (routes/console.php)
-- `UpdateDailyAnalytics` - Mise à jour quotidienne des stats (00:05)
-
-## 11. Variables d'environnement cles
+## 13. Variables d'environnement cles
 
 ```env
 APP_NAME="SendWave Pro"
@@ -445,6 +522,7 @@ AIRTEL_USERNAME=username
 AIRTEL_PASSWORD=password
 AIRTEL_ORIGIN_ADDR=SENDWAVE
 AIRTEL_ENABLED=true
+AIRTEL_COST_PER_SMS=20
 
 # Moov Gabon (SMPP)
 MOOV_SMPP_HOST=172.16.59.66
@@ -453,126 +531,84 @@ MOOV_SMPP_SYSTEM_ID=
 MOOV_SMPP_PASSWORD=
 MOOV_SOURCE_ADDR=SENDWAVE
 MOOV_ENABLED=false
-
-# Cout SMS (FCFA)
-SMS_COST_PER_UNIT=20
-AIRTEL_COST_PER_SMS=20
 MOOV_COST_PER_SMS=20
 
+# SMS Global
+SMS_COST_PER_UNIT=20
+SMS_FALLBACK_ENABLED=true
+
 # Sanctum
-SANCTUM_STATEFUL_DOMAINS=localhost:8888
+SANCTUM_STATEFUL_DOMAINS=localhost:8888,yourdomain.com
 ```
-
-## 12. Conventions de code
-
-### Backend (PHP/Laravel)
-- Controllers: `app/Http/Controllers/Api/`
-- Models: `app/Models/`
-- Services: `app/Services/`
-- Routes API: `routes/api.php`
-- Validation dans les controllers
-- Scope queries par user authentifie
-
-### Frontend (Vue/TypeScript)
-- Pages: `resources/src/views/`
-- Composants: `resources/src/components/`
-- Services API: `resources/src/services/`
-- Stores Pinia: `resources/src/stores/`
-- Router: `resources/src/router/`
-
-### Git et Commits
-- **NE PAS signer les commits au nom de Claude** (pas de `Co-Authored-By: Claude`)
-- Messages de commit en francais ou anglais selon le contexte
-- Format recommande: `type: description courte`
-- Types: `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `chore`
-- Exemple: `feat: ajout export PDF des rapports`
-
-## 13. Documentation additionnelle
-
-Les fichiers de documentation detaillee sont dans `/docs/` (non commite):
-- `API_DOCUMENTATION.md` - Reference API complete
-- `DEPLOYMENT_GUIDE.md` - Guide de deploiement
-- `IMPLEMENTATION_SUMMARY.md` - Resume des fonctionnalites
-- `DOCUMENTATION-SMS-OPERATORS.md` - Integration operateurs
-- `ROADMAP.md` - Feuille de route
-- `ROUTES_AUDIT.md` - Audit des routes
-- `SWAGGER.md` - Documentation Swagger
 
 ## 14. Points d'attention
 
-1. **Rate limiting**: L'endpoint `/api/messages/send` est limité (throttle:sms-send)
-2. **Authentification**: Sanctum tokens requis pour toutes les routes protegees
-3. **Scope utilisateur**: Toutes les requetes sont scopees par l'utilisateur authentifie
-4. **Webhooks**: Signature HMAC-SHA256 obligatoire pour la securite
-5. **Detection operateur**: Basee sur le prefixe du numero de telephone
-6. **Devise**: Tous les montants sont en FCFA
-7. **SPA Routing**: Route catch-all dans `routes/web.php` pour Vue Router
-8. **SSL Airtel**: Certificat auto-signé, `withoutVerifying()` utilisé
-9. **Format numéros**: Préfixe `241` ajouté automatiquement pour Gabon
-10. **Cache Analytics**: 5 minutes pour le dashboard, invalidé après chaque envoi
+1. **Rate limiting**: Endpoint `/api/messages/send` limite (throttle:sms-send)
+2. **Filtrage blacklist**: Automatique avant chaque envoi
+3. **Fallback SMS**: Active par defaut, desactivable par config
+4. **STOP detection**: Fonctionne avec/sans accents
+5. **Scope utilisateur**: Toutes les requetes scopees par user authentifie
+6. **Webhooks**: Signature HMAC-SHA256 obligatoire
+7. **SSL Airtel**: Certificat auto-signe, `withoutVerifying()` utilise
+8. **Format numeros**: Prefixe `241` ajoute automatiquement pour Gabon
+9. **Cache Analytics**: 5 minutes dashboard, invalide apres envoi
+10. **Cloture mensuelle**: Automatique le 1er du mois a 00:30
 
-## 15. Routes Vue.js (SPA)
+## 15. Statistiques du projet
 
-| Route | Page | Description |
-|-------|------|-------------|
-| `/dashboard` | Dashboard.vue | Tableau de bord |
-| `/send-message` | SendMessage.vue | Envoi SMS rapide |
-| `/contacts` | Contacts.vue | Gestion contacts |
-| `/contact-groups` | ContactGroups.vue | Groupes de contacts |
-| `/templates` | Templates.vue | Modèles de messages |
-| `/campaign/create` | CampaignCreate.vue | Création campagne |
-| `/campaigns/history` | CampaignHistory.vue | Historique campagnes |
-| `/messages/history` | MessageHistory.vue | Historique messages |
-| `/calendar` | Calendar.vue | Calendrier |
-| `/reports` | Reports.vue | Rapports & exports |
-| `/accounts` | Accounts.vue | Sous-comptes |
-| `/sms-config` | SmsConfig.vue | Config opérateurs SMS |
-| `/api-keys` | ApiIntegrations.vue | Clés API clients |
-| `/webhooks` | Webhooks.vue | Configuration webhooks |
-| `/blacklist` | Blacklist.vue | Liste noire |
-| `/audit-logs` | AuditLogs.vue | Journal d'audit |
-| `/profile` | Profile.vue | Profil utilisateur |
-| `/settings` | Settings.vue | Paramètres |
+| Metrique | Valeur |
+|----------|--------|
+| Tables DB | 20+ |
+| Modeles Eloquent | 19 |
+| Controleurs API | 14 |
+| Routes API | 102+ |
+| Services | 16 |
+| Pages Vue | 24 |
+| Composants UI | 50+ |
+| Migrations | 37 |
+| Enums | 5 |
+| Jobs Background | 4 |
+| Evenements Webhook | 14 |
+| Tests | 46 |
 
-## 16. Plan d'Action
+## 16. Plan d'Action - Status
 
-### Version 3.0 (Complété)
-Voir `docs/PLAN_ACTION.md` pour le plan initial:
-- **Phase 1**: Bugs critiques et securite ✅
-- **Phase 2**: Coherence backend ✅
-- **Phase 3**: Interfaces manquantes ✅
-- **Phase 4**: Ameliorations ✅
+### PLAN_ACTION_V2.md - COMPLETE
 
-### Version 3.1 (En cours)
-Voir `docs/PLAN_ACTION_V2.md` pour les nouvelles fonctionnalités:
+| Phase | Description | Status |
+|-------|-------------|--------|
+| **Phase 1** | Comptabilite Analytique | ✅ 100% |
+| **Phase 2** | Refonte Interfaces | ✅ 100% |
+| **Phase 3** | Fonctionnalites Avancees | ✅ 100% |
+| **Ameliorations** | Tests, Scheduler, Migrations | ✅ 100% |
 
-#### Phase 1 - Comptabilité Analytique (Priorité Haute)
-- [ ] Table `sms_analytics` - Traçabilité complète par SMS
-- [ ] Table `period_closures` - Clôture mensuelle automatique
-- [ ] `BudgetService` - Plafonds mensuels par sous-compte
-- [ ] API Keys rattachées aux sous-comptes
+**Phase 1 - Comptabilite Analytique**
+- ✅ Table `sms_analytics` - Tracabilite complete par SMS
+- ✅ Table `period_closures` - Cloture mensuelle automatique
+- ✅ `BudgetService` - Plafonds mensuels par sous-compte
+- ✅ API Keys rattachees aux sous-comptes
+- ✅ Commande `sms:close-period`
+- ✅ Scheduler cloture automatique
 
-#### Phase 2 - Refonte Interfaces (Priorité Moyenne)
-- [ ] Interface SendSms avec 3 onglets (Send SMS | Send Opt SMS | SMS From File)
-- [ ] Section Transactional avec 4 onglets (Sender Id | Templates | Drafts | Routes)
-- [ ] Section Database avec 3 onglets (My Groups | Import | Export)
-- [ ] Section Reports avec 5 onglets (Campaign | Delivery | Schedule | Archived | Credit)
+**Phase 2 - Refonte Interfaces**
+- ✅ `SendSms.vue` avec 3 onglets (Send SMS | Send Opt SMS | SMS From File)
+- ✅ `Transactional.vue` avec 4 onglets (Sender Id | Templates | Drafts | Routes)
+- ✅ `Database.vue` avec 3 onglets (My Groups | Import | Export)
+- ✅ `Reports.vue` avec 5 onglets (Campaign | Delivery | Schedule | Archived | Credit)
+- ✅ `TabNav.vue` composant reutilisable
 
-#### Phase 3 - Fonctionnalités Avancées
-- [ ] Fallback automatique entre passerelles
-- [ ] Gestion STOP automatique (blacklist auto)
-- [ ] Support international (normalisation E.164)
+**Phase 3 - Fonctionnalites Avancees**
+- ✅ Fallback automatique Airtel <-> Moov
+- ✅ `StopWordService` - Gestion STOP automatique
+- ✅ `PhoneNormalizationService` - Support E.164 international
+- ✅ Webhooks incoming SMS
+- ✅ Nouveaux evenements webhook (message.received, contact.unsubscribed)
 
-### Design (Basé sur maquettes OrbiTel)
-```css
---primary-blue: #1E40AF;
---primary-blue-light: #3B82F6;
---success-green: #22C55E;
---warning-yellow: #EAB308;
---danger-red: #EF4444;
---bg-sidebar: #1F2937;
---bg-main: #F9FAFB;
-```
+**Tests Unitaires**
+- ✅ `StopWordServiceTest` (13 tests)
+- ✅ `PhoneNormalizationServiceTest` (22 tests)
+- ✅ `BudgetServiceTest` (11 tests - groupe integration)
+- ✅ `OperatorDetectorTest` (existant)
 
 ---
 
