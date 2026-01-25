@@ -1,77 +1,79 @@
 <template>
   <MainLayout>
-    <div class="p-6 lg:p-8">
+    <div class="p-4 sm:p-6 lg:p-8">
       <!-- Header -->
-      <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="mb-4 sm:mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 class="text-2xl font-bold flex items-center gap-2">
-              <PaperAirplaneIcon class="w-7 h-7 text-primary" />
+            <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <PaperAirplaneIcon class="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
               Envoi de SMS
             </h1>
-            <p class="text-muted-foreground mt-1">Envoyez des SMS unitaires ou en masse</p>
+            <p class="text-sm text-muted-foreground mt-1">Envoyez des SMS unitaires ou en masse</p>
           </div>
           <div class="flex items-center gap-2">
             <button
               @click="showTemplates = true"
-              class="inline-flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors text-sm font-medium"
+              class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 border rounded-lg hover:bg-accent transition-colors text-xs sm:text-sm font-medium"
             >
               <DocumentTextIcon class="w-4 h-4" />
-              Templates
+              <span class="hidden sm:inline">Templates</span>
             </button>
             <button
               @click="saveDraft"
               :disabled="!message"
-              class="inline-flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition-colors text-sm font-medium disabled:opacity-50"
+              class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 border rounded-lg hover:bg-accent transition-colors text-xs sm:text-sm font-medium disabled:opacity-50"
             >
               <BookmarkIcon class="w-4 h-4" />
-              Brouillon
+              <span class="hidden sm:inline">Brouillon</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Tabs -->
-      <TabNav
-        v-model="activeTab"
-        :tabs="tabs"
-        class="mb-6"
-      />
+      <!-- Tabs with horizontal scroll on mobile -->
+      <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <TabNav
+          v-model="activeTab"
+          :tabs="tabs"
+          class="mb-4 sm:mb-6"
+        />
+      </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <!-- Main Form -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-6">
           <!-- Send SMS Tab -->
-          <div v-if="activeTab === 'send'" class="space-y-6">
-            <div class="rounded-lg border bg-card p-6 space-y-6">
+          <div v-if="activeTab === 'send'" class="space-y-4 sm:space-y-6">
+            <div class="rounded-lg border bg-card p-4 sm:p-6 space-y-4 sm:space-y-6">
               <!-- Channel & Route Selection -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Message Channel</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div class="space-y-1.5 sm:space-y-2">
+                  <label class="text-xs sm:text-sm font-medium">Message Channel</label>
                   <select
                     v-model="channel"
-                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
+                    class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-primary"
                   >
                     <option value="transactional">Transactional</option>
                     <option value="marketing">Marketing</option>
                   </select>
                 </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Message Route</label>
+                <div class="space-y-1.5 sm:space-y-2">
+                  <label class="text-xs sm:text-sm font-medium">Message Route</label>
                   <select
                     v-model="route"
-                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
+                    class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-primary"
                   >
                     <option value="auto">Auto (Recommended)</option>
                     <option value="airtel">Airtel Direct</option>
                     <option value="moov">Moov Direct</option>
                   </select>
                 </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Sender ID</label>
+                <div class="space-y-1.5 sm:space-y-2 sm:col-span-2 lg:col-span-1">
+                  <label class="text-xs sm:text-sm font-medium">Sender ID</label>
                   <select
                     v-model="senderId"
-                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
+                    class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-primary"
                   >
                     <option value="JOBSSMS">JOBSSMS (Default)</option>
                     <option value="SendWave">SendWave</option>
@@ -80,9 +82,9 @@
               </div>
 
               <!-- Recipients -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <label class="text-sm font-medium">Destinataires</label>
+              <div class="space-y-1.5 sm:space-y-2">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                  <label class="text-xs sm:text-sm font-medium">Destinataires</label>
                   <div class="flex items-center gap-2">
                     <button
                       @click="showContactPicker = true"
@@ -104,21 +106,21 @@
                   <textarea
                     v-model="recipients"
                     placeholder="Entrez les numéros (un par ligne ou séparés par virgule)&#10;+241 77 75 07 37&#10;62 34 56 78"
-                    rows="4"
-                    class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-primary resize-none"
+                    rows="3"
+                    class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-primary resize-none"
                   ></textarea>
                 </div>
-                <div class="flex items-center justify-between text-xs text-muted-foreground">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs text-muted-foreground">
                   <span>{{ recipientCount }} destinataire(s) - Airtel: {{ operatorStats.airtel }}, Moov: {{ operatorStats.moov }}</span>
                   <span v-if="operatorStats.invalid > 0" class="text-destructive">{{ operatorStats.invalid }} invalide(s)</span>
                 </div>
               </div>
 
               <!-- Message -->
-              <div class="space-y-2">
+              <div class="space-y-1.5 sm:space-y-2">
                 <div class="flex items-center justify-between">
-                  <label class="text-sm font-medium">Message</label>
-                  <div class="flex items-center gap-3 text-xs">
+                  <label class="text-xs sm:text-sm font-medium">Message</label>
+                  <div class="flex items-center gap-2 sm:gap-3 text-xs">
                     <span class="text-muted-foreground">{{ messageLength }}/160</span>
                     <span v-if="smsCount > 1" class="px-2 py-0.5 bg-warning/10 text-warning rounded font-medium">
                       {{ smsCount }} SMS
@@ -128,9 +130,9 @@
                 <textarea
                   v-model="message"
                   placeholder="Tapez votre message ici..."
-                  rows="6"
+                  rows="5"
                   maxlength="640"
-                  class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary resize-none"
+                  class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-primary resize-none"
                 ></textarea>
               </div>
             </div>
@@ -306,108 +308,124 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               @click="sendNow"
               :disabled="!canSend || sending"
-              class="flex-1 inline-flex items-center justify-center gap-2 h-12 px-6 bg-success text-white rounded-lg font-medium hover:bg-success/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="flex-1 inline-flex items-center justify-center gap-2 h-10 sm:h-12 px-4 sm:px-6 bg-success text-white rounded-lg text-sm sm:text-base font-medium hover:bg-success/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <PaperAirplaneIcon v-if="!sending" class="w-5 h-5" />
-              <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              {{ sending ? 'Envoi en cours...' : 'Envoyer maintenant' }}
+              <PaperAirplaneIcon v-if="!sending" class="w-4 h-4 sm:w-5 sm:h-5" />
+              <div v-else class="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
+              {{ sending ? 'Envoi...' : 'Envoyer' }}
             </button>
             <button
               @click="showScheduleModal = true"
               :disabled="!canSend"
-              class="inline-flex items-center justify-center gap-2 h-12 px-6 border rounded-lg font-medium hover:bg-accent disabled:opacity-50 transition-colors"
+              class="inline-flex items-center justify-center gap-2 h-10 sm:h-12 px-4 sm:px-6 border rounded-lg text-sm sm:text-base font-medium hover:bg-accent disabled:opacity-50 transition-colors"
             >
-              <ClockIcon class="w-5 h-5" />
+              <ClockIcon class="w-4 h-4 sm:w-5 sm:h-5" />
               Planifier
             </button>
           </div>
+
+          <!-- Mobile Cost Summary (shown only on mobile) -->
+          <div class="lg:hidden rounded-lg border bg-card p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <CalculatorIcon class="w-5 h-5 text-primary" />
+                <span class="font-semibold text-sm">Estimation</span>
+              </div>
+              <span class="text-lg font-bold text-primary">{{ estimatedCost }} XAF</span>
+            </div>
+            <div class="flex gap-4 mt-2 text-xs text-muted-foreground">
+              <span>{{ recipientCount }} dest.</span>
+              <span>{{ smsCount }} SMS/msg</span>
+              <span>{{ totalSms }} total</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-6">
+        <!-- Sidebar (hidden on mobile) -->
+        <div class="hidden lg:block space-y-4 sm:space-y-6">
           <!-- Cost Summary -->
-          <div class="rounded-lg border bg-card p-6">
-            <h3 class="font-semibold mb-4 flex items-center gap-2">
+          <div class="rounded-lg border bg-card p-4 sm:p-6">
+            <h3 class="font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
               <CalculatorIcon class="w-5 h-5 text-primary" />
               Estimation
             </h3>
-            <div class="space-y-3">
-              <div class="flex justify-between text-sm">
+            <div class="space-y-2 sm:space-y-3">
+              <div class="flex justify-between text-xs sm:text-sm">
                 <span class="text-muted-foreground">Destinataires</span>
                 <span class="font-medium">{{ recipientCount }}</span>
               </div>
-              <div class="flex justify-between text-sm">
+              <div class="flex justify-between text-xs sm:text-sm">
                 <span class="text-muted-foreground">SMS par message</span>
                 <span class="font-medium" :class="smsCount > 1 ? 'text-warning' : ''">{{ smsCount }}</span>
               </div>
-              <div class="flex justify-between text-sm">
+              <div class="flex justify-between text-xs sm:text-sm">
                 <span class="text-muted-foreground">Total SMS</span>
                 <span class="font-medium">{{ totalSms }}</span>
               </div>
-              <div class="border-t pt-3 mt-3">
+              <div class="border-t pt-2 sm:pt-3 mt-2 sm:mt-3">
                 <div class="flex justify-between">
-                  <span class="font-medium">Cout estime</span>
-                  <span class="text-xl font-bold text-primary">{{ estimatedCost }} XAF</span>
+                  <span class="font-medium text-sm">Cout estime</span>
+                  <span class="text-lg sm:text-xl font-bold text-primary">{{ estimatedCost }} XAF</span>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Quick Actions -->
-          <div class="rounded-lg border bg-card p-6">
-            <h3 class="font-semibold mb-4">Actions rapides</h3>
+          <div class="rounded-lg border bg-card p-4 sm:p-6">
+            <h3 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Actions rapides</h3>
             <div class="space-y-2">
               <button
                 @click="showContactPicker = true"
-                class="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors text-left"
+                class="w-full flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border hover:bg-accent transition-colors text-left"
               >
-                <UserGroupIcon class="w-5 h-5 text-primary" />
-                <div>
-                  <p class="font-medium text-sm">Ajouter des contacts</p>
-                  <p class="text-xs text-muted-foreground">Depuis votre repertoire</p>
+                <UserGroupIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                <div class="min-w-0">
+                  <p class="font-medium text-xs sm:text-sm">Ajouter des contacts</p>
+                  <p class="text-xs text-muted-foreground hidden sm:block">Depuis votre repertoire</p>
                 </div>
               </button>
               <button
                 @click="showGroupPicker = true"
-                class="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors text-left"
+                class="w-full flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border hover:bg-accent transition-colors text-left"
               >
-                <FolderIcon class="w-5 h-5 text-primary" />
-                <div>
-                  <p class="font-medium text-sm">Selectionner un groupe</p>
-                  <p class="text-xs text-muted-foreground">Envoi a un groupe entier</p>
+                <FolderIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                <div class="min-w-0">
+                  <p class="font-medium text-xs sm:text-sm">Selectionner un groupe</p>
+                  <p class="text-xs text-muted-foreground hidden sm:block">Envoi a un groupe entier</p>
                 </div>
               </button>
               <button
                 @click="showTemplates = true"
-                class="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors text-left"
+                class="w-full flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border hover:bg-accent transition-colors text-left"
               >
-                <DocumentTextIcon class="w-5 h-5 text-primary" />
-                <div>
-                  <p class="font-medium text-sm">Utiliser un template</p>
-                  <p class="text-xs text-muted-foreground">Messages predefinis</p>
+                <DocumentTextIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                <div class="min-w-0">
+                  <p class="font-medium text-xs sm:text-sm">Utiliser un template</p>
+                  <p class="text-xs text-muted-foreground hidden sm:block">Messages predefinis</p>
                 </div>
               </button>
             </div>
           </div>
 
           <!-- Recent Templates -->
-          <div class="rounded-lg border bg-card p-6">
-            <h3 class="font-semibold mb-4">Templates recents</h3>
+          <div class="rounded-lg border bg-card p-4 sm:p-6">
+            <h3 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Templates recents</h3>
             <div class="space-y-2">
               <button
                 v-for="template in recentTemplates"
                 :key="template.id"
                 @click="useTemplate(template)"
-                class="w-full p-3 rounded-lg border hover:bg-accent transition-colors text-left"
+                class="w-full p-2 sm:p-3 rounded-lg border hover:bg-accent transition-colors text-left"
               >
-                <p class="font-medium text-sm truncate">{{ template.name }}</p>
+                <p class="font-medium text-xs sm:text-sm truncate">{{ template.name }}</p>
                 <p class="text-xs text-muted-foreground truncate">{{ template.content }}</p>
               </button>
-              <p v-if="recentTemplates.length === 0" class="text-sm text-muted-foreground text-center py-4">
+              <p v-if="recentTemplates.length === 0" class="text-xs sm:text-sm text-muted-foreground text-center py-3 sm:py-4">
                 Aucun template recent
               </p>
             </div>
@@ -417,40 +435,40 @@
     </div>
 
     <!-- Schedule Modal -->
-    <div v-if="showScheduleModal" class="fixed inset-0 z-50 flex items-center justify-center">
+    <div v-if="showScheduleModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/50" @click="showScheduleModal = false"></div>
-      <div class="relative bg-card rounded-lg shadow-lg w-full max-w-md p-6 m-4">
-        <h3 class="text-lg font-semibold mb-4">Planifier l'envoi</h3>
-        <div class="space-y-4">
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Date</label>
+      <div class="relative bg-card rounded-lg shadow-lg w-full max-w-sm sm:max-w-md p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Planifier l'envoi</h3>
+        <div class="space-y-3 sm:space-y-4">
+          <div class="space-y-1.5 sm:space-y-2">
+            <label class="text-xs sm:text-sm font-medium">Date</label>
             <input
               type="date"
               v-model="scheduleDate"
               :min="today"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm"
             />
           </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Heure</label>
+          <div class="space-y-1.5 sm:space-y-2">
+            <label class="text-xs sm:text-sm font-medium">Heure</label>
             <input
               type="time"
               v-model="scheduleTime"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm"
             />
           </div>
         </div>
-        <div class="flex gap-3 mt-6">
+        <div class="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
           <button
             @click="scheduleMessage"
             :disabled="!scheduleDate || !scheduleTime"
-            class="flex-1 h-10 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50"
+            class="flex-1 h-9 sm:h-10 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
           >
             Planifier
           </button>
           <button
             @click="showScheduleModal = false"
-            class="px-4 h-10 border rounded-lg hover:bg-accent"
+            class="px-3 sm:px-4 h-9 sm:h-10 border rounded-lg text-sm hover:bg-accent"
           >
             Annuler
           </button>
@@ -459,44 +477,44 @@
     </div>
 
     <!-- Contact Picker Modal -->
-    <div v-if="showContactPicker" class="fixed inset-0 z-50 flex items-center justify-center">
+    <div v-if="showContactPicker" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/50" @click="showContactPicker = false"></div>
-      <div class="relative bg-card rounded-lg shadow-lg w-full max-w-lg p-6 m-4 max-h-[80vh] overflow-hidden flex flex-col">
-        <h3 class="text-lg font-semibold mb-4">Selectionner des contacts</h3>
+      <div class="relative bg-card rounded-lg shadow-lg w-full max-w-sm sm:max-w-lg p-4 sm:p-6 max-h-[85vh] overflow-hidden flex flex-col">
+        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Selectionner des contacts</h3>
         <input
           type="text"
           v-model="contactSearch"
           placeholder="Rechercher..."
-          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm mb-4"
+          class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm mb-3 sm:mb-4"
         />
-        <div class="flex-1 overflow-y-auto space-y-2">
+        <div class="flex-1 overflow-y-auto space-y-2 min-h-0">
           <label
             v-for="contact in filteredContacts"
             :key="contact.id"
-            class="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent cursor-pointer"
+            class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border hover:bg-accent cursor-pointer"
           >
             <input
               type="checkbox"
               :value="contact.phone"
               v-model="selectedContacts"
-              class="w-4 h-4 rounded"
+              class="w-4 h-4 rounded flex-shrink-0"
             />
-            <div>
-              <p class="font-medium text-sm">{{ contact.name }}</p>
-              <p class="text-xs text-muted-foreground">{{ contact.phone }}</p>
+            <div class="min-w-0">
+              <p class="font-medium text-xs sm:text-sm truncate">{{ contact.name }}</p>
+              <p class="text-xs text-muted-foreground truncate">{{ contact.phone }}</p>
             </div>
           </label>
         </div>
-        <div class="flex gap-3 mt-4 pt-4 border-t">
+        <div class="flex gap-2 sm:gap-3 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
           <button
             @click="addSelectedContacts"
-            class="flex-1 h-10 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90"
+            class="flex-1 h-9 sm:h-10 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90"
           >
             Ajouter ({{ selectedContacts.length }})
           </button>
           <button
             @click="showContactPicker = false"
-            class="px-4 h-10 border rounded-lg hover:bg-accent"
+            class="px-3 sm:px-4 h-9 sm:h-10 border rounded-lg text-sm hover:bg-accent"
           >
             Annuler
           </button>
@@ -505,24 +523,24 @@
     </div>
 
     <!-- Templates Modal -->
-    <div v-if="showTemplates" class="fixed inset-0 z-50 flex items-center justify-center">
+    <div v-if="showTemplates" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/50" @click="showTemplates = false"></div>
-      <div class="relative bg-card rounded-lg shadow-lg w-full max-w-lg p-6 m-4 max-h-[80vh] overflow-hidden flex flex-col">
-        <h3 class="text-lg font-semibold mb-4">Templates</h3>
-        <div class="flex-1 overflow-y-auto space-y-2">
+      <div class="relative bg-card rounded-lg shadow-lg w-full max-w-sm sm:max-w-lg p-4 sm:p-6 max-h-[85vh] overflow-hidden flex flex-col">
+        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Templates</h3>
+        <div class="flex-1 overflow-y-auto space-y-2 min-h-0">
           <button
             v-for="template in templates"
             :key="template.id"
             @click="useTemplate(template); showTemplates = false"
-            class="w-full p-4 rounded-lg border hover:bg-accent transition-colors text-left"
+            class="w-full p-3 sm:p-4 rounded-lg border hover:bg-accent transition-colors text-left"
           >
-            <p class="font-medium">{{ template.name }}</p>
-            <p class="text-sm text-muted-foreground mt-1 line-clamp-2">{{ template.content }}</p>
+            <p class="font-medium text-sm">{{ template.name }}</p>
+            <p class="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">{{ template.content }}</p>
           </button>
         </div>
         <button
           @click="showTemplates = false"
-          class="mt-4 w-full h-10 border rounded-lg hover:bg-accent"
+          class="mt-3 sm:mt-4 w-full h-9 sm:h-10 border rounded-lg text-sm hover:bg-accent"
         >
           Fermer
         </button>

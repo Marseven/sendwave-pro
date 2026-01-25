@@ -1,14 +1,14 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex items-center justify-between">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 class="text-3xl font-bold">Modèles SMS</h1>
-          <p class="text-muted-foreground mt-2">Créez et gérez vos modèles de messages</p>
+          <h1 class="text-2xl sm:text-3xl font-bold">Modèles SMS</h1>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Créez et gérez vos modèles de messages</p>
         </div>
         <button
           @click="openAddModal"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
         >
           <PlusIcon class="w-4 h-4" />
           <span>Nouveau modèle</span>
@@ -16,84 +16,84 @@
       </div>
 
       <!-- Statistiques -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Total modèles</div>
-          <div class="text-2xl font-bold mt-1">{{ templates.length }}</div>
+      <div class="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Total modèles</div>
+          <div class="text-xl sm:text-2xl font-bold mt-1">{{ templates.length }}</div>
         </div>
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Actifs</div>
-          <div class="text-2xl font-bold mt-1 text-success">{{ activeTemplates }}</div>
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Actifs</div>
+          <div class="text-xl sm:text-2xl font-bold mt-1 text-success">{{ activeTemplates }}</div>
         </div>
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Utilisations</div>
-          <div class="text-2xl font-bold mt-1 text-primary">{{ totalUses.toLocaleString('fr-FR') }}</div>
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Utilisations</div>
+          <div class="text-xl sm:text-2xl font-bold mt-1 text-primary">{{ totalUses.toLocaleString('fr-FR') }}</div>
         </div>
       </div>
 
       <!-- Grille de modèles -->
-      <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div v-if="loading" class="flex items-center justify-center py-8 sm:py-12">
+        <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary"></div>
       </div>
-      <div v-else-if="templates.length === 0" class="flex flex-col items-center justify-center py-12 rounded-lg border bg-card">
-        <DocumentTextIcon class="w-16 h-16 text-muted-foreground mb-4" />
-        <p class="text-lg font-medium">Aucun modèle trouvé</p>
-        <p class="text-sm text-muted-foreground mt-1">Créez votre premier modèle pour commencer</p>
+      <div v-else-if="templates.length === 0" class="flex flex-col items-center justify-center py-8 sm:py-12 rounded-lg border bg-card px-4">
+        <DocumentTextIcon class="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mb-3 sm:mb-4" />
+        <p class="text-base sm:text-lg font-medium text-center">Aucun modèle trouvé</p>
+        <p class="text-xs sm:text-sm text-muted-foreground mt-1 text-center">Créez votre premier modèle pour commencer</p>
       </div>
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         <div
           v-for="template in templates"
           :key="template.id"
           class="rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow"
         >
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <component :is="getIconComponent(template.icon)" class="w-6 h-6 text-primary" />
+          <div class="p-4 sm:p-6">
+            <div class="flex items-start justify-between gap-2 mb-3 sm:mb-4">
+              <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <component :is="getIconComponent(template.icon)" class="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <div>
-                  <h3 class="font-semibold">{{ template.name }}</h3>
-                  <p class="text-xs text-muted-foreground">{{ template.category }}</p>
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-sm sm:text-base truncate">{{ template.name }}</h3>
+                  <p class="text-xs text-muted-foreground truncate">{{ template.category }}</p>
                 </div>
               </div>
               <span
-                class="text-xs px-2 py-1 rounded-full"
+                class="text-xs px-2 py-0.5 sm:py-1 rounded-full flex-shrink-0"
                 :class="template.status === 'active' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'"
               >
                 {{ template.status === 'active' ? 'Actif' : 'Inactif' }}
               </span>
             </div>
 
-            <div class="mb-4 p-3 bg-muted/50 rounded-lg">
-              <p class="text-sm text-muted-foreground line-clamp-3">{{ template.message }}</p>
+            <div class="mb-3 sm:mb-4 p-2 sm:p-3 bg-muted/50 rounded-lg">
+              <p class="text-xs sm:text-sm text-muted-foreground line-clamp-3">{{ template.message }}</p>
             </div>
 
-            <div class="flex items-center justify-between text-xs text-muted-foreground mb-4">
+            <div class="flex items-center justify-between text-xs text-muted-foreground mb-3 sm:mb-4">
               <span>{{ template.uses || 0 }} utilisations</span>
-              <span>{{ template.message.length }} caractères</span>
+              <span>{{ template.message.length }} car.</span>
             </div>
 
-            <div class="flex gap-2">
+            <div class="flex gap-1 sm:gap-2">
               <button
                 @click="openEditModal(template)"
-                class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9"
+                class="flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9"
               >
-                <PencilIcon class="w-4 h-4" />
-                <span>Modifier</span>
+                <PencilIcon class="w-3 h-3 sm:w-4 sm:h-4" />
+                <span class="hidden sm:inline">Modifier</span>
               </button>
               <button
                 @click="deleteTemplate(template)"
-                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-destructive/10 hover:text-destructive h-9 w-9"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-destructive/10 hover:text-destructive h-8 w-8 sm:h-9 sm:w-9"
               >
-                <TrashIcon class="w-4 h-4" />
+                <TrashIcon class="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
               <button
                 @click="useTemplate(template)"
-                class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9"
+                class="flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-8 sm:h-9"
               >
-                <PaperAirplaneIcon class="w-4 h-4" />
-                <span>Utiliser</span>
+                <PaperAirplaneIcon class="w-3 h-3 sm:w-4 sm:h-4" />
+                <span class="hidden sm:inline">Utiliser</span>
               </button>
             </div>
           </div>
@@ -104,36 +104,36 @@
     <!-- Modal Ajout/Modification -->
     <div
       v-if="showAddModal || showEditModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       @click.self="closeModal"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold">{{ editingTemplate ? 'Modifier le modèle' : 'Nouveau modèle' }}</h2>
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 class="text-lg sm:text-xl font-bold">{{ editingTemplate ? 'Modifier le modèle' : 'Nouveau modèle' }}</h2>
           <button @click="closeModal" class="hover:bg-accent rounded-full p-1">
             <XMarkIcon class="w-5 h-5" />
           </button>
         </div>
 
-        <form @submit.prevent="saveTemplate" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Nom du modèle *</label>
+        <form @submit.prevent="saveTemplate" class="space-y-3 sm:space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium">Nom du modèle *</label>
               <input
                 v-model="templateForm.name"
                 type="text"
                 required
                 placeholder="Promotion été"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
 
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Catégorie *</label>
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium">Catégorie *</label>
               <select
                 v-model="templateForm.category"
                 required
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Sélectionner...</option>
                 <option v-for="(label, key) in categories" :key="key" :value="key">{{ label }}</option>
