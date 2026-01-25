@@ -9,6 +9,7 @@ class ApiKey extends Model
 {
     protected $fillable = [
         'user_id',
+        'sub_account_id',
         'name',
         'key',
         'provider',
@@ -38,6 +39,19 @@ class ApiKey extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function subAccount(): BelongsTo
+    {
+        return $this->belongsTo(SubAccount::class);
+    }
+
+    /**
+     * Scope for filtering by sub account
+     */
+    public function scopeForSubAccount($query, int $subAccountId)
+    {
+        return $query->where('sub_account_id', $subAccountId);
     }
 
     /**

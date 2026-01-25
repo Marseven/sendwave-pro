@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\ApiKeyController;
 use App\Http\Controllers\SmsProviderController;
 use App\Http\Controllers\SubAccountController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\SmsAnalyticsController;
+use App\Http\Controllers\BudgetController;
 use Illuminate\Support\Facades\Route;
 
 // Routes publiques
@@ -146,4 +148,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('analytics/export/excel', [\App\Http\Controllers\Api\AnalyticsController::class, 'exportExcel']);
         Route::get('analytics/export/csv', [\App\Http\Controllers\Api\AnalyticsController::class, 'exportCsv']);
     });
+
+    // SMS Analytics - Comptabilité analytique (permission: view_analytics)
+    Route::middleware('permission:view_analytics')->group(function () {
+        Route::get('sms-analytics/overview', [SmsAnalyticsController::class, 'overview']);
+        Route::get('sms-analytics/periods', [SmsAnalyticsController::class, 'periods']);
+        Route::get('sms-analytics/closures', [SmsAnalyticsController::class, 'closures']);
+        Route::get('sms-analytics/closures/{periodKey}', [SmsAnalyticsController::class, 'closureDetail']);
+        Route::post('sms-analytics/report', [SmsAnalyticsController::class, 'generateReport']);
+        Route::get('sms-analytics/export', [SmsAnalyticsController::class, 'export']);
+        Route::get('sms-analytics', [SmsAnalyticsController::class, 'index']);
+    });
+
+    // Budget Management (réservé au compte parent uniquement)
+    Route::get('budgets/status/{subAccountId?}', [BudgetController::class, 'status']);
+    Route::get('budgets/all', [BudgetController::class, 'allStatus']);
+    Route::put('budgets/{subAccountId}', [BudgetController::class, 'update']);
+    Route::post('budgets/check-send', [BudgetController::class, 'checkSend']);
+    Route::get('budgets/history/{subAccountId?}', [BudgetController::class, 'history']);
 });

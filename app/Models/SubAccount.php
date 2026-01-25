@@ -6,6 +6,7 @@ use App\Enums\SubAccountRole;
 use App\Enums\SubAccountPermission;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -24,6 +25,9 @@ class SubAccount extends Authenticatable
         'sms_used',
         'permissions',
         'last_connection',
+        'monthly_budget',
+        'budget_alert_threshold',
+        'block_on_budget_exceeded',
     ];
 
     protected $hidden = [
@@ -36,6 +40,9 @@ class SubAccount extends Authenticatable
         'permissions' => 'array',
         'sms_credit_limit' => 'integer',
         'sms_used' => 'integer',
+        'monthly_budget' => 'decimal:2',
+        'budget_alert_threshold' => 'decimal:2',
+        'block_on_budget_exceeded' => 'boolean',
     ];
 
     /**
@@ -44,6 +51,16 @@ class SubAccount extends Authenticatable
     public function parentUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'parent_user_id');
+    }
+
+    public function apiKeys(): HasMany
+    {
+        return $this->hasMany(ApiKey::class);
+    }
+
+    public function smsAnalytics(): HasMany
+    {
+        return $this->hasMany(SmsAnalytics::class);
     }
 
     /**

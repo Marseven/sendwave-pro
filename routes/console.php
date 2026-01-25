@@ -13,8 +13,7 @@ Artisan::command('inspire', function () {
 // Process scheduled campaigns every minute
 Schedule::command('campaigns:process-scheduled')
     ->everyMinute()
-    ->withoutOverlapping()
-    ->runInBackground();
+    ->withoutOverlapping();
 
 // Update daily analytics at midnight
 Schedule::job(new UpdateDailyAnalytics())
@@ -23,10 +22,16 @@ Schedule::job(new UpdateDailyAnalytics())
 
 // Send weekly reports every Monday at 8:00 AM
 Schedule::job(new SendScheduledReportJob('weekly'))
-    ->weeklyOn(1, '08:00') // Monday at 8:00 AM
+    ->weeklyOn(1, '08:00')
     ->withoutOverlapping();
 
 // Send monthly reports on the 1st of each month at 8:00 AM
 Schedule::job(new SendScheduledReportJob('monthly'))
     ->monthlyOn(1, '08:00')
+    ->withoutOverlapping();
+
+// Close previous month's analytics on the 1st of each month at 00:30
+Schedule::command('sms:close-period')
+    ->monthlyOn(1, '00:30')
+    ->timezone('Africa/Libreville')
     ->withoutOverlapping();

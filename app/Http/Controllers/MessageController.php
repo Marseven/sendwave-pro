@@ -7,6 +7,8 @@ use App\Services\SMS\SmsRouter;
 use App\Services\SMS\OperatorDetector;
 use App\Services\WebhookService;
 use App\Services\AnalyticsService;
+use App\Services\AnalyticsRecordService;
+use App\Services\BudgetService;
 use App\Models\Message;
 use App\Models\Contact;
 use Illuminate\Http\Request;
@@ -17,7 +19,9 @@ class MessageController extends Controller
     public function __construct(
         protected SmsRouter $smsRouter,
         protected WebhookService $webhookService,
-        protected AnalyticsService $analyticsService
+        protected AnalyticsService $analyticsService,
+        protected AnalyticsRecordService $analyticsRecordService,
+        protected BudgetService $budgetService
     ) {}
 
     /**
@@ -162,6 +166,11 @@ class MessageController extends Controller
                     'provider_response' => $result,
                 ]);
 
+                // Enregistrer dans sms_analytics pour la comptabilité
+                $this->analyticsRecordService->recordSms($messageRecord, [
+                    'message_type' => $request->input('type', 'transactional'),
+                ]);
+
                 if ($result['success']) {
                     // Trigger webhook for message.sent
                     $this->webhookService->trigger('message.sent', $request->user()->id, [
@@ -239,6 +248,11 @@ class MessageController extends Controller
                         'cost' => $cost,
                         'error_message' => $detail['success'] ? null : ($detail['message'] ?? 'Erreur inconnue'),
                         'provider_response' => $detail,
+                    ]);
+
+                    // Enregistrer dans sms_analytics pour la comptabilité
+                    $this->analyticsRecordService->recordSms($messageRecord, [
+                        'message_type' => $request->input('type', 'transactional'),
                     ]);
 
                     $messageIds[] = $messageRecord->id;
