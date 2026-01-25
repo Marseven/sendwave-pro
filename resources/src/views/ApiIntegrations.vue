@@ -1,17 +1,18 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex items-center justify-between">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 class="text-3xl font-bold">Clés API</h1>
-          <p class="text-muted-foreground mt-2">Gérez vos clés API pour intégrer SendWave dans vos applications</p>
+          <h1 class="text-xl sm:text-3xl font-bold">Clés API</h1>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Gérez vos clés API pour intégrer SendWave dans vos applications</p>
         </div>
         <button
           @click="openCreateModal"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
         >
           <PlusIcon class="w-4 h-4" />
-          <span>Nouvelle clé API</span>
+          <span class="hidden sm:inline">Nouvelle clé API</span>
+          <span class="sm:hidden">Nouvelle clé</span>
         </button>
       </div>
 

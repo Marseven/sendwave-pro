@@ -1,15 +1,15 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex items-center justify-between">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 class="text-3xl font-bold">Journal d'Audit</h1>
-          <p class="text-muted-foreground mt-2">Consultez l'historique des actions sur votre compte</p>
+          <h1 class="text-xl sm:text-3xl font-bold">Journal d'Audit</h1>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Consultez l'historique des actions sur votre compte</p>
         </div>
         <button
           @click="exportLogs"
           :disabled="exporting || logs.length === 0"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2"
         >
           <ArrowDownTrayIcon class="w-4 h-4" />
           <span>{{ exporting ? 'Export...' : 'Exporter' }}</span>
@@ -17,14 +17,14 @@
       </div>
 
       <!-- Filtres -->
-      <div class="rounded-lg border bg-card shadow-sm mb-6 p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="rounded-lg border bg-card shadow-sm mb-4 sm:mb-6 p-4 sm:p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="space-y-2">
             <label class="text-sm font-medium">Action</label>
             <select
               v-model="filters.action"
               @change="loadLogs"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <option value="">Toutes les actions</option>
               <option v-for="action in availableActions" :key="action" :value="action">
@@ -39,7 +39,7 @@
               v-model="filters.start_date"
               type="date"
               @change="loadLogs"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </div>
 
@@ -49,15 +49,15 @@
               v-model="filters.end_date"
               type="date"
               @change="loadLogs"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">&nbsp;</label>
+            <label class="text-sm font-medium hidden sm:block">&nbsp;</label>
             <button
               @click="resetFilters"
-              class="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              class="flex h-9 sm:h-10 w-full items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <XMarkIcon class="w-4 h-4" />
               <span>Réinitialiser</span>

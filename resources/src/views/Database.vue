@@ -1,23 +1,24 @@
 <template>
   <MainLayout>
-    <div class="p-6 lg:p-8">
+    <div class="p-4 sm:p-6 lg:p-8">
       <!-- Header -->
-      <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="mb-4 sm:mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 class="text-2xl font-bold flex items-center gap-2">
-              <CircleStackIcon class="w-7 h-7 text-primary" />
-              Base de donnees
+            <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <CircleStackIcon class="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+              Base de données
             </h1>
-            <p class="text-muted-foreground mt-1">Gerez vos contacts et groupes</p>
+            <p class="text-sm text-muted-foreground mt-1">Gérez vos contacts et groupes</p>
           </div>
           <div class="flex items-center gap-2">
             <button
               @click="showCreateGroup = true"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90"
+              class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 h-9 sm:h-10"
             >
               <PlusIcon class="w-4 h-4" />
-              Nouveau groupe
+              <span class="hidden sm:inline">Nouveau groupe</span>
+              <span class="sm:hidden">Nouveau</span>
             </button>
           </div>
         </div>
