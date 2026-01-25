@@ -12,12 +12,23 @@ use App\Http\Controllers\SubAccountController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SmsAnalyticsController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\Api\IncomingSmsController;
 use Illuminate\Support\Facades\Route;
 
 // Routes publiques
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/sub-accounts/login', [SubAccountController::class, 'login']);
+
+// Incoming SMS Webhooks (public - called by SMS providers)
+Route::prefix('webhooks/incoming')->group(function () {
+    Route::post('/sms', [IncomingSmsController::class, 'handleIncoming']);
+    Route::post('/airtel', [IncomingSmsController::class, 'handleAirtelWebhook']);
+    Route::post('/moov', [IncomingSmsController::class, 'handleMoovWebhook']);
+});
+
+// Phone Normalization (public utility)
+Route::get('/phone/countries', [IncomingSmsController::class, 'getSupportedCountries']);
 
 // Routes protégées
 Route::middleware('auth:sanctum')->group(function () {
@@ -118,6 +129,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('blacklist', [\App\Http\Controllers\Api\BlacklistController::class, 'store']);
     Route::delete('blacklist/{id}', [\App\Http\Controllers\Api\BlacklistController::class, 'destroy']);
     Route::post('blacklist/check', [\App\Http\Controllers\Api\BlacklistController::class, 'check']);
+    Route::get('blacklist/stats', [IncomingSmsController::class, 'blacklistStats']);
+    Route::get('blacklist/stop-keywords', [IncomingSmsController::class, 'getStopKeywords']);
+
+    // Phone Normalization
+    Route::post('phone/normalize', [IncomingSmsController::class, 'normalizePhone']);
+    Route::post('phone/normalize-many', [IncomingSmsController::class, 'normalizePhones']);
 
     // Audit Logs (réservé au compte parent uniquement)
     Route::get('audit-logs', [\App\Http\Controllers\Api\AuditLogController::class, 'index']);

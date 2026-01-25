@@ -18,6 +18,17 @@ return [
     */
     'cost_per_sms' => env('SMS_COST_PER_UNIT', 20), // 20 FCFA par défaut
 
+    /*
+    |--------------------------------------------------------------------------
+    | Fallback Configuration
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, if primary operator fails, system will try fallback operator
+    |
+    */
+    'fallback_enabled' => env('SMS_FALLBACK_ENABLED', true),
+    'fallback_order' => ['airtel', 'moov'], // Primary -> Fallback
+
     // Configuration Airtel Gabon
     'airtel' => [
         'api_url' => env('AIRTEL_API_URL', 'https://messaging.airtel.ga:9002/smshttp/qs/'),

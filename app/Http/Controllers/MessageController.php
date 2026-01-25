@@ -9,6 +9,7 @@ use App\Services\WebhookService;
 use App\Services\AnalyticsService;
 use App\Services\AnalyticsRecordService;
 use App\Services\BudgetService;
+use App\Services\StopWordService;
 use App\Models\Message;
 use App\Models\Contact;
 use Illuminate\Http\Request;
@@ -21,7 +22,8 @@ class MessageController extends Controller
         protected WebhookService $webhookService,
         protected AnalyticsService $analyticsService,
         protected AnalyticsRecordService $analyticsRecordService,
-        protected BudgetService $budgetService
+        protected BudgetService $budgetService,
+        protected StopWordService $stopWordService
     ) {}
 
     /**
@@ -130,6 +132,22 @@ class MessageController extends Controller
         try {
             $recipients = $validated['recipients'];
             $message = $validated['message'];
+            $userId = $request->user()->id;
+
+            // Filter out blacklisted numbers
+            $blacklistFilter = $this->stopWordService->filterBlacklisted($userId, $recipients);
+            $recipients = $blacklistFilter['allowed'];
+            $blacklistedCount = $blacklistFilter['filtered_count'];
+
+            // If all recipients are blacklisted
+            if (empty($recipients)) {
+                return response()->json([
+                    'message' => 'Aucun destinataire valide',
+                    'error' => 'Tous les destinataires sont dans la liste noire',
+                    'blacklisted_count' => $blacklistedCount,
+                    'blacklisted_numbers' => $blacklistFilter['filtered'],
+                ], 400);
+            }
 
             // Analyser les numéros avant l'envoi
             $analysis = $this->smsRouter->analyzeNumbers($recipients);
@@ -138,6 +156,7 @@ class MessageController extends Controller
                 'recipients_count' => count($recipients),
                 'message_length' => strlen($message),
                 'analysis' => $analysis,
+                'blacklisted_count' => $blacklistedCount,
             ]);
 
             // Envoyer les messages avec routage automatique
@@ -150,11 +169,11 @@ class MessageController extends Controller
 
                 // Trouver le contact associé au numéro
                 $recipientPhone = $result['phone'] ?? $recipients[0];
-                $contactData = $this->getContactData($request->user()->id, $recipientPhone);
+                $contactData = $this->getContactData($userId, $recipientPhone);
 
                 // Enregistrer dans l'historique
                 $messageRecord = $this->saveMessageToHistory([
-                    'user_id' => $request->user()->id,
+                    'user_id' => $userId,
                     'contact_id' => $contactData['contact_id'],
                     'recipient_name' => $contactData['recipient_name'],
                     'recipient_phone' => $recipientPhone,
@@ -173,7 +192,7 @@ class MessageController extends Controller
 
                 if ($result['success']) {
                     // Trigger webhook for message.sent
-                    $this->webhookService->trigger('message.sent', $request->user()->id, [
+                    $this->webhookService->trigger('message.sent', $userId, [
                         'message_id' => $messageRecord->id,
                         'recipient' => $result['phone'],
                         'content' => $message,
@@ -182,7 +201,7 @@ class MessageController extends Controller
                     ]);
 
                     // Update daily analytics
-                    $this->analyticsService->updateDailyAnalytics($request->user()->id);
+                    $this->analyticsService->updateDailyAnalytics($userId);
 
                     return response()->json([
                         'message' => 'Message envoyé avec succès',
@@ -192,11 +211,12 @@ class MessageController extends Controller
                             'phone' => $result['phone'],
                             'sms_count' => ceil(strlen($message) / 160),
                             'cost' => $cost,
+                            'blacklisted_skipped' => $blacklistedCount,
                         ]
                     ]);
                 } else {
                     // Trigger webhook for message.failed
-                    $this->webhookService->trigger('message.failed', $request->user()->id, [
+                    $this->webhookService->trigger('message.failed', $userId, [
                         'recipient' => $recipients[0],
                         'content' => $message,
                         'error' => $result['message'] ?? 'Erreur inconnue',
@@ -204,7 +224,7 @@ class MessageController extends Controller
                     ]);
 
                     // Update daily analytics (even for failed messages)
-                    $this->analyticsService->updateDailyAnalytics($request->user()->id);
+                    $this->analyticsService->updateDailyAnalytics($userId);
                 }
 
                 return response()->json([
@@ -220,9 +240,6 @@ class MessageController extends Controller
                 // Enregistrer chaque message dans l'historique
                 $totalCost = 0;
                 $messageIds = [];
-
-                // Pré-charger les contacts pour tous les numéros (optimisation)
-                $userId = $request->user()->id;
                 $contactCache = [];
 
                 foreach ($result['details'] as $detail) {
@@ -274,6 +291,7 @@ class MessageController extends Controller
                         'total' => $result['total'],
                         'sent' => $result['sent'],
                         'failed' => $result['failed'],
+                        'blacklisted_skipped' => $blacklistedCount,
                         'sms_count' => ceil(strlen($message) / 160),
                         'total_cost' => $totalCost,
                         'by_operator' => [

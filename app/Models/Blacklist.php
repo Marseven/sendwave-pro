@@ -13,6 +13,7 @@ class Blacklist extends Model
         'user_id',
         'phone_number',
         'reason',
+        'source',
         'added_at',
     ];
 
