@@ -1,39 +1,40 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex items-center justify-between">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <div class="flex items-center gap-2">
-            <ClockIcon class="w-8 h-8 text-primary" />
-            <h1 class="text-3xl font-bold">Historique des campagnes</h1>
+            <ClockIcon class="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            <h1 class="text-xl sm:text-3xl font-bold">Historique des campagnes</h1>
           </div>
-          <p class="text-muted-foreground mt-2">Consultez toutes vos campagnes envoyées</p>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Consultez toutes vos campagnes envoyées</p>
         </div>
         <router-link
           to="/campaigns/create"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
         >
           <PlusIcon class="w-4 h-4" />
-          <span>Nouvelle campagne</span>
+          <span class="hidden sm:inline">Nouvelle campagne</span>
+          <span class="sm:hidden">Nouvelle</span>
         </router-link>
       </div>
 
       <!-- Filters -->
-      <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
+      <div class="mb-4 sm:mb-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+        <div class="col-span-2 md:col-span-1">
           <input
             v-model="filters.search"
             type="text"
             placeholder="Rechercher..."
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <div>
           <select
             v-model="filters.status"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <option value="">Tous les statuts</option>
+            <option value="">Tous statuts</option>
             <option value="draft">Brouillon</option>
             <option value="scheduled">Planifié</option>
             <option value="sending">En cours</option>
@@ -47,7 +48,7 @@
             v-model="filters.dateFrom"
             type="date"
             placeholder="Date de début"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <div>
@@ -55,7 +56,7 @@
             v-model="filters.dateTo"
             type="date"
             placeholder="Date de fin"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
       </div>
@@ -80,30 +81,30 @@
       </div>
 
       <!-- Campaigns List -->
-      <div v-else class="space-y-4">
+      <div v-else class="space-y-3 sm:space-y-4">
         <div
           v-for="campaign in filteredCampaigns"
           :key="campaign.id"
-          class="rounded-lg border bg-card shadow-sm p-6 hover:shadow-md transition-shadow"
+          class="rounded-lg border bg-card shadow-sm p-4 sm:p-6 hover:shadow-md transition-shadow"
         >
-          <div class="flex items-start justify-between mb-4">
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <h3 class="text-lg font-semibold">{{ campaign.name }}</h3>
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                <h3 class="text-base sm:text-lg font-semibold truncate">{{ campaign.name }}</h3>
                 <span
-                  class="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  class="px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0"
                   :class="getStatusClass(campaign.status)"
                 >
                   {{ getStatusLabel(campaign.status) }}
                 </span>
               </div>
-              <p class="text-sm text-muted-foreground line-clamp-2">{{ campaign.message }}</p>
+              <p class="text-xs sm:text-sm text-muted-foreground line-clamp-2">{{ campaign.message }}</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-shrink-0">
               <button
                 @click="cloneCampaign(campaign)"
                 :disabled="cloning === campaign.id"
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3"
                 title="Dupliquer"
               >
                 <DocumentDuplicateIcon v-if="cloning !== campaign.id" class="w-4 h-4" />
@@ -111,47 +112,47 @@
               </button>
               <button
                 @click="viewDetails(campaign)"
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+                class="inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3"
               >
                 <EyeIcon class="w-4 h-4" />
-                <span>Détails</span>
+                <span class="hidden sm:inline">Détails</span>
               </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 pt-3 sm:pt-4 border-t">
             <div>
-              <p class="text-xs text-muted-foreground mb-1">Date d'envoi</p>
-              <p class="text-sm font-medium flex items-center gap-1.5">
-                <CalendarIcon class="w-4 h-4 text-muted-foreground" />
-                {{ formatDate(campaign.sent_at || campaign.scheduled_at) }}
+              <p class="text-xs text-muted-foreground mb-0.5 sm:mb-1">Date</p>
+              <p class="text-xs sm:text-sm font-medium flex items-center gap-1">
+                <CalendarIcon class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground hidden sm:block" />
+                <span class="truncate">{{ formatDate(campaign.sent_at || campaign.scheduled_at) }}</span>
               </p>
             </div>
             <div>
-              <p class="text-xs text-muted-foreground mb-1">Destinataires</p>
-              <p class="text-sm font-medium flex items-center gap-1.5">
-                <UsersIcon class="w-4 h-4 text-muted-foreground" />
+              <p class="text-xs text-muted-foreground mb-0.5 sm:mb-1">Destinataires</p>
+              <p class="text-xs sm:text-sm font-medium flex items-center gap-1">
+                <UsersIcon class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground hidden sm:block" />
                 {{ campaign.recipients_count }}
               </p>
             </div>
             <div>
-              <p class="text-xs text-muted-foreground mb-1">SMS envoyés</p>
-              <p class="text-sm font-medium flex items-center gap-1.5">
-                <ChatBubbleLeftIcon class="w-4 h-4 text-muted-foreground" />
+              <p class="text-xs text-muted-foreground mb-0.5 sm:mb-1">SMS</p>
+              <p class="text-xs sm:text-sm font-medium flex items-center gap-1">
+                <ChatBubbleLeftIcon class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground hidden sm:block" />
                 {{ campaign.sms_count }}
               </p>
             </div>
             <div>
-              <p class="text-xs text-muted-foreground mb-1">Taux de livraison</p>
-              <p class="text-sm font-medium flex items-center gap-1.5">
-                <ChartBarIcon class="w-4 h-4 text-muted-foreground" />
+              <p class="text-xs text-muted-foreground mb-0.5 sm:mb-1">Livraison</p>
+              <p class="text-xs sm:text-sm font-medium flex items-center gap-1">
+                <ChartBarIcon class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground hidden sm:block" />
                 {{ campaign.delivery_rate }}%
               </p>
             </div>
             <div>
-              <p class="text-xs text-muted-foreground mb-1">Coût total</p>
-              <p class="text-sm font-bold text-primary flex items-center gap-1.5">
-                <BanknotesIcon class="w-4 h-4" />
+              <p class="text-xs text-muted-foreground mb-0.5 sm:mb-1">Coût</p>
+              <p class="text-xs sm:text-sm font-bold text-primary flex items-center gap-1">
+                <BanknotesIcon class="w-3 h-3 sm:w-4 sm:h-4 hidden sm:block" />
                 {{ campaign.cost }} XAF
               </p>
             </div>
@@ -160,21 +161,21 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="mt-6 flex justify-center gap-2">
+      <div v-if="totalPages > 1" class="mt-4 sm:mt-6 flex justify-center gap-2">
         <button
           @click="currentPage--"
           :disabled="currentPage === 1"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3"
         >
           <ChevronLeftIcon class="w-4 h-4" />
         </button>
-        <span class="inline-flex items-center px-4 text-sm">
-          Page {{ currentPage }} sur {{ totalPages }}
+        <span class="inline-flex items-center px-2 sm:px-4 text-xs sm:text-sm">
+          {{ currentPage }}/{{ totalPages }}
         </span>
         <button
           @click="currentPage++"
           :disabled="currentPage === totalPages"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3"
         >
           <ChevronRightIcon class="w-4 h-4" />
         </button>
@@ -184,80 +185,80 @@
     <!-- Campaign Details Modal -->
     <div
       v-if="selectedCampaign"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4"
       @click.self="selectedCampaign = null"
     >
-      <div class="bg-background rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6 border-b flex items-center justify-between">
-          <h2 class="text-2xl font-bold">Détails de la campagne</h2>
+      <div class="bg-background rounded-lg shadow-xl w-full max-w-sm sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="p-4 sm:p-6 border-b flex items-center justify-between">
+          <h2 class="text-lg sm:text-2xl font-bold">Détails de la campagne</h2>
           <button
             @click="selectedCampaign = null"
             class="text-muted-foreground hover:text-foreground transition-colors"
           >
-            <XMarkIcon class="w-6 h-6" />
+            <XMarkIcon class="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
-        <div class="p-6 space-y-6">
+        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div>
-            <h3 class="font-semibold mb-2">Nom de la campagne</h3>
-            <p class="text-muted-foreground">{{ selectedCampaign.name }}</p>
+            <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Nom de la campagne</h3>
+            <p class="text-sm text-muted-foreground">{{ selectedCampaign.name }}</p>
           </div>
           <div>
-            <h3 class="font-semibold mb-2">Message</h3>
-            <div class="p-4 bg-muted/50 rounded-lg font-mono text-sm whitespace-pre-wrap">{{ selectedCampaign.message }}</div>
+            <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Message</h3>
+            <div class="p-3 sm:p-4 bg-muted/50 rounded-lg font-mono text-xs sm:text-sm whitespace-pre-wrap">{{ selectedCampaign.message }}</div>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <h3 class="font-semibold mb-2">Statut</h3>
+              <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Statut</h3>
               <span
-                class="inline-block px-3 py-1 rounded-full text-sm font-medium"
+                class="inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium"
                 :class="getStatusClass(selectedCampaign.status)"
               >
                 {{ getStatusLabel(selectedCampaign.status) }}
               </span>
             </div>
             <div>
-              <h3 class="font-semibold mb-2">Date d'envoi</h3>
-              <p class="text-muted-foreground">{{ formatDate(selectedCampaign.sent_at || selectedCampaign.scheduled_at) }}</p>
+              <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Date d'envoi</h3>
+              <p class="text-xs sm:text-sm text-muted-foreground">{{ formatDate(selectedCampaign.sent_at || selectedCampaign.scheduled_at) }}</p>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <h3 class="font-semibold mb-2">Destinataires</h3>
-              <p class="text-2xl font-bold text-primary">{{ selectedCampaign.recipients_count }}</p>
+              <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Destinataires</h3>
+              <p class="text-xl sm:text-2xl font-bold text-primary">{{ selectedCampaign.recipients_count }}</p>
             </div>
             <div>
-              <h3 class="font-semibold mb-2">SMS envoyés</h3>
-              <p class="text-2xl font-bold text-primary">{{ selectedCampaign.sms_count }}</p>
+              <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">SMS envoyés</h3>
+              <p class="text-xl sm:text-2xl font-bold text-primary">{{ selectedCampaign.sms_count }}</p>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <h3 class="font-semibold mb-2">Taux de livraison</h3>
-              <p class="text-2xl font-bold">{{ selectedCampaign.delivery_rate }}%</p>
+              <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Taux livraison</h3>
+              <p class="text-xl sm:text-2xl font-bold">{{ selectedCampaign.delivery_rate }}%</p>
             </div>
             <div>
-              <h3 class="font-semibold mb-2">Coût total</h3>
-              <p class="text-2xl font-bold text-primary">{{ selectedCampaign.cost }} XAF</p>
+              <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Coût total</h3>
+              <p class="text-xl sm:text-2xl font-bold text-primary">{{ selectedCampaign.cost }} XAF</p>
             </div>
           </div>
           <div v-if="selectedCampaign.groups && selectedCampaign.groups.length > 0">
-            <h3 class="font-semibold mb-2">Groupes ciblés</h3>
+            <h3 class="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Groupes ciblés</h3>
             <div class="flex flex-wrap gap-2">
               <span
                 v-for="group in selectedCampaign.groups"
                 :key="group.id"
-                class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                class="px-2 sm:px-3 py-0.5 sm:py-1 bg-primary/10 text-primary rounded-full text-xs sm:text-sm"
               >
                 {{ group.name }}
               </span>
             </div>
           </div>
         </div>
-        <div class="p-6 border-t flex justify-end">
+        <div class="p-4 sm:p-6 border-t flex justify-end">
           <button
             @click="selectedCampaign = null"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2"
           >
             Fermer
           </button>

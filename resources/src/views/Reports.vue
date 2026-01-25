@@ -1,21 +1,21 @@
 <template>
   <MainLayout>
-    <div class="p-6 lg:p-8">
+    <div class="p-4 sm:p-6 lg:p-8">
       <!-- Header -->
-      <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="mb-4 sm:mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 class="text-2xl font-bold flex items-center gap-2">
-              <ChartBarIcon class="w-7 h-7 text-primary" />
+            <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <ChartBarIcon class="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
               Rapports & Statistiques
             </h1>
-            <p class="text-muted-foreground mt-1">Analysez les performances de vos envois</p>
+            <p class="text-sm text-muted-foreground mt-1">Analysez les performances de vos envois</p>
           </div>
           <div class="flex items-center gap-2">
             <button
               @click="exportReport('pdf')"
               :disabled="exporting"
-              class="inline-flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent text-sm font-medium disabled:opacity-50"
+              class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border rounded-lg hover:bg-accent text-xs sm:text-sm font-medium disabled:opacity-50"
             >
               <ArrowDownTrayIcon class="w-4 h-4" />
               PDF
@@ -23,7 +23,7 @@
             <button
               @click="exportReport('excel')"
               :disabled="exporting"
-              class="inline-flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent text-sm font-medium disabled:opacity-50"
+              class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border rounded-lg hover:bg-accent text-xs sm:text-sm font-medium disabled:opacity-50"
             >
               <ArrowDownTrayIcon class="w-4 h-4" />
               Excel
@@ -33,43 +33,44 @@
       </div>
 
       <!-- Tabs -->
-      <TabNav
-        v-model="activeTab"
-        :tabs="tabs"
-        class="mb-6"
-      />
+      <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-4 sm:mb-6">
+        <TabNav
+          v-model="activeTab"
+          :tabs="tabs"
+        />
+      </div>
 
       <!-- Date Range Filter (shared) -->
-      <div class="rounded-lg border bg-card p-4 mb-6">
-        <div class="flex flex-wrap items-end gap-4">
-          <div class="flex-1 min-w-[150px]">
-            <label class="text-sm font-medium mb-1 block">Date debut</label>
+      <div class="rounded-lg border bg-card p-3 sm:p-4 mb-4 sm:mb-6">
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-2 sm:gap-4">
+          <div class="col-span-1 sm:flex-1 sm:min-w-[150px]">
+            <label class="text-xs sm:text-sm font-medium mb-1 block">Date debut</label>
             <input
               v-model="startDate"
               type="date"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm"
             />
           </div>
-          <div class="flex-1 min-w-[150px]">
-            <label class="text-sm font-medium mb-1 block">Date fin</label>
+          <div class="col-span-1 sm:flex-1 sm:min-w-[150px]">
+            <label class="text-xs sm:text-sm font-medium mb-1 block">Date fin</label>
             <input
               v-model="endDate"
               type="date"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm"
             />
           </div>
           <button
             @click="loadData"
-            class="h-10 px-4 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90"
+            class="h-9 sm:h-10 px-3 sm:px-4 bg-primary text-primary-foreground rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90"
           >
             Appliquer
           </button>
           <select
             v-model="quickPeriod"
             @change="applyQuickPeriod"
-            class="h-10 px-3 rounded-md border border-input bg-background text-sm"
+            class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm"
           >
-            <option value="">Periode rapide...</option>
+            <option value="">Periode...</option>
             <option value="today">Aujourd'hui</option>
             <option value="yesterday">Hier</option>
             <option value="week">Cette semaine</option>
@@ -84,55 +85,56 @@
         <div v-if="loading" class="flex items-center justify-center py-12">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-        <div v-else class="space-y-6">
+        <div v-else class="space-y-4 sm:space-y-6">
           <!-- Overview Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="rounded-lg border bg-card p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <RocketLaunchIcon class="w-5 h-5 text-primary" />
-                <span class="text-sm font-medium text-muted-foreground">Campagnes</span>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+            <div class="rounded-lg border bg-card p-3 sm:p-5">
+              <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                <RocketLaunchIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                <span class="text-xs sm:text-sm font-medium text-muted-foreground">Campagnes</span>
               </div>
-              <p class="text-2xl font-bold">{{ dashboard?.overview.campaigns_executed || 0 }}</p>
-              <p class="text-xs text-muted-foreground mt-1">sur la periode</p>
+              <p class="text-lg sm:text-2xl font-bold">{{ dashboard?.overview.campaigns_executed || 0 }}</p>
+              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">sur la periode</p>
             </div>
-            <div class="rounded-lg border bg-card p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <PaperAirplaneIcon class="w-5 h-5 text-primary" />
-                <span class="text-sm font-medium text-muted-foreground">SMS Envoyes</span>
+            <div class="rounded-lg border bg-card p-3 sm:p-5">
+              <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                <PaperAirplaneIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                <span class="text-xs sm:text-sm font-medium text-muted-foreground">SMS Envoyes</span>
               </div>
-              <p class="text-2xl font-bold">{{ formatNumber(dashboard?.overview.sms_sent || 0) }}</p>
-              <p class="text-xs text-success mt-1">{{ dashboard?.overview.success_rate?.toFixed(1) }}% livres</p>
+              <p class="text-lg sm:text-2xl font-bold">{{ formatNumber(dashboard?.overview.sms_sent || 0) }}</p>
+              <p class="text-xs text-success mt-1 hidden sm:block">{{ dashboard?.overview.success_rate?.toFixed(1) }}% livres</p>
             </div>
-            <div class="rounded-lg border bg-card p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <CheckCircleIcon class="w-5 h-5 text-success" />
-                <span class="text-sm font-medium text-muted-foreground">Taux de succes</span>
+            <div class="rounded-lg border bg-card p-3 sm:p-5">
+              <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                <CheckCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success" />
+                <span class="text-xs sm:text-sm font-medium text-muted-foreground">Taux succes</span>
               </div>
-              <p class="text-2xl font-bold text-success">{{ dashboard?.overview.success_rate?.toFixed(1) || 0 }}%</p>
-              <p class="text-xs text-muted-foreground mt-1">{{ dashboard?.overview.sms_delivered || 0 }} livres</p>
+              <p class="text-lg sm:text-2xl font-bold text-success">{{ dashboard?.overview.success_rate?.toFixed(1) || 0 }}%</p>
+              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">{{ dashboard?.overview.sms_delivered || 0 }} livres</p>
             </div>
-            <div class="rounded-lg border bg-card p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <BanknotesIcon class="w-5 h-5 text-warning" />
-                <span class="text-sm font-medium text-muted-foreground">Cout Total</span>
+            <div class="rounded-lg border bg-card p-3 sm:p-5">
+              <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                <BanknotesIcon class="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
+                <span class="text-xs sm:text-sm font-medium text-muted-foreground">Cout Total</span>
               </div>
-              <p class="text-2xl font-bold">{{ (dashboard?.overview.total_cost || 0).toLocaleString() }} XAF</p>
-              <p class="text-xs text-muted-foreground mt-1">{{ dashboard?.overview.average_cost_per_sms?.toFixed(0) || 0 }} XAF/SMS</p>
+              <p class="text-lg sm:text-2xl font-bold">{{ (dashboard?.overview.total_cost || 0).toLocaleString() }}</p>
+              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">{{ dashboard?.overview.average_cost_per_sms?.toFixed(0) || 0 }} XAF/SMS</p>
             </div>
           </div>
 
           <!-- Campaigns Table -->
           <div class="rounded-lg border bg-card">
-            <div class="p-4 border-b flex items-center justify-between">
-              <h3 class="font-semibold">Liste des campagnes</h3>
+            <div class="p-3 sm:p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h3 class="font-semibold text-sm sm:text-base">Liste des campagnes</h3>
               <input
                 v-model="campaignSearch"
                 type="text"
                 placeholder="Rechercher..."
-                class="h-9 px-3 rounded-md border border-input bg-background text-sm w-64"
+                class="h-8 sm:h-9 px-3 rounded-md border border-input bg-background text-xs sm:text-sm w-full sm:w-64"
               />
             </div>
-            <div class="overflow-x-auto">
+            <!-- Desktop Table -->
+            <div class="hidden md:block overflow-x-auto">
               <table class="w-full">
                 <thead class="bg-muted/50">
                   <tr>
@@ -171,7 +173,27 @@
                 </tbody>
               </table>
             </div>
-            <div v-if="filteredCampaigns.length === 0" class="p-8 text-center text-muted-foreground">
+            <!-- Mobile Cards -->
+            <div class="md:hidden divide-y">
+              <div v-for="campaign in filteredCampaigns" :key="campaign.id" class="p-3">
+                <div class="flex items-start justify-between mb-2">
+                  <div>
+                    <div class="font-medium text-sm">{{ campaign.name }}</div>
+                    <div class="text-xs text-muted-foreground">{{ formatDate(campaign.sent_at || campaign.created_at) }}</div>
+                  </div>
+                  <span class="px-2 py-0.5 text-xs rounded-full" :class="getStatusClass(campaign.status)">
+                    {{ campaign.status }}
+                  </span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div><span class="text-muted-foreground">Envoyes:</span> {{ campaign.messages_sent?.toLocaleString() }}</div>
+                  <div><span class="text-muted-foreground">Taux:</span> <span :class="getSuccessRateClass(campaign.success_rate)">{{ campaign.success_rate?.toFixed(1) || 0 }}%</span></div>
+                  <div><span class="text-muted-foreground">Livres:</span> <span class="text-success">{{ campaign.delivered?.toLocaleString() || '-' }}</span></div>
+                  <div><span class="text-muted-foreground">Cout:</span> {{ (campaign.cost || 0).toLocaleString() }} XAF</div>
+                </div>
+              </div>
+            </div>
+            <div v-if="filteredCampaigns.length === 0" class="p-6 sm:p-8 text-center text-muted-foreground text-sm">
               Aucune campagne sur cette periode
             </div>
           </div>
@@ -179,53 +201,52 @@
       </div>
 
       <!-- Delivery Report Tab -->
-      <div v-if="activeTab === 'delivery'" class="space-y-6">
+      <div v-if="activeTab === 'delivery'" class="space-y-4 sm:space-y-6">
         <!-- Status Distribution -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-3 h-3 rounded-full bg-success"></div>
-              <span class="text-sm font-medium">Livres</span>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-success"></div>
+              <span class="text-xs sm:text-sm font-medium">Livres</span>
             </div>
-            <p class="text-2xl font-bold text-success">{{ deliveryStats.delivered }}</p>
+            <p class="text-lg sm:text-2xl font-bold text-success">{{ deliveryStats.delivered }}</p>
           </div>
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-3 h-3 rounded-full bg-warning"></div>
-              <span class="text-sm font-medium">En attente</span>
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-warning"></div>
+              <span class="text-xs sm:text-sm font-medium">En attente</span>
             </div>
-            <p class="text-2xl font-bold text-warning">{{ deliveryStats.pending }}</p>
+            <p class="text-lg sm:text-2xl font-bold text-warning">{{ deliveryStats.pending }}</p>
           </div>
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-3 h-3 rounded-full bg-destructive"></div>
-              <span class="text-sm font-medium">Echecs</span>
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-destructive"></div>
+              <span class="text-xs sm:text-sm font-medium">Echecs</span>
             </div>
-            <p class="text-2xl font-bold text-destructive">{{ deliveryStats.failed }}</p>
+            <p class="text-lg sm:text-2xl font-bold text-destructive">{{ deliveryStats.failed }}</p>
           </div>
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-3 h-3 rounded-full bg-primary"></div>
-              <span class="text-sm font-medium">Taux global</span>
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-primary"></div>
+              <span class="text-xs sm:text-sm font-medium">Taux global</span>
             </div>
-            <p class="text-2xl font-bold">{{ deliveryStats.rate.toFixed(1) }}%</p>
+            <p class="text-lg sm:text-2xl font-bold">{{ deliveryStats.rate.toFixed(1) }}%</p>
           </div>
         </div>
 
         <!-- Messages Table -->
         <div class="rounded-lg border bg-card">
-          <div class="p-4 border-b flex items-center justify-between">
-            <h3 class="font-semibold">Historique des livraisons</h3>
-            <div class="flex gap-2">
-              <select v-model="deliveryFilter" class="h-9 px-3 rounded-md border border-input bg-background text-sm">
-                <option value="">Tous les statuts</option>
-                <option value="delivered">Livres</option>
-                <option value="sent">Envoyes</option>
-                <option value="failed">Echecs</option>
-              </select>
-            </div>
+          <div class="p-3 sm:p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h3 class="font-semibold text-sm sm:text-base">Historique des livraisons</h3>
+            <select v-model="deliveryFilter" class="h-8 sm:h-9 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
+              <option value="">Tous les statuts</option>
+              <option value="delivered">Livres</option>
+              <option value="sent">Envoyes</option>
+              <option value="failed">Echecs</option>
+            </select>
           </div>
-          <div class="overflow-x-auto">
+          <!-- Desktop Table -->
+          <div class="hidden md:block overflow-x-auto">
             <table class="w-full">
               <thead class="bg-muted/50">
                 <tr>
@@ -258,100 +279,121 @@
               </tbody>
             </table>
           </div>
-          <div v-if="deliveryMessages.length === 0" class="p-8 text-center text-muted-foreground">
+          <!-- Mobile Cards -->
+          <div class="md:hidden divide-y">
+            <div v-for="msg in deliveryMessages" :key="msg.id" class="p-3">
+              <div class="flex items-start justify-between mb-2">
+                <div>
+                  <div class="font-medium text-sm">{{ msg.recipient_phone }}</div>
+                  <div class="text-xs text-muted-foreground">{{ msg.recipient_name || '-' }}</div>
+                </div>
+                <span class="px-2 py-0.5 text-xs rounded-full" :class="getDeliveryStatusClass(msg.status)">
+                  {{ msg.status }}
+                </span>
+              </div>
+              <p class="text-xs text-muted-foreground mb-2 line-clamp-2">{{ msg.content }}</p>
+              <div class="flex items-center justify-between text-xs">
+                <span class="px-2 py-0.5 rounded" :class="msg.provider === 'airtel' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'">
+                  {{ msg.provider }}
+                </span>
+                <span class="text-muted-foreground">{{ formatDateTime(msg.sent_at) }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="deliveryMessages.length === 0" class="p-6 sm:p-8 text-center text-muted-foreground text-sm">
             Aucun message sur cette periode
           </div>
         </div>
       </div>
 
       <!-- Schedule Report Tab -->
-      <div v-if="activeTab === 'schedule'" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <CalendarIcon class="w-5 h-5 text-primary" />
-              <span class="text-sm font-medium">Planifiees</span>
+      <div v-if="activeTab === 'schedule'" class="space-y-4 sm:space-y-6">
+        <div class="grid grid-cols-3 gap-2 sm:gap-4">
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <CalendarIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <span class="text-xs sm:text-sm font-medium">Planifiees</span>
             </div>
-            <p class="text-2xl font-bold">{{ scheduledCampaigns.filter(c => c.status === 'scheduled').length }}</p>
+            <p class="text-lg sm:text-2xl font-bold">{{ scheduledCampaigns.filter(c => c.status === 'scheduled').length }}</p>
           </div>
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <ClockIcon class="w-5 h-5 text-warning" />
-              <span class="text-sm font-medium">En attente</span>
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <ClockIcon class="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
+              <span class="text-xs sm:text-sm font-medium">En attente</span>
             </div>
-            <p class="text-2xl font-bold">{{ scheduledCampaigns.filter(c => c.status === 'pending').length }}</p>
+            <p class="text-lg sm:text-2xl font-bold">{{ scheduledCampaigns.filter(c => c.status === 'pending').length }}</p>
           </div>
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <CheckCircleIcon class="w-5 h-5 text-success" />
-              <span class="text-sm font-medium">Executees</span>
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <CheckCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success" />
+              <span class="text-xs sm:text-sm font-medium">Executees</span>
             </div>
-            <p class="text-2xl font-bold">{{ scheduledCampaigns.filter(c => c.status === 'completed').length }}</p>
+            <p class="text-lg sm:text-2xl font-bold">{{ scheduledCampaigns.filter(c => c.status === 'completed').length }}</p>
           </div>
         </div>
 
         <!-- Scheduled Campaigns List -->
         <div class="rounded-lg border bg-card">
-          <div class="p-4 border-b">
-            <h3 class="font-semibold">Campagnes planifiees</h3>
+          <div class="p-3 sm:p-4 border-b">
+            <h3 class="font-semibold text-sm sm:text-base">Campagnes planifiees</h3>
           </div>
           <div class="divide-y">
-            <div v-for="campaign in scheduledCampaigns" :key="campaign.id" class="p-4 flex items-center justify-between hover:bg-muted/30">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CalendarIcon class="w-5 h-5 text-primary" />
+            <div v-for="campaign in scheduledCampaigns" :key="campaign.id" class="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 hover:bg-muted/30">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <CalendarIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
                 <div>
-                  <p class="font-medium">{{ campaign.name }}</p>
-                  <p class="text-sm text-muted-foreground">{{ campaign.recipients_count }} destinataires</p>
+                  <p class="font-medium text-sm sm:text-base">{{ campaign.name }}</p>
+                  <p class="text-xs sm:text-sm text-muted-foreground">{{ campaign.recipients_count }} destinataires</p>
                 </div>
               </div>
-              <div class="text-right">
-                <p class="font-medium">{{ formatDateTime(campaign.scheduled_at) }}</p>
-                <span class="px-2 py-1 text-xs rounded-full" :class="getStatusClass(campaign.status)">
+              <div class="text-left sm:text-right pl-11 sm:pl-0">
+                <p class="font-medium text-xs sm:text-base">{{ formatDateTime(campaign.scheduled_at) }}</p>
+                <span class="px-2 py-0.5 sm:py-1 text-xs rounded-full" :class="getStatusClass(campaign.status)">
                   {{ campaign.status }}
                 </span>
               </div>
             </div>
           </div>
-          <div v-if="scheduledCampaigns.length === 0" class="p-8 text-center text-muted-foreground">
+          <div v-if="scheduledCampaigns.length === 0" class="p-6 sm:p-8 text-center text-muted-foreground text-sm">
             Aucune campagne planifiee
           </div>
         </div>
       </div>
 
       <!-- Archived Report Tab -->
-      <div v-if="activeTab === 'archived'" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-if="activeTab === 'archived'" class="space-y-4 sm:space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <div
             v-for="archive in archivedPeriods"
             :key="archive.period"
-            class="rounded-lg border bg-card p-5 hover:shadow-md transition-shadow cursor-pointer"
+            class="rounded-lg border bg-card p-4 sm:p-5 hover:shadow-md transition-shadow cursor-pointer"
             @click="loadArchive(archive.period)"
           >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-semibold">{{ archive.label }}</h3>
-              <ArchiveBoxIcon class="w-5 h-5 text-muted-foreground" />
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
+              <h3 class="font-semibold text-sm sm:text-base">{{ archive.label }}</h3>
+              <ArchiveBoxIcon class="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <p class="text-xs text-muted-foreground">SMS</p>
-                <p class="text-lg font-bold">{{ archive.total_sms.toLocaleString() }}</p>
+                <p class="text-base sm:text-lg font-bold">{{ archive.total_sms.toLocaleString() }}</p>
               </div>
               <div>
                 <p class="text-xs text-muted-foreground">Cout</p>
-                <p class="text-lg font-bold">{{ archive.total_cost.toLocaleString() }} XAF</p>
+                <p class="text-base sm:text-lg font-bold">{{ archive.total_cost.toLocaleString() }}</p>
               </div>
               <div>
                 <p class="text-xs text-muted-foreground">Campagnes</p>
-                <p class="text-lg font-bold">{{ archive.campaigns_count }}</p>
+                <p class="text-base sm:text-lg font-bold">{{ archive.campaigns_count }}</p>
               </div>
               <div>
                 <p class="text-xs text-muted-foreground">Taux</p>
-                <p class="text-lg font-bold text-success">{{ archive.success_rate.toFixed(1) }}%</p>
+                <p class="text-base sm:text-lg font-bold text-success">{{ archive.success_rate.toFixed(1) }}%</p>
               </div>
             </div>
-            <div class="mt-4 pt-4 border-t flex justify-end">
+            <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t flex justify-end">
               <button class="text-xs text-primary hover:underline flex items-center gap-1">
                 <ArrowDownTrayIcon class="w-4 h-4" />
                 Exporter
@@ -359,69 +401,69 @@
             </div>
           </div>
         </div>
-        <div v-if="archivedPeriods.length === 0" class="text-center py-12">
-          <ArchiveBoxIcon class="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 class="text-lg font-semibold mb-2">Aucune archive</h3>
-          <p class="text-muted-foreground">Les archives seront creees automatiquement chaque mois</p>
+        <div v-if="archivedPeriods.length === 0" class="text-center py-8 sm:py-12">
+          <ArchiveBoxIcon class="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-4" />
+          <h3 class="text-base sm:text-lg font-semibold mb-2">Aucune archive</h3>
+          <p class="text-sm text-muted-foreground">Les archives seront creees automatiquement chaque mois</p>
         </div>
       </div>
 
       <!-- Credit History Tab -->
-      <div v-if="activeTab === 'credit'" class="space-y-6">
+      <div v-if="activeTab === 'credit'" class="space-y-4 sm:space-y-6">
         <!-- Credit Balance -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <BanknotesIcon class="w-5 h-5 text-success" />
-              <span class="text-sm font-medium">Credits achetes</span>
+        <div class="grid grid-cols-3 gap-2 sm:gap-4">
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <BanknotesIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success" />
+              <span class="text-xs sm:text-sm font-medium">Achetes</span>
             </div>
-            <p class="text-2xl font-bold text-success">{{ creditStats.purchased.toLocaleString() }} XAF</p>
+            <p class="text-sm sm:text-2xl font-bold text-success">{{ creditStats.purchased.toLocaleString() }}</p>
           </div>
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <ArrowTrendingDownIcon class="w-5 h-5 text-destructive" />
-              <span class="text-sm font-medium">Credits utilises</span>
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <ArrowTrendingDownIcon class="w-4 h-4 sm:w-5 sm:h-5 text-destructive" />
+              <span class="text-xs sm:text-sm font-medium">Utilises</span>
             </div>
-            <p class="text-2xl font-bold text-destructive">{{ creditStats.used.toLocaleString() }} XAF</p>
+            <p class="text-sm sm:text-2xl font-bold text-destructive">{{ creditStats.used.toLocaleString() }}</p>
           </div>
-          <div class="rounded-lg border bg-card p-5">
-            <div class="flex items-center gap-2 mb-2">
-              <WalletIcon class="w-5 h-5 text-primary" />
-              <span class="text-sm font-medium">Solde actuel</span>
+          <div class="rounded-lg border bg-card p-3 sm:p-5">
+            <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
+              <WalletIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <span class="text-xs sm:text-sm font-medium">Solde</span>
             </div>
-            <p class="text-2xl font-bold text-primary">{{ creditStats.balance.toLocaleString() }} XAF</p>
+            <p class="text-sm sm:text-2xl font-bold text-primary">{{ creditStats.balance.toLocaleString() }}</p>
           </div>
         </div>
 
         <!-- Credit Transactions -->
         <div class="rounded-lg border bg-card">
-          <div class="p-4 border-b">
-            <h3 class="font-semibold">Historique des credits</h3>
+          <div class="p-3 sm:p-4 border-b">
+            <h3 class="font-semibold text-sm sm:text-base">Historique des credits</h3>
           </div>
           <div class="divide-y">
-            <div v-for="tx in creditTransactions" :key="tx.id" class="p-4 flex items-center justify-between hover:bg-muted/30">
-              <div class="flex items-center gap-4">
+            <div v-for="tx in creditTransactions" :key="tx.id" class="p-3 sm:p-4 flex items-center justify-between gap-3 hover:bg-muted/30">
+              <div class="flex items-center gap-2 sm:gap-4">
                 <div
-                  class="w-10 h-10 rounded-full flex items-center justify-center"
+                  class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0"
                   :class="tx.type === 'credit' ? 'bg-success/10' : 'bg-destructive/10'"
                 >
-                  <ArrowUpIcon v-if="tx.type === 'credit'" class="w-5 h-5 text-success" />
-                  <ArrowDownIcon v-else class="w-5 h-5 text-destructive" />
+                  <ArrowUpIcon v-if="tx.type === 'credit'" class="w-4 h-4 sm:w-5 sm:h-5 text-success" />
+                  <ArrowDownIcon v-else class="w-4 h-4 sm:w-5 sm:h-5 text-destructive" />
                 </div>
-                <div>
-                  <p class="font-medium">{{ tx.description }}</p>
-                  <p class="text-sm text-muted-foreground">{{ formatDateTime(tx.created_at) }}</p>
+                <div class="min-w-0">
+                  <p class="font-medium text-sm sm:text-base truncate">{{ tx.description }}</p>
+                  <p class="text-xs sm:text-sm text-muted-foreground">{{ formatDateTime(tx.created_at) }}</p>
                 </div>
               </div>
-              <div class="text-right">
-                <p class="font-bold" :class="tx.type === 'credit' ? 'text-success' : 'text-destructive'">
-                  {{ tx.type === 'credit' ? '+' : '-' }}{{ tx.amount.toLocaleString() }} XAF
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-sm sm:text-base" :class="tx.type === 'credit' ? 'text-success' : 'text-destructive'">
+                  {{ tx.type === 'credit' ? '+' : '-' }}{{ tx.amount.toLocaleString() }}
                 </p>
-                <p class="text-xs text-muted-foreground">Solde: {{ tx.balance_after.toLocaleString() }} XAF</p>
+                <p class="text-xs text-muted-foreground hidden sm:block">Solde: {{ tx.balance_after.toLocaleString() }} XAF</p>
               </div>
             </div>
           </div>
-          <div v-if="creditTransactions.length === 0" class="p-8 text-center text-muted-foreground">
+          <div v-if="creditTransactions.length === 0" class="p-6 sm:p-8 text-center text-muted-foreground text-sm">
             Aucune transaction
           </div>
         </div>

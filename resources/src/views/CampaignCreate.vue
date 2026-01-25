@@ -1,19 +1,19 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold">Nouvelle Campagne SMS</h1>
-        <p class="text-muted-foreground mt-2">Créez et planifiez votre campagne d'envoi</p>
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-bold">Nouvelle Campagne SMS</h1>
+        <p class="text-sm sm:text-base text-muted-foreground mt-1 sm:mt-2">Créez et planifiez votre campagne d'envoi</p>
       </div>
 
       <!-- Progress Steps -->
-      <div class="mb-10">
+      <div class="mb-6 sm:mb-10">
         <div class="max-w-4xl mx-auto">
           <div class="relative flex items-center justify-between">
             <!-- Progress Line -->
-            <div class="absolute top-5 left-0 right-0 h-1 bg-border -z-10"></div>
+            <div class="absolute top-4 sm:top-5 left-0 right-0 h-1 bg-border -z-10"></div>
             <div
-              class="absolute top-5 left-0 h-1 bg-primary transition-all duration-300 -z-10"
+              class="absolute top-4 sm:top-5 left-0 h-1 bg-primary transition-all duration-300 -z-10"
               :style="{ width: `${(currentStep / (steps.length - 1)) * 100}%` }"
             ></div>
 
@@ -21,21 +21,21 @@
             <div
               v-for="(step, index) in steps"
               :key="index"
-              class="flex flex-col items-center relative bg-background px-2"
+              class="flex flex-col items-center relative bg-background px-1 sm:px-2"
             >
               <div
-                class="w-12 h-12 rounded-full flex items-center justify-center font-bold mb-3 border-4 transition-all duration-300 shadow-md"
+                class="w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold mb-2 sm:mb-3 border-2 sm:border-4 transition-all duration-300 shadow-md text-xs sm:text-base"
                 :class="currentStep >= index
                   ? 'bg-primary text-primary-foreground border-primary scale-110'
                   : currentStep === index - 1
                     ? 'bg-background border-primary text-primary'
                     : 'bg-background border-border text-muted-foreground'"
               >
-                <CheckCircleIcon v-if="currentStep > index" class="w-6 h-6" />
+                <CheckCircleIcon v-if="currentStep > index" class="w-4 h-4 sm:w-6 sm:h-6" />
                 <span v-else>{{ index + 1 }}</span>
               </div>
               <span
-                class="text-sm font-medium text-center transition-colors"
+                class="text-xs sm:text-sm font-medium text-center transition-colors max-w-[60px] sm:max-w-none"
                 :class="currentStep >= index ? 'text-foreground' : 'text-muted-foreground'"
               >
                 {{ step }}
@@ -47,7 +47,7 @@
 
       <!-- Form Container -->
       <div class="max-w-3xl mx-auto">
-        <div class="rounded-lg border bg-card shadow-sm p-8">
+        <div class="rounded-lg border bg-card shadow-sm p-4 sm:p-6 lg:p-8">
           <!-- Step 1: Type d'envoi -->
           <div v-if="currentStep === 0" class="space-y-6">
             <h2 class="text-xl font-semibold mb-6">Type d'envoi</h2>
@@ -106,23 +106,23 @@
               </div>
             </div>
 
-            <div v-if="campaign.sendType === 'scheduled'" class="space-y-4 p-4 bg-muted/50 rounded-lg">
-              <div class="grid grid-cols-2 gap-4">
+            <div v-if="campaign.sendType === 'scheduled'" class="space-y-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium">Date d'envoi *</label>
+                  <label class="text-xs sm:text-sm font-medium">Date d'envoi *</label>
                   <input
                     v-model="campaign.sendDate"
                     type="date"
                     :min="minDate"
-                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium">Heure d'envoi *</label>
+                  <label class="text-xs sm:text-sm font-medium">Heure d'envoi *</label>
                   <input
                     v-model="campaign.sendTime"
                     type="time"
-                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   />
                 </div>
               </div>
@@ -361,27 +361,27 @@
               </select>
             </div>
 
-            <div class="p-5 bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/20 rounded-lg">
-              <div class="flex items-start gap-4">
-                <ChartPieIcon class="w-10 h-10 text-primary flex-shrink-0 mt-1" />
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/20 rounded-lg">
+              <div class="flex items-start gap-3 sm:gap-4">
+                <ChartPieIcon class="w-8 h-8 sm:w-10 sm:h-10 text-primary flex-shrink-0 mt-1" />
                 <div class="flex-1">
-                  <p class="font-bold text-lg mb-2">Estimation de l'envoi</p>
-                  <div class="grid grid-cols-2 gap-4 text-sm">
+                  <p class="font-bold text-base sm:text-lg mb-2">Estimation de l'envoi</p>
+                  <div class="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
                     <div>
-                      <p class="text-muted-foreground">Destinataires</p>
-                      <p class="text-2xl font-bold text-foreground">{{ estimatedRecipients }}</p>
+                      <p class="text-xs sm:text-sm text-muted-foreground">Destinataires</p>
+                      <p class="text-xl sm:text-2xl font-bold text-foreground">{{ estimatedRecipients }}</p>
                     </div>
                     <div>
-                      <p class="text-muted-foreground">SMS par message</p>
-                      <p class="text-2xl font-bold" :class="smsCount > 1 ? 'text-warning' : 'text-foreground'">{{ smsCount }}</p>
+                      <p class="text-xs sm:text-sm text-muted-foreground">SMS/message</p>
+                      <p class="text-xl sm:text-2xl font-bold" :class="smsCount > 1 ? 'text-warning' : 'text-foreground'">{{ smsCount }}</p>
                     </div>
                     <div>
-                      <p class="text-muted-foreground">Total SMS</p>
-                      <p class="text-2xl font-bold text-foreground">{{ estimatedRecipients * smsCount }}</p>
+                      <p class="text-xs sm:text-sm text-muted-foreground">Total SMS</p>
+                      <p class="text-xl sm:text-2xl font-bold text-foreground">{{ estimatedRecipients * smsCount }}</p>
                     </div>
                     <div>
-                      <p class="text-muted-foreground">Coût estimé</p>
-                      <p class="text-2xl font-bold text-primary">{{ estimatedCost }} XAF</p>
+                      <p class="text-xs sm:text-sm text-muted-foreground">Coût estimé</p>
+                      <p class="text-xl sm:text-2xl font-bold text-primary">{{ estimatedCost }} XAF</p>
                     </div>
                   </div>
                 </div>
@@ -476,23 +476,23 @@
           </div>
 
           <!-- Navigation Buttons -->
-          <div class="flex justify-between mt-8 pt-6 border-t">
+          <div class="flex flex-col sm:flex-row justify-between gap-3 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t">
             <button
               v-if="currentStep > 0"
               @click="currentStep--"
               :disabled="submitting"
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2 order-2 sm:order-1"
             >
               ← Précédent
             </button>
-            <div v-else></div>
+            <div v-else class="hidden sm:block"></div>
 
-            <div class="flex gap-3">
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
               <button
                 v-if="currentStep < steps.length - 1"
                 @click="saveDraft"
                 :disabled="submitting"
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2"
               >
                 <DocumentArrowDownIcon class="w-4 h-4" />
                 <span>{{ submitting ? 'Sauvegarde...' : 'Brouillon' }}</span>
@@ -501,7 +501,7 @@
                 v-if="currentStep < steps.length - 1"
                 @click="currentStep++"
                 :disabled="!canGoNext() || submitting"
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
               >
                 Suivant →
               </button>
@@ -509,12 +509,15 @@
                 v-else
                 @click="launchCampaign"
                 :disabled="submitting"
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-6 py-2"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 sm:h-10 px-4 sm:px-6 py-2"
                 :class="campaign.sendType === 'immediate' ? 'bg-success text-success-foreground hover:bg-success/90' : 'bg-primary text-primary-foreground hover:bg-primary/90'"
               >
-                <RocketLaunchIcon class="w-5 h-5" />
-                <span v-if="submitting">Envoi en cours...</span>
-                <span v-else>{{ campaign.sendType === 'immediate' ? 'Envoyer maintenant' : 'Planifier la campagne' }}</span>
+                <RocketLaunchIcon class="w-4 h-4 sm:w-5 sm:h-5" />
+                <span v-if="submitting">Envoi...</span>
+                <template v-else>
+                  <span class="hidden sm:inline">{{ campaign.sendType === 'immediate' ? 'Envoyer maintenant' : 'Planifier la campagne' }}</span>
+                  <span class="sm:hidden">{{ campaign.sendType === 'immediate' ? 'Envoyer' : 'Planifier' }}</span>
+                </template>
               </button>
             </div>
           </div>

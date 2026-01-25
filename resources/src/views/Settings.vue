@@ -1,188 +1,188 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-6 sm:mb-8">
         <div class="flex items-center gap-2">
-          <Cog6ToothIcon class="w-8 h-8 text-primary" />
-          <h1 class="text-3xl font-bold">Paramètres</h1>
+          <Cog6ToothIcon class="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+          <h1 class="text-2xl sm:text-3xl font-bold">Paramètres</h1>
         </div>
-        <p class="text-muted-foreground mt-2">Configurez votre compte et vos préférences</p>
+        <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Configurez votre compte et vos préférences</p>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary"></div>
       </div>
 
-      <div v-else class="max-w-2xl space-y-6">
-        <div class="rounded-lg border bg-card p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <UserCircleIcon class="w-5 h-5 text-primary" />
-            <h3 class="font-semibold">Profil</h3>
+      <div v-else class="max-w-2xl space-y-4 sm:space-y-6">
+        <div class="rounded-lg border bg-card p-4 sm:p-6">
+          <div class="flex items-center gap-2 mb-3 sm:mb-4">
+            <UserCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <h3 class="font-semibold text-sm sm:text-base">Profil</h3>
           </div>
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium flex items-center gap-2">
-                <UserIcon class="w-4 h-4 text-muted-foreground" />
+          <div class="space-y-3 sm:space-y-4">
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium flex items-center gap-2">
+                <UserIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                 Nom complet
               </label>
               <input
                 v-model="formData.name"
                 type="text"
                 placeholder="Votre nom complet"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
-            <div class="space-y-2">
-              <label class="text-sm font-medium flex items-center gap-2">
-                <EnvelopeIcon class="w-4 h-4 text-muted-foreground" />
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium flex items-center gap-2">
+                <EnvelopeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                 Email
               </label>
               <input
                 v-model="formData.email"
                 type="email"
                 placeholder="votre@email.com"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border bg-card p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <KeyIcon class="w-5 h-5 text-primary" />
-            <h3 class="font-semibold">Sécurité</h3>
+        <div class="rounded-lg border bg-card p-4 sm:p-6">
+          <div class="flex items-center gap-2 mb-3 sm:mb-4">
+            <KeyIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <h3 class="font-semibold text-sm sm:text-base">Sécurité</h3>
           </div>
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Nouveau mot de passe</label>
+          <div class="space-y-3 sm:space-y-4">
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium">Nouveau mot de passe</label>
               <input
                 v-model="formData.password"
                 type="password"
                 placeholder="Laisser vide pour ne pas changer"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Confirmer le mot de passe</label>
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium">Confirmer le mot de passe</label>
               <input
                 v-model="formData.password_confirmation"
                 type="password"
                 placeholder="Confirmer le nouveau mot de passe"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border bg-card p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <BellIcon class="w-5 h-5 text-primary" />
-            <h3 class="font-semibold">Notifications</h3>
+        <div class="rounded-lg border bg-card p-4 sm:p-6">
+          <div class="flex items-center gap-2 mb-3 sm:mb-4">
+            <BellIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <h3 class="font-semibold text-sm sm:text-base">Notifications</h3>
           </div>
-          <div class="space-y-3">
-            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/50 transition-colors">
-              <input v-model="formData.email_notifications" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <EnvelopeIcon class="w-4 h-4 text-muted-foreground" />
-                  <div class="font-medium text-sm">Notifications par email</div>
+          <div class="space-y-2 sm:space-y-3">
+            <label class="flex items-center gap-2 sm:gap-3 cursor-pointer p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
+              <input v-model="formData.email_notifications" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <EnvelopeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                  <div class="font-medium text-xs sm:text-sm">Notifications email</div>
                 </div>
-                <div class="text-xs text-muted-foreground mt-1">Recevoir les alertes importantes par email</div>
+                <div class="text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">Recevoir les alertes importantes par email</div>
               </div>
             </label>
-            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/50 transition-colors">
-              <input v-model="formData.weekly_reports" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <ChartBarIcon class="w-4 h-4 text-muted-foreground" />
-                  <div class="font-medium text-sm">Rapports hebdomadaires</div>
+            <label class="flex items-center gap-2 sm:gap-3 cursor-pointer p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
+              <input v-model="formData.weekly_reports" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <ChartBarIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                  <div class="font-medium text-xs sm:text-sm">Rapports hebdo</div>
                 </div>
-                <div class="text-xs text-muted-foreground mt-1">Recevoir les statistiques chaque lundi matin</div>
+                <div class="text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">Recevoir les statistiques chaque lundi matin</div>
               </div>
             </label>
-            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/50 transition-colors">
-              <input v-model="formData.campaign_alerts" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <ExclamationTriangleIcon class="w-4 h-4 text-muted-foreground" />
-                  <div class="font-medium text-sm">Alertes campagnes</div>
+            <label class="flex items-center gap-2 sm:gap-3 cursor-pointer p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
+              <input v-model="formData.campaign_alerts" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <ExclamationTriangleIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                  <div class="font-medium text-xs sm:text-sm">Alertes campagnes</div>
                 </div>
-                <div class="text-xs text-muted-foreground mt-1">Être notifié en cas d'échec ou d'anomalie</div>
+                <div class="text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">Être notifié en cas d'échec ou d'anomalie</div>
               </div>
             </label>
-            <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-muted/50 transition-colors">
-              <input v-model="formData.low_credit_alert" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <CreditCardIcon class="w-4 h-4 text-muted-foreground" />
-                  <div class="font-medium text-sm">Alerte crédit faible</div>
+            <label class="flex items-center gap-2 sm:gap-3 cursor-pointer p-2 sm:p-3 rounded-lg hover:bg-muted/50 transition-colors">
+              <input v-model="formData.low_credit_alert" type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <CreditCardIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                  <div class="font-medium text-xs sm:text-sm">Alerte crédit faible</div>
                 </div>
-                <div class="text-xs text-muted-foreground mt-1">Être notifié quand le solde est bas</div>
+                <div class="text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">Être notifié quand le solde est bas</div>
               </div>
             </label>
           </div>
         </div>
 
-        <div class="rounded-lg border bg-card p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <GlobeAltIcon class="w-5 h-5 text-primary" />
-            <h3 class="font-semibold">Préférences régionales</h3>
+        <div class="rounded-lg border bg-card p-4 sm:p-6">
+          <div class="flex items-center gap-2 mb-3 sm:mb-4">
+            <GlobeAltIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <h3 class="font-semibold text-sm sm:text-base">Préférences régionales</h3>
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Langue</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium">Langue</label>
               <select
                 v-model="formData.language"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="fr">Français</option>
                 <option value="en">English</option>
               </select>
             </div>
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Fuseau horaire</label>
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium">Fuseau horaire</label>
               <select
                 v-model="formData.timezone"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <option value="Africa/Libreville">Africa/Libreville (WAT)</option>
-                <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
-                <option value="Africa/Douala">Africa/Douala (WAT)</option>
-                <option value="Europe/Paris">Europe/Paris (CET)</option>
+                <option value="Africa/Libreville">Africa/Libreville</option>
+                <option value="Africa/Lagos">Africa/Lagos</option>
+                <option value="Africa/Douala">Africa/Douala</option>
+                <option value="Europe/Paris">Europe/Paris</option>
                 <option value="UTC">UTC</option>
               </select>
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border bg-card p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <DocumentTextIcon class="w-5 h-5 text-primary" />
-            <h3 class="font-semibold">Préférences SMS</h3>
+        <div class="rounded-lg border bg-card p-4 sm:p-6">
+          <div class="flex items-center gap-2 mb-3 sm:mb-4">
+            <DocumentTextIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <h3 class="font-semibold text-sm sm:text-base">Préférences SMS</h3>
           </div>
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Signature par défaut</label>
+          <div class="space-y-3 sm:space-y-4">
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium">Signature par défaut</label>
               <input
                 v-model="formData.default_signature"
                 type="text"
                 placeholder="Ex: - JOBS SMS"
                 maxlength="30"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
-              <p class="text-xs text-muted-foreground">Ajoutée automatiquement à la fin de vos messages (max 30 caractères)</p>
+              <p class="text-xs text-muted-foreground">Ajoutée à la fin de vos messages (max 30 car.)</p>
             </div>
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Seuil alerte crédit (FCFA)</label>
+            <div class="space-y-1.5 sm:space-y-2">
+              <label class="text-xs sm:text-sm font-medium">Seuil alerte crédit (FCFA)</label>
               <input
                 v-model.number="formData.credit_alert_threshold"
                 type="number"
                 min="0"
                 step="1000"
                 placeholder="5000"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
-              <p class="text-xs text-muted-foreground">Recevoir une alerte quand le solde passe en dessous de ce montant</p>
+              <p class="text-xs text-muted-foreground">Alerte quand le solde est en dessous</p>
             </div>
           </div>
         </div>
@@ -201,13 +201,13 @@
           </div>
         </div>
 
-        <div class="flex gap-3">
-          <button @click="saveSettings" :disabled="saving" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <button @click="saveSettings" :disabled="saving" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2">
             <CheckCircleIcon v-if="!saving" class="w-4 h-4" />
             <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
             <span>{{ saving ? 'Enregistrement...' : 'Enregistrer' }}</span>
           </button>
-          <button @click="resetForm" :disabled="saving" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+          <button @click="resetForm" :disabled="saving" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2">
             <XCircleIcon class="w-4 h-4" />
             <span>Annuler</span>
           </button>
