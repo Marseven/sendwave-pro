@@ -1,59 +1,60 @@
 <template>
   <MainLayout>
-    <div class="p-8">
+    <div class="p-4 sm:p-6 lg:p-8">
       <!-- Header -->
-      <div class="mb-8 flex justify-between items-center">
+      <div class="mb-4 sm:mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-3 sm:gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-foreground">Webhooks</h1>
-          <p class="text-muted-foreground mt-2">Intégrez SendWave Pro avec vos applications tierces</p>
+          <h1 class="text-xl sm:text-3xl font-bold text-foreground">Webhooks</h1>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Intégrez SendWave Pro avec vos applications tierces</p>
         </div>
         <button
           @click="openCreateDialog"
-          class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+          class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium h-9 sm:h-10"
         >
-          <PlusIcon class="w-5 h-5" />
-          Nouveau Webhook
+          <PlusIcon class="w-4 h-4 sm:w-5 sm:h-5" />
+          <span class="hidden sm:inline">Nouveau Webhook</span>
+          <span class="sm:hidden">Nouveau</span>
         </button>
       </div>
 
       <!-- Info Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-8">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-medium text-muted-foreground">Webhooks Actifs</h3>
-            <component :is="webhookIcon" class="w-8 h-8 text-primary" />
+            <h3 class="text-xs sm:text-sm font-medium text-muted-foreground">Webhooks Actifs</h3>
+            <component :is="webhookIcon" class="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
           </div>
-          <p class="text-3xl font-bold">{{ activeWebhooksCount }}</p>
-          <p class="text-xs text-muted-foreground mt-2">sur {{ webhooks.length }} total</p>
+          <p class="text-2xl sm:text-3xl font-bold">{{ activeWebhooksCount }}</p>
+          <p class="text-xs text-muted-foreground mt-1 sm:mt-2">sur {{ webhooks.length }} total</p>
         </div>
 
-        <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-medium text-muted-foreground">Livraisons Réussies</h3>
-            <CheckCircleIcon class="w-8 h-8 text-success" />
+            <h3 class="text-xs sm:text-sm font-medium text-muted-foreground">Livraisons Réussies</h3>
+            <CheckCircleIcon class="w-6 h-6 sm:w-8 sm:h-8 text-success" />
           </div>
-          <p class="text-3xl font-bold text-success">{{ totalSuccessCount }}</p>
-          <p class="text-xs text-muted-foreground mt-2">au total</p>
+          <p class="text-2xl sm:text-3xl font-bold text-success">{{ totalSuccessCount }}</p>
+          <p class="text-xs text-muted-foreground mt-1 sm:mt-2">au total</p>
         </div>
 
-        <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-medium text-muted-foreground">Échecs</h3>
-            <ExclamationTriangleIcon class="w-8 h-8 text-destructive" />
+            <h3 class="text-xs sm:text-sm font-medium text-muted-foreground">Échecs</h3>
+            <ExclamationTriangleIcon class="w-6 h-6 sm:w-8 sm:h-8 text-destructive" />
           </div>
-          <p class="text-3xl font-bold text-destructive">{{ totalFailureCount }}</p>
-          <p class="text-xs text-muted-foreground mt-2">au total</p>
+          <p class="text-2xl sm:text-3xl font-bold text-destructive">{{ totalFailureCount }}</p>
+          <p class="text-xs text-muted-foreground mt-1 sm:mt-2">au total</p>
         </div>
       </div>
 
       <!-- Events Info -->
-      <div class="rounded-lg border bg-card shadow-sm mb-8">
-        <div class="p-6 border-b border-border">
-          <h2 class="text-xl font-semibold">Événements Disponibles</h2>
-          <p class="text-sm text-muted-foreground mt-1">12 types d'événements pour déclencher vos webhooks</p>
+      <div class="rounded-lg border bg-card shadow-sm mb-4 sm:mb-8">
+        <div class="p-4 sm:p-6 border-b border-border">
+          <h2 class="text-base sm:text-xl font-semibold">Événements Disponibles</h2>
+          <p class="text-xs sm:text-sm text-muted-foreground mt-1">12 types d'événements pour déclencher vos webhooks</p>
         </div>
-        <div class="p-6">
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div class="p-4 sm:p-6">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             <div
               v-for="event in availableEvents"
               :key="event"

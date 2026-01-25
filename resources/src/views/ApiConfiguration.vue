@@ -1,12 +1,12 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8">
         <div class="flex items-center gap-2">
-          <KeyIcon class="w-8 h-8 text-primary" />
-          <h1 class="text-3xl font-bold">Configuration des API SMS</h1>
+          <KeyIcon class="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+          <h1 class="text-xl sm:text-3xl font-bold">Configuration des API SMS</h1>
         </div>
-        <p class="text-muted-foreground mt-2">Configurez les API des opérateurs Airtel et Moov Gabon</p>
+        <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Configurez les API des opérateurs Airtel et Moov Gabon</p>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-12">
