@@ -44,7 +44,7 @@
       <div class="rounded-lg border bg-card p-3 sm:p-4 mb-4 sm:mb-6">
         <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-2 sm:gap-4">
           <div class="col-span-1 sm:flex-1 sm:min-w-[150px]">
-            <label class="text-xs sm:text-sm font-medium mb-1 block">Date debut</label>
+            <label class="text-xs sm:text-sm font-medium mb-1 block">Date début</label>
             <input
               v-model="startDate"
               type="date"
@@ -70,7 +70,7 @@
             @change="applyQuickPeriod"
             class="h-9 sm:h-10 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm"
           >
-            <option value="">Periode...</option>
+            <option value="">Période...</option>
             <option value="today">Aujourd'hui</option>
             <option value="yesterday">Hier</option>
             <option value="week">Cette semaine</option>
@@ -94,28 +94,28 @@
                 <span class="text-xs sm:text-sm font-medium text-muted-foreground">Campagnes</span>
               </div>
               <p class="text-lg sm:text-2xl font-bold">{{ dashboard?.overview.campaigns_executed || 0 }}</p>
-              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">sur la periode</p>
+              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">sur la période</p>
             </div>
             <div class="rounded-lg border bg-card p-3 sm:p-5">
               <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                 <PaperAirplaneIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                <span class="text-xs sm:text-sm font-medium text-muted-foreground">SMS Envoyes</span>
+                <span class="text-xs sm:text-sm font-medium text-muted-foreground">SMS Envoyés</span>
               </div>
               <p class="text-lg sm:text-2xl font-bold">{{ formatNumber(dashboard?.overview.sms_sent || 0) }}</p>
-              <p class="text-xs text-success mt-1 hidden sm:block">{{ dashboard?.overview.success_rate?.toFixed(1) }}% livres</p>
+              <p class="text-xs text-success mt-1 hidden sm:block">{{ dashboard?.overview.success_rate?.toFixed(1) }}% livrés</p>
             </div>
             <div class="rounded-lg border bg-card p-3 sm:p-5">
               <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                 <CheckCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success" />
-                <span class="text-xs sm:text-sm font-medium text-muted-foreground">Taux succes</span>
+                <span class="text-xs sm:text-sm font-medium text-muted-foreground">Taux succès</span>
               </div>
               <p class="text-lg sm:text-2xl font-bold text-success">{{ dashboard?.overview.success_rate?.toFixed(1) || 0 }}%</p>
-              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">{{ dashboard?.overview.sms_delivered || 0 }} livres</p>
+              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">{{ dashboard?.overview.sms_delivered || 0 }} livrés</p>
             </div>
             <div class="rounded-lg border bg-card p-3 sm:p-5">
               <div class="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                 <BanknotesIcon class="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
-                <span class="text-xs sm:text-sm font-medium text-muted-foreground">Cout Total</span>
+                <span class="text-xs sm:text-sm font-medium text-muted-foreground">Coût Total</span>
               </div>
               <p class="text-lg sm:text-2xl font-bold">{{ (dashboard?.overview.total_cost || 0).toLocaleString() }}</p>
               <p class="text-xs text-muted-foreground mt-1 hidden sm:block">{{ dashboard?.overview.average_cost_per_sms?.toFixed(0) || 0 }} XAF/SMS</p>
@@ -140,11 +140,11 @@
                   <tr>
                     <th class="px-4 py-3 text-left text-sm font-medium">Campagne</th>
                     <th class="px-4 py-3 text-left text-sm font-medium">Date</th>
-                    <th class="px-4 py-3 text-center text-sm font-medium">Envoyes</th>
-                    <th class="px-4 py-3 text-center text-sm font-medium">Livres</th>
-                    <th class="px-4 py-3 text-center text-sm font-medium">Echecs</th>
+                    <th class="px-4 py-3 text-center text-sm font-medium">Envoyés</th>
+                    <th class="px-4 py-3 text-center text-sm font-medium">Livrés</th>
+                    <th class="px-4 py-3 text-center text-sm font-medium">Échecs</th>
                     <th class="px-4 py-3 text-center text-sm font-medium">Taux</th>
-                    <th class="px-4 py-3 text-right text-sm font-medium">Cout</th>
+                    <th class="px-4 py-3 text-right text-sm font-medium">Coût</th>
                     <th class="px-4 py-3 text-center text-sm font-medium">Statut</th>
                   </tr>
                 </thead>
@@ -186,15 +186,15 @@
                   </span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-xs">
-                  <div><span class="text-muted-foreground">Envoyes:</span> {{ campaign.messages_sent?.toLocaleString() }}</div>
+                  <div><span class="text-muted-foreground">Envoyés:</span> {{ campaign.messages_sent?.toLocaleString() }}</div>
                   <div><span class="text-muted-foreground">Taux:</span> <span :class="getSuccessRateClass(campaign.success_rate)">{{ campaign.success_rate?.toFixed(1) || 0 }}%</span></div>
-                  <div><span class="text-muted-foreground">Livres:</span> <span class="text-success">{{ campaign.delivered?.toLocaleString() || '-' }}</span></div>
-                  <div><span class="text-muted-foreground">Cout:</span> {{ (campaign.cost || 0).toLocaleString() }} XAF</div>
+                  <div><span class="text-muted-foreground">Livrés:</span> <span class="text-success">{{ campaign.delivered?.toLocaleString() || '-' }}</span></div>
+                  <div><span class="text-muted-foreground">Coût:</span> {{ (campaign.cost || 0).toLocaleString() }} XAF</div>
                 </div>
               </div>
             </div>
             <div v-if="filteredCampaigns.length === 0" class="p-6 sm:p-8 text-center text-muted-foreground text-sm">
-              Aucune campagne sur cette periode
+              Aucune campagne sur cette période
             </div>
           </div>
         </div>
@@ -207,7 +207,7 @@
           <div class="rounded-lg border bg-card p-3 sm:p-5">
             <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
               <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-success"></div>
-              <span class="text-xs sm:text-sm font-medium">Livres</span>
+              <span class="text-xs sm:text-sm font-medium">Livrés</span>
             </div>
             <p class="text-lg sm:text-2xl font-bold text-success">{{ deliveryStats.delivered }}</p>
           </div>
@@ -221,7 +221,7 @@
           <div class="rounded-lg border bg-card p-3 sm:p-5">
             <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
               <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-destructive"></div>
-              <span class="text-xs sm:text-sm font-medium">Echecs</span>
+              <span class="text-xs sm:text-sm font-medium">Échecs</span>
             </div>
             <p class="text-lg sm:text-2xl font-bold text-destructive">{{ deliveryStats.failed }}</p>
           </div>
@@ -240,9 +240,9 @@
             <h3 class="font-semibold text-sm sm:text-base">Historique des livraisons</h3>
             <select v-model="deliveryFilter" class="h-8 sm:h-9 px-2 sm:px-3 rounded-md border border-input bg-background text-xs sm:text-sm">
               <option value="">Tous les statuts</option>
-              <option value="delivered">Livres</option>
-              <option value="sent">Envoyes</option>
-              <option value="failed">Echecs</option>
+              <option value="delivered">Livrés</option>
+              <option value="sent">Envoyés</option>
+              <option value="failed">Échecs</option>
             </select>
           </div>
           <!-- Desktop Table -->
@@ -252,7 +252,7 @@
                 <tr>
                   <th class="px-4 py-3 text-left text-sm font-medium">Destinataire</th>
                   <th class="px-4 py-3 text-left text-sm font-medium">Message</th>
-                  <th class="px-4 py-3 text-left text-sm font-medium">Operateur</th>
+                  <th class="px-4 py-3 text-left text-sm font-medium">Opérateur</th>
                   <th class="px-4 py-3 text-left text-sm font-medium">Date envoi</th>
                   <th class="px-4 py-3 text-center text-sm font-medium">Statut</th>
                 </tr>
@@ -301,7 +301,7 @@
             </div>
           </div>
           <div v-if="deliveryMessages.length === 0" class="p-6 sm:p-8 text-center text-muted-foreground text-sm">
-            Aucun message sur cette periode
+            Aucun message sur cette période
           </div>
         </div>
       </div>
@@ -312,7 +312,7 @@
           <div class="rounded-lg border bg-card p-3 sm:p-5">
             <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
               <CalendarIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-              <span class="text-xs sm:text-sm font-medium">Planifiees</span>
+              <span class="text-xs sm:text-sm font-medium">Planifiées</span>
             </div>
             <p class="text-lg sm:text-2xl font-bold">{{ scheduledCampaigns.filter(c => c.status === 'scheduled').length }}</p>
           </div>
@@ -326,7 +326,7 @@
           <div class="rounded-lg border bg-card p-3 sm:p-5">
             <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
               <CheckCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success" />
-              <span class="text-xs sm:text-sm font-medium">Executees</span>
+              <span class="text-xs sm:text-sm font-medium">Exécutées</span>
             </div>
             <p class="text-lg sm:text-2xl font-bold">{{ scheduledCampaigns.filter(c => c.status === 'completed').length }}</p>
           </div>
@@ -335,7 +335,7 @@
         <!-- Scheduled Campaigns List -->
         <div class="rounded-lg border bg-card">
           <div class="p-3 sm:p-4 border-b">
-            <h3 class="font-semibold text-sm sm:text-base">Campagnes planifiees</h3>
+            <h3 class="font-semibold text-sm sm:text-base">Campagnes planifiées</h3>
           </div>
           <div class="divide-y">
             <div v-for="campaign in scheduledCampaigns" :key="campaign.id" class="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 hover:bg-muted/30">
@@ -357,7 +357,7 @@
             </div>
           </div>
           <div v-if="scheduledCampaigns.length === 0" class="p-6 sm:p-8 text-center text-muted-foreground text-sm">
-            Aucune campagne planifiee
+            Aucune campagne planifiée
           </div>
         </div>
       </div>
@@ -404,7 +404,7 @@
         <div v-if="archivedPeriods.length === 0" class="text-center py-8 sm:py-12">
           <ArchiveBoxIcon class="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground mb-4" />
           <h3 class="text-base sm:text-lg font-semibold mb-2">Aucune archive</h3>
-          <p class="text-sm text-muted-foreground">Les archives seront creees automatiquement chaque mois</p>
+          <p class="text-sm text-muted-foreground">Les archives seront créées automatiquement chaque mois</p>
         </div>
       </div>
 
@@ -415,14 +415,14 @@
           <div class="rounded-lg border bg-card p-3 sm:p-5">
             <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
               <BanknotesIcon class="w-4 h-4 sm:w-5 sm:h-5 text-success" />
-              <span class="text-xs sm:text-sm font-medium">Achetes</span>
+              <span class="text-xs sm:text-sm font-medium">Achetés</span>
             </div>
             <p class="text-sm sm:text-2xl font-bold text-success">{{ creditStats.purchased.toLocaleString() }}</p>
           </div>
           <div class="rounded-lg border bg-card p-3 sm:p-5">
             <div class="flex items-center gap-1.5 sm:gap-2 mb-2">
               <ArrowTrendingDownIcon class="w-4 h-4 sm:w-5 sm:h-5 text-destructive" />
-              <span class="text-xs sm:text-sm font-medium">Utilises</span>
+              <span class="text-xs sm:text-sm font-medium">Utilisés</span>
             </div>
             <p class="text-sm sm:text-2xl font-bold text-destructive">{{ creditStats.used.toLocaleString() }}</p>
           </div>
@@ -497,11 +497,11 @@ import { showSuccess, showError } from '@/utils/notifications'
 
 // Tabs
 const tabs = [
-  { id: 'campaign', label: 'Campaign Report' },
-  { id: 'delivery', label: 'Delivery Report' },
-  { id: 'schedule', label: 'Schedule Report' },
-  { id: 'archived', label: 'Archived Report' },
-  { id: 'credit', label: 'Credit History' }
+  { id: 'campaign', label: 'Rapport campagnes' },
+  { id: 'delivery', label: 'Rapport livraisons' },
+  { id: 'schedule', label: 'Rapport planifiés' },
+  { id: 'archived', label: 'Archives' },
+  { id: 'credit', label: 'Historique crédits' }
 ]
 const activeTab = ref('campaign')
 
@@ -698,7 +698,7 @@ async function exportReport(format: 'pdf' | 'excel') {
     }
 
     analyticsService.downloadFile(blob, filename)
-    showSuccess(`Rapport ${format.toUpperCase()} telecharge`)
+    showSuccess(`Rapport ${format.toUpperCase()} téléchargé`)
   } catch (error: any) {
     showError(error.response?.data?.message || 'Erreur lors de l\'export')
   } finally {

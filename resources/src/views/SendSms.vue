@@ -17,7 +17,7 @@
               class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 border rounded-lg hover:bg-accent transition-colors text-xs sm:text-sm font-medium"
             >
               <DocumentTextIcon class="w-4 h-4" />
-              <span class="hidden sm:inline">Templates</span>
+              <span class="hidden sm:inline">Modèles</span>
             </button>
             <button
               @click="saveDraft"
@@ -49,33 +49,33 @@
               <!-- Channel & Route Selection -->
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <div class="space-y-1.5 sm:space-y-2">
-                  <label class="text-xs sm:text-sm font-medium">Message Channel</label>
+                  <label class="text-xs sm:text-sm font-medium">Canal de message</label>
                   <select
                     v-model="channel"
                     class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-primary"
                   >
-                    <option value="transactional">Transactional</option>
+                    <option value="transactional">Transactionnel</option>
                     <option value="marketing">Marketing</option>
                   </select>
                 </div>
                 <div class="space-y-1.5 sm:space-y-2">
-                  <label class="text-xs sm:text-sm font-medium">Message Route</label>
+                  <label class="text-xs sm:text-sm font-medium">Route du message</label>
                   <select
                     v-model="route"
                     class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-primary"
                   >
-                    <option value="auto">Auto (Recommended)</option>
+                    <option value="auto">Auto (Recommandé)</option>
                     <option value="airtel">Airtel Direct</option>
                     <option value="moov">Moov Direct</option>
                   </select>
                 </div>
                 <div class="space-y-1.5 sm:space-y-2 sm:col-span-2 lg:col-span-1">
-                  <label class="text-xs sm:text-sm font-medium">Sender ID</label>
+                  <label class="text-xs sm:text-sm font-medium">ID Expéditeur</label>
                   <select
                     v-model="senderId"
                     class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm focus:ring-2 focus:ring-primary"
                   >
-                    <option value="JOBSSMS">JOBSSMS (Default)</option>
+                    <option value="JOBSSMS">JOBSSMS (Défaut)</option>
                     <option value="SendWave">SendWave</option>
                   </select>
                 </div>
@@ -143,20 +143,20 @@
             <div class="rounded-lg border bg-card p-6 space-y-6">
               <div class="flex items-center gap-2 pb-4 border-b">
                 <CogIcon class="w-5 h-5 text-primary" />
-                <h3 class="font-semibold">Options avancees</h3>
+                <h3 class="font-semibold">Options avancées</h3>
               </div>
 
               <!-- Same fields as Send SMS -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium">Message Channel</label>
+                  <label class="text-sm font-medium">Canal de message</label>
                   <select v-model="channel" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                    <option value="transactional">Transactional</option>
+                    <option value="transactional">Transactionnel</option>
                     <option value="marketing">Marketing</option>
                   </select>
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium">Message Route</label>
+                  <label class="text-sm font-medium">Route du message</label>
                   <select v-model="route" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                     <option value="auto">Auto</option>
                     <option value="airtel">Airtel Direct</option>
@@ -170,7 +170,7 @@
                 <label class="text-sm font-medium">Destinataires</label>
                 <textarea
                   v-model="recipients"
-                  placeholder="Numeros de telephone..."
+                  placeholder="Numéros de téléphone..."
                   rows="3"
                   class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono resize-none"
                 ></textarea>
@@ -192,21 +192,21 @@
                 <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent/50">
                   <input type="checkbox" v-model="options.unicode" class="w-4 h-4 rounded" />
                   <div>
-                    <p class="font-medium text-sm">Unicode Support</p>
-                    <p class="text-xs text-muted-foreground">Caracteres speciaux et emojis</p>
+                    <p class="font-medium text-sm">Support Unicode</p>
+                    <p class="text-xs text-muted-foreground">Caractères spéciaux et emojis</p>
                   </div>
                 </label>
                 <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent/50">
                   <input type="checkbox" v-model="options.flash" class="w-4 h-4 rounded" />
                   <div>
-                    <p class="font-medium text-sm">Flash SMS</p>
-                    <p class="text-xs text-muted-foreground">Affichage immediat</p>
+                    <p class="font-medium text-sm">SMS Flash</p>
+                    <p class="text-xs text-muted-foreground">Affichage immédiat</p>
                   </div>
                 </label>
                 <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent/50">
                   <input type="checkbox" v-model="options.dlr" class="w-4 h-4 rounded" />
                   <div>
-                    <p class="font-medium text-sm">Delivery Report</p>
+                    <p class="font-medium text-sm">Rapport de livraison</p>
                     <p class="text-xs text-muted-foreground">Accusé de réception</p>
                   </div>
                 </label>
@@ -245,7 +245,7 @@
                   class="hidden"
                 />
                 <CloudArrowUpIcon class="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <p class="text-sm font-medium mb-2">Glissez-deposez votre fichier ici</p>
+                <p class="text-sm font-medium mb-2">Glissez-déposez votre fichier ici</p>
                 <p class="text-xs text-muted-foreground mb-4">ou</p>
                 <button
                   @click="$refs.fileInput.click()"
@@ -254,7 +254,7 @@
                   Parcourir
                 </button>
                 <p class="text-xs text-muted-foreground mt-4">
-                  Formats acceptes: CSV, Excel (.xlsx, .xls), TXT
+                  Formats acceptés: CSV, Excel (.xlsx, .xls), TXT
                 </p>
               </div>
 
@@ -265,7 +265,7 @@
                     <DocumentTextIcon class="w-8 h-8 text-primary" />
                     <div>
                       <p class="font-medium">{{ uploadedFile.name }}</p>
-                      <p class="text-xs text-muted-foreground">{{ uploadedFile.rows }} lignes detectees</p>
+                      <p class="text-xs text-muted-foreground">{{ uploadedFile.rows }} lignes détectées</p>
                     </div>
                   </div>
                   <button @click="uploadedFile = null" class="text-muted-foreground hover:text-destructive">
@@ -368,7 +368,7 @@
               </div>
               <div class="border-t pt-2 sm:pt-3 mt-2 sm:mt-3">
                 <div class="flex justify-between">
-                  <span class="font-medium text-sm">Cout estime</span>
+                  <span class="font-medium text-sm">Coût estimé</span>
                   <span class="text-lg sm:text-xl font-bold text-primary">{{ estimatedCost }} XAF</span>
                 </div>
               </div>
@@ -386,7 +386,7 @@
                 <UserGroupIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
                 <div class="min-w-0">
                   <p class="font-medium text-xs sm:text-sm">Ajouter des contacts</p>
-                  <p class="text-xs text-muted-foreground hidden sm:block">Depuis votre repertoire</p>
+                  <p class="text-xs text-muted-foreground hidden sm:block">Depuis votre répertoire</p>
                 </div>
               </button>
               <button
@@ -395,8 +395,8 @@
               >
                 <FolderIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
                 <div class="min-w-0">
-                  <p class="font-medium text-xs sm:text-sm">Selectionner un groupe</p>
-                  <p class="text-xs text-muted-foreground hidden sm:block">Envoi a un groupe entier</p>
+                  <p class="font-medium text-xs sm:text-sm">Sélectionner un groupe</p>
+                  <p class="text-xs text-muted-foreground hidden sm:block">Envoi à un groupe entier</p>
                 </div>
               </button>
               <button
@@ -405,8 +405,8 @@
               >
                 <DocumentTextIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
                 <div class="min-w-0">
-                  <p class="font-medium text-xs sm:text-sm">Utiliser un template</p>
-                  <p class="text-xs text-muted-foreground hidden sm:block">Messages predefinis</p>
+                  <p class="font-medium text-xs sm:text-sm">Utiliser un modèle</p>
+                  <p class="text-xs text-muted-foreground hidden sm:block">Messages prédéfinis</p>
                 </div>
               </button>
             </div>
@@ -414,7 +414,7 @@
 
           <!-- Recent Templates -->
           <div class="rounded-lg border bg-card p-4 sm:p-6">
-            <h3 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Templates recents</h3>
+            <h3 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Modèles récents</h3>
             <div class="space-y-2">
               <button
                 v-for="template in recentTemplates"
@@ -426,7 +426,7 @@
                 <p class="text-xs text-muted-foreground truncate">{{ template.content }}</p>
               </button>
               <p v-if="recentTemplates.length === 0" class="text-xs sm:text-sm text-muted-foreground text-center py-3 sm:py-4">
-                Aucun template recent
+                Aucun modèle récent
               </p>
             </div>
           </div>
@@ -480,7 +480,7 @@
     <div v-if="showContactPicker" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/50" @click="showContactPicker = false"></div>
       <div class="relative bg-card rounded-lg shadow-lg w-full max-w-sm sm:max-w-lg p-4 sm:p-6 max-h-[85vh] overflow-hidden flex flex-col">
-        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Selectionner des contacts</h3>
+        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Sélectionner des contacts</h3>
         <input
           type="text"
           v-model="contactSearch"
@@ -526,7 +526,7 @@
     <div v-if="showTemplates" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/50" @click="showTemplates = false"></div>
       <div class="relative bg-card rounded-lg shadow-lg w-full max-w-sm sm:max-w-lg p-4 sm:p-6 max-h-[85vh] overflow-hidden flex flex-col">
-        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Templates</h3>
+        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Modèles</h3>
         <div class="flex-1 overflow-y-auto space-y-2 min-h-0">
           <button
             v-for="template in templates"
@@ -585,9 +585,9 @@ interface Template {
 
 // Tabs
 const tabs = [
-  { id: 'send', label: 'Send SMS' },
-  { id: 'opt', label: 'Send Opt SMS' },
-  { id: 'file', label: 'SMS From File' }
+  { id: 'send', label: 'Envoyer SMS' },
+  { id: 'opt', label: 'Envoi avancé' },
+  { id: 'file', label: 'Import fichier' }
 ]
 const activeTab = ref('send')
 

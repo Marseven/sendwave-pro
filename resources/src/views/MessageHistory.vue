@@ -309,7 +309,7 @@
             <p class="text-muted-foreground">{{ selectedMessage.campaign_name }}</p>
           </div>
           <div v-if="selectedMessage.provider">
-            <h3 class="font-semibold mb-2">Provider</h3>
+            <h3 class="font-semibold mb-2">Opérateur</h3>
             <p class="text-muted-foreground uppercase">{{ selectedMessage.provider }}</p>
           </div>
           <div v-if="selectedMessage.error_message" class="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
