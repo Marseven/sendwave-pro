@@ -1,17 +1,18 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex items-center justify-between">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 class="text-3xl font-bold">Groupes de Contacts</h1>
-          <p class="text-muted-foreground mt-2">Organisez vos contacts en groupes pour faciliter les envois</p>
+          <h1 class="text-xl sm:text-3xl font-bold">Groupes de Contacts</h1>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Organisez vos contacts en groupes</p>
         </div>
         <button
           @click="openAddModal"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
         >
           <PlusIcon class="w-4 h-4" />
-          <span>Nouveau groupe</span>
+          <span class="hidden sm:inline">Nouveau groupe</span>
+          <span class="sm:hidden">Nouveau</span>
         </button>
       </div>
 
@@ -19,30 +20,30 @@
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
 
-      <div v-else-if="groups.length === 0" class="flex flex-col items-center justify-center py-12 rounded-lg border bg-card">
-        <UserGroupIcon class="w-16 h-16 text-muted-foreground mb-4" />
-        <p class="text-lg font-medium">Aucun groupe trouvé</p>
-        <p class="text-sm text-muted-foreground mt-1">Créez des groupes pour organiser vos contacts</p>
+      <div v-else-if="groups.length === 0" class="flex flex-col items-center justify-center py-8 sm:py-12 rounded-lg border bg-card">
+        <UserGroupIcon class="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mb-4" />
+        <p class="text-base sm:text-lg font-medium">Aucun groupe trouvé</p>
+        <p class="text-xs sm:text-sm text-muted-foreground mt-1">Créez des groupes pour organiser vos contacts</p>
       </div>
 
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         <div
           v-for="group in groups"
           :key="group.id"
           class="rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow"
         >
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
+          <div class="p-4 sm:p-6">
+            <div class="flex items-start justify-between mb-3 sm:mb-4">
               <div class="flex-1">
-                <h3 class="font-semibold text-lg">{{ group.name }}</h3>
-                <p v-if="group.description" class="text-sm text-muted-foreground mt-1 line-clamp-2">
+                <h3 class="font-semibold text-base sm:text-lg">{{ group.name }}</h3>
+                <p v-if="group.description" class="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
                   {{ group.description }}
                 </p>
               </div>
             </div>
 
-            <div class="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-              <UsersIcon class="w-4 h-4" />
+            <div class="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
+              <UsersIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{{ group.contacts_count || 0 }} contact(s)</span>
             </div>
 
@@ -51,7 +52,7 @@
             </div>
           </div>
 
-          <div class="border-t p-4 bg-muted/30 flex gap-2">
+          <div class="border-t p-3 sm:p-4 bg-muted/30 flex gap-2">
             <button
               @click="viewGroupContacts(group)"
               class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9"
@@ -79,10 +80,10 @@
     <!-- Modal Ajout/Modification -->
     <div
       v-if="showAddModal || showEditModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4"
       @click.self="closeModal"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-lg">
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="border-b p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold">{{ editingGroup ? 'Modifier le groupe' : 'Nouveau groupe' }}</h2>
@@ -138,10 +139,10 @@
     <!-- Modal Contacts du Groupe -->
     <div
       v-if="showContactsModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4"
       @click.self="closeContactsModal"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] flex flex-col">
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-3xl max-h-[90vh] flex flex-col">
         <div class="border-b p-6">
           <div class="flex items-center justify-between">
             <div>

@@ -1,101 +1,116 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex items-center justify-between">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 class="text-3xl font-bold">Liste Noire</h1>
-          <p class="text-muted-foreground mt-2">Gérez les numéros bloqués pour l'envoi de SMS</p>
+          <h1 class="text-xl sm:text-3xl font-bold">Liste Noire</h1>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Gérez les numéros bloqués</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-2 sm:gap-3">
           <button
             @click="showCheckModal = true"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-10 px-2 sm:px-4 py-2"
           >
             <MagnifyingGlassIcon class="w-4 h-4" />
-            <span>Vérifier un numéro</span>
+            <span class="hidden sm:inline">Vérifier</span>
           </button>
           <button
             @click="openAddModal"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 sm:h-10 px-2 sm:px-4 py-2"
           >
             <PlusIcon class="w-4 h-4" />
-            <span>Ajouter un numéro</span>
+            <span class="hidden sm:inline">Ajouter</span>
           </button>
         </div>
       </div>
 
       <!-- Statistiques -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Total bloqués</div>
-          <div class="text-2xl font-bold mt-1">{{ totalBlocked }}</div>
+      <div class="grid grid-cols-3 gap-2 sm:gap-6 mb-4 sm:mb-8">
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Bloqués</div>
+          <div class="text-lg sm:text-2xl font-bold mt-1">{{ totalBlocked }}</div>
         </div>
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">Ajoutés ce mois</div>
-          <div class="text-2xl font-bold mt-1 text-destructive">{{ blockedThisMonth }}</div>
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Ce mois</div>
+          <div class="text-lg sm:text-2xl font-bold mt-1 text-destructive">{{ blockedThisMonth }}</div>
         </div>
-        <div class="rounded-lg border bg-card p-4">
-          <div class="text-sm text-muted-foreground">SMS évités</div>
-          <div class="text-2xl font-bold mt-1 text-success">{{ smsAvoided }}</div>
+        <div class="rounded-lg border bg-card p-3 sm:p-4">
+          <div class="text-xs sm:text-sm text-muted-foreground">Évités</div>
+          <div class="text-lg sm:text-2xl font-bold mt-1 text-success">{{ smsAvoided }}</div>
         </div>
       </div>
 
       <!-- Recherche -->
-      <div class="rounded-lg border bg-card shadow-sm mb-6 p-6">
-        <div class="flex gap-4">
-          <div class="flex-1">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Rechercher par numéro ou raison..."
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
-          </div>
-        </div>
+      <div class="rounded-lg border bg-card shadow-sm mb-4 sm:mb-6 p-3 sm:p-6">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Rechercher..."
+          class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        />
       </div>
 
       <!-- Liste des numéros bloqués -->
       <div class="rounded-lg border bg-card shadow-sm">
         <div v-if="loading" class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary"></div>
         </div>
-        <div v-else-if="filteredBlacklist.length === 0" class="flex flex-col items-center justify-center py-12">
-          <NoSymbolIcon class="w-16 h-16 text-muted-foreground mb-4" />
-          <p class="text-lg font-medium">Aucun numéro bloqué</p>
-          <p class="text-sm text-muted-foreground mt-1">La liste noire est vide</p>
+        <div v-else-if="filteredBlacklist.length === 0" class="flex flex-col items-center justify-center py-8 sm:py-12">
+          <NoSymbolIcon class="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground mb-4" />
+          <p class="text-base sm:text-lg font-medium">Aucun numéro bloqué</p>
+          <p class="text-xs sm:text-sm text-muted-foreground mt-1">La liste noire est vide</p>
         </div>
-        <div v-else class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="border-b bg-muted/50">
-              <tr>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Numéro</th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Raison</th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date d'ajout</th>
-                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="item in filteredBlacklist"
-                :key="item.id"
-                class="border-b transition-colors hover:bg-muted/50"
+        <template v-else>
+          <!-- Desktop Table -->
+          <div class="hidden md:block overflow-x-auto">
+            <table class="w-full">
+              <thead class="border-b bg-muted/50">
+                <tr>
+                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Numéro</th>
+                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Raison</th>
+                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Date d'ajout</th>
+                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="item in filteredBlacklist"
+                  :key="item.id"
+                  class="border-b transition-colors hover:bg-muted/50"
+                >
+                  <td class="p-4 font-medium font-mono">{{ item.phone_number }}</td>
+                  <td class="p-4 text-sm text-muted-foreground">{{ item.reason || '-' }}</td>
+                  <td class="p-4 text-sm text-muted-foreground">{{ formatDate(item.added_at || item.created_at) }}</td>
+                  <td class="p-4">
+                    <button
+                      @click="removeFromBlacklist(item)"
+                      class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-destructive/10 hover:text-destructive h-8 w-8"
+                      title="Retirer"
+                    >
+                      <TrashIcon class="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Mobile Cards -->
+          <div class="md:hidden divide-y">
+            <div v-for="item in filteredBlacklist" :key="item.id" class="p-3 flex items-center justify-between">
+              <div class="min-w-0 flex-1">
+                <div class="font-medium font-mono text-sm">{{ item.phone_number }}</div>
+                <div class="text-xs text-muted-foreground truncate">{{ item.reason || 'Aucune raison' }}</div>
+                <div class="text-xs text-muted-foreground">{{ formatDate(item.added_at || item.created_at) }}</div>
+              </div>
+              <button
+                @click="removeFromBlacklist(item)"
+                class="ml-2 inline-flex items-center justify-center rounded-md transition-colors hover:bg-destructive/10 hover:text-destructive h-8 w-8"
               >
-                <td class="p-4 font-medium font-mono">{{ item.phone_number }}</td>
-                <td class="p-4 text-sm text-muted-foreground">{{ item.reason || '-' }}</td>
-                <td class="p-4 text-sm text-muted-foreground">{{ formatDate(item.added_at || item.created_at) }}</td>
-                <td class="p-4">
-                  <button
-                    @click="removeFromBlacklist(item)"
-                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-destructive/10 hover:text-destructive h-8 w-8"
-                    title="Retirer de la liste noire"
-                  >
-                    <TrashIcon class="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                <TrashIcon class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </template>
       </div>
 
       <!-- Pagination -->
@@ -125,10 +140,10 @@
     <!-- Modal Ajouter numéro -->
     <div
       v-if="showAddModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4"
       @click.self="closeAddModal"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-md p-6">
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-bold">Ajouter à la liste noire</h2>
           <button @click="closeAddModal" class="hover:bg-accent rounded-full p-1">
@@ -182,10 +197,10 @@
     <!-- Modal Vérifier numéro -->
     <div
       v-if="showCheckModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4"
       @click.self="showCheckModal = false"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-md p-6">
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-md p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-bold">Vérifier un numéro</h2>
           <button @click="showCheckModal = false" class="hover:bg-accent rounded-full p-1">

@@ -1,130 +1,130 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8">
         <div class="flex items-center gap-2">
-          <UserCircleIcon class="w-8 h-8 text-primary" />
-          <h1 class="text-3xl font-bold">Mon Profil</h1>
+          <UserCircleIcon class="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+          <h1 class="text-2xl sm:text-3xl font-bold">Mon Profil</h1>
         </div>
-        <p class="text-muted-foreground mt-2">Gérez vos informations personnelles et préférences</p>
+        <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Gérez vos informations personnelles</p>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary"></div>
       </div>
 
-      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <!-- Left Column - Profile Info & Stats -->
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6">
           <!-- Profile Card -->
-          <div class="rounded-lg border bg-card p-6">
+          <div class="rounded-lg border bg-card p-4 sm:p-6">
             <div class="flex flex-col items-center text-center">
-              <div class="relative mb-4">
-                <div class="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-3xl font-bold">
+              <div class="relative mb-3 sm:mb-4">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl sm:text-3xl font-bold">
                   {{ userInitials }}
                 </div>
-                <button class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-accent border-2 border-background flex items-center justify-center hover:bg-accent/80 transition-colors">
-                  <CameraIcon class="w-4 h-4" />
+                <button class="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent border-2 border-background flex items-center justify-center hover:bg-accent/80 transition-colors">
+                  <CameraIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
               </div>
-              <h2 class="text-xl font-bold">{{ profileData.name }}</h2>
-              <p class="text-sm text-muted-foreground">{{ profileData.email }}</p>
-              <div class="mt-4 flex items-center gap-2">
-                <span class="px-3 py-1 rounded-full bg-success/10 text-success text-xs font-medium flex items-center gap-1">
-                  <CheckBadgeIcon class="w-4 h-4" />
-                  <span>Compte actif</span>
+              <h2 class="text-lg sm:text-xl font-bold">{{ profileData.name }}</h2>
+              <p class="text-xs sm:text-sm text-muted-foreground">{{ profileData.email }}</p>
+              <div class="mt-3 sm:mt-4 flex items-center gap-2">
+                <span class="px-2 sm:px-3 py-1 rounded-full bg-success/10 text-success text-xs font-medium flex items-center gap-1">
+                  <CheckBadgeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span>Actif</span>
                 </span>
               </div>
             </div>
           </div>
 
           <!-- Stats Card -->
-          <div class="rounded-lg border bg-card p-6">
-            <h3 class="font-semibold mb-4 flex items-center gap-2">
-              <ChartBarIcon class="w-5 h-5 text-primary" />
+          <div class="rounded-lg border bg-card p-4 sm:p-6">
+            <h3 class="font-semibold text-sm sm:text-base mb-3 sm:mb-4 flex items-center gap-2">
+              <ChartBarIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               <span>Statistiques</span>
             </h3>
-            <div class="space-y-3">
-              <div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+            <div class="space-y-2 sm:space-y-3">
+              <div class="flex items-center justify-between p-2 sm:p-3 rounded-lg bg-muted/50">
                 <div class="flex items-center gap-2">
-                  <PaperAirplaneIcon class="w-4 h-4 text-muted-foreground" />
-                  <span class="text-sm">Campagnes créées</span>
+                  <PaperAirplaneIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                  <span class="text-xs sm:text-sm">Campagnes</span>
                 </div>
-                <span class="font-bold">{{ stats.campaigns }}</span>
+                <span class="font-bold text-sm sm:text-base">{{ stats.campaigns }}</span>
               </div>
-              <div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div class="flex items-center justify-between p-2 sm:p-3 rounded-lg bg-muted/50">
                 <div class="flex items-center gap-2">
-                  <ChatBubbleLeftIcon class="w-4 h-4 text-muted-foreground" />
-                  <span class="text-sm">Messages envoyés</span>
+                  <ChatBubbleLeftIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                  <span class="text-xs sm:text-sm">Messages</span>
                 </div>
-                <span class="font-bold">{{ stats.messagesSent }}</span>
+                <span class="font-bold text-sm sm:text-base">{{ stats.messagesSent }}</span>
               </div>
-              <div class="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div class="flex items-center justify-between p-2 sm:p-3 rounded-lg bg-muted/50">
                 <div class="flex items-center gap-2">
-                  <UsersIcon class="w-4 h-4 text-muted-foreground" />
-                  <span class="text-sm">Contacts</span>
+                  <UsersIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                  <span class="text-xs sm:text-sm">Contacts</span>
                 </div>
-                <span class="font-bold">{{ stats.contacts }}</span>
+                <span class="font-bold text-sm sm:text-base">{{ stats.contacts }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Right Column - Forms -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-6">
           <!-- Personal Information -->
-          <div class="rounded-lg border bg-card p-6">
-            <div class="flex items-center gap-2 mb-4">
-              <IdentificationIcon class="w-5 h-5 text-primary" />
-              <h3 class="font-semibold">Informations personnelles</h3>
+          <div class="rounded-lg border bg-card p-4 sm:p-6">
+            <div class="flex items-center gap-2 mb-3 sm:mb-4">
+              <IdentificationIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <h3 class="font-semibold text-sm sm:text-base">Informations personnelles</h3>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-2">
-                <label class="text-sm font-medium flex items-center gap-2">
-                  <UserIcon class="w-4 h-4 text-muted-foreground" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div class="space-y-1.5 sm:space-y-2">
+                <label class="text-xs sm:text-sm font-medium flex items-center gap-2">
+                  <UserIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                   Nom complet
                 </label>
                 <input
                   v-model="profileData.name"
                   type="text"
                   placeholder="Votre nom complet"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
-              <div class="space-y-2">
-                <label class="text-sm font-medium flex items-center gap-2">
-                  <EnvelopeIcon class="w-4 h-4 text-muted-foreground" />
+              <div class="space-y-1.5 sm:space-y-2">
+                <label class="text-xs sm:text-sm font-medium flex items-center gap-2">
+                  <EnvelopeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                   Email
                 </label>
                 <input
                   v-model="profileData.email"
                   type="email"
                   placeholder="votre@email.com"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
-              <div class="space-y-2">
-                <label class="text-sm font-medium flex items-center gap-2">
-                  <PhoneIcon class="w-4 h-4 text-muted-foreground" />
+              <div class="space-y-1.5 sm:space-y-2">
+                <label class="text-xs sm:text-sm font-medium flex items-center gap-2">
+                  <PhoneIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                   Téléphone
                 </label>
                 <input
                   v-model="profileData.phone"
                   type="tel"
                   placeholder="+33612345678"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
-              <div class="space-y-2">
-                <label class="text-sm font-medium flex items-center gap-2">
-                  <BuildingOfficeIcon class="w-4 h-4 text-muted-foreground" />
+              <div class="space-y-1.5 sm:space-y-2">
+                <label class="text-xs sm:text-sm font-medium flex items-center gap-2">
+                  <BuildingOfficeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                   Entreprise
                 </label>
                 <input
                   v-model="profileData.company"
                   type="text"
                   placeholder="Nom de l'entreprise"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
             </div>
@@ -215,13 +215,14 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-3">
-            <button @click="saveProfile" :disabled="saving" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <button @click="saveProfile" :disabled="saving" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-4 sm:px-6 py-2">
               <CheckCircleIcon v-if="!saving" class="w-4 h-4" />
               <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>{{ saving ? 'Enregistrement...' : 'Enregistrer les modifications' }}</span>
+              <span class="hidden sm:inline">{{ saving ? 'Enregistrement...' : 'Enregistrer les modifications' }}</span>
+              <span class="sm:hidden">{{ saving ? 'Enregistrement...' : 'Enregistrer' }}</span>
             </button>
-            <button @click="resetForm" :disabled="saving" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+            <button @click="resetForm" :disabled="saving" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-3 sm:px-4 py-2">
               <XCircleIcon class="w-4 h-4" />
               <span>Annuler</span>
             </button>

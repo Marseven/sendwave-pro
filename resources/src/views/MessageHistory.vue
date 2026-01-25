@@ -1,90 +1,91 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8 flex items-center justify-between">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <div class="flex items-center gap-2">
-            <ChatBubbleLeftIcon class="w-8 h-8 text-primary" />
-            <h1 class="text-3xl font-bold">Historique des messages</h1>
+            <ChatBubbleLeftIcon class="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            <h1 class="text-xl sm:text-3xl font-bold">Historique messages</h1>
           </div>
-          <p class="text-muted-foreground mt-2">Consultez tous les messages SMS envoyés</p>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Consultez tous les SMS envoyés</p>
         </div>
         <router-link
           to="/send-message"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
         >
           <PaperAirplaneIcon class="w-4 h-4" />
-          <span>Envoyer un message</span>
+          <span class="hidden sm:inline">Envoyer un message</span>
+          <span class="sm:hidden">Envoyer</span>
         </router-link>
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="rounded-lg border bg-card p-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <div class="rounded-lg border bg-card p-3 sm:p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-muted-foreground mb-1">Total envoyé</p>
-              <p class="text-2xl font-bold">{{ stats.total }}</p>
+              <p class="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">Total</p>
+              <p class="text-lg sm:text-2xl font-bold">{{ stats.total }}</p>
             </div>
-            <ChatBubbleLeftIcon class="w-10 h-10 text-primary/20" />
+            <ChatBubbleLeftIcon class="w-6 h-6 sm:w-10 sm:h-10 text-primary/20 hidden sm:block" />
           </div>
         </div>
-        <div class="rounded-lg border bg-card p-6">
+        <div class="rounded-lg border bg-card p-3 sm:p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-muted-foreground mb-1">Livrés</p>
-              <p class="text-2xl font-bold text-success">{{ stats.delivered }}</p>
+              <p class="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">Livrés</p>
+              <p class="text-lg sm:text-2xl font-bold text-success">{{ stats.delivered }}</p>
             </div>
-            <CheckCircleIcon class="w-10 h-10 text-success/20" />
+            <CheckCircleIcon class="w-6 h-6 sm:w-10 sm:h-10 text-success/20 hidden sm:block" />
           </div>
         </div>
-        <div class="rounded-lg border bg-card p-6">
+        <div class="rounded-lg border bg-card p-3 sm:p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-muted-foreground mb-1">Échecs</p>
-              <p class="text-2xl font-bold text-destructive">{{ stats.failed }}</p>
+              <p class="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">Échecs</p>
+              <p class="text-lg sm:text-2xl font-bold text-destructive">{{ stats.failed }}</p>
             </div>
-            <ExclamationCircleIcon class="w-10 h-10 text-destructive/20" />
+            <ExclamationCircleIcon class="w-6 h-6 sm:w-10 sm:h-10 text-destructive/20 hidden sm:block" />
           </div>
         </div>
-        <div class="rounded-lg border bg-card p-6">
+        <div class="rounded-lg border bg-card p-3 sm:p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-muted-foreground mb-1">Coût total</p>
-              <p class="text-2xl font-bold text-primary">{{ stats.totalCost }} XAF</p>
+              <p class="text-xs sm:text-sm text-muted-foreground mb-0.5 sm:mb-1">Coût</p>
+              <p class="text-lg sm:text-2xl font-bold text-primary">{{ stats.totalCost }}</p>
             </div>
-            <BanknotesIcon class="w-10 h-10 text-primary/20" />
+            <BanknotesIcon class="w-6 h-6 sm:w-10 sm:h-10 text-primary/20 hidden sm:block" />
           </div>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div>
+      <div class="mb-4 sm:mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
+        <div class="col-span-2 sm:col-span-1">
           <input
             v-model="filters.search"
             type="text"
-            placeholder="Rechercher destinataire..."
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            placeholder="Rechercher..."
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <div>
           <select
             v-model="filters.status"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <option value="">Tous les statuts</option>
+            <option value="">Statut</option>
             <option value="delivered">Livré</option>
-            <option value="pending">En attente</option>
+            <option value="pending">Attente</option>
             <option value="failed">Échoué</option>
           </select>
         </div>
         <div>
           <select
             v-model="filters.type"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <option value="">Tous les types</option>
+            <option value="">Type</option>
             <option value="immediate">Immédiat</option>
             <option value="campaign">Campagne</option>
           </select>
@@ -93,16 +94,14 @@
           <input
             v-model="filters.dateFrom"
             type="date"
-            placeholder="Date de début"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <div>
           <input
             v-model="filters.dateTo"
             type="date"
-            placeholder="Date de fin"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-2 text-xs sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
       </div>
@@ -126,9 +125,9 @@
         </router-link>
       </div>
 
-      <!-- Messages Table -->
+      <!-- Messages Table - Desktop -->
       <div v-else class="rounded-lg border bg-card shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="hidden md:block overflow-x-auto">
           <table class="w-full">
             <thead class="bg-muted/50">
               <tr>
@@ -198,24 +197,48 @@
             </tbody>
           </table>
         </div>
+        <!-- Mobile Cards -->
+        <div class="md:hidden divide-y">
+          <div v-for="message in filteredMessages" :key="message.id" class="p-3" @click="viewDetails(message)">
+            <div class="flex items-start justify-between mb-2">
+              <div class="min-w-0 flex-1">
+                <div class="font-medium text-sm">{{ message.recipient_name || message.recipient_phone }}</div>
+                <div class="text-xs text-muted-foreground">{{ formatDate(message.sent_at) }} {{ formatTime(message.sent_at) }}</div>
+              </div>
+              <span
+                class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0"
+                :class="getStatusClass(message.status)"
+              >
+                {{ getStatusLabel(message.status) }}
+              </span>
+            </div>
+            <p class="text-xs text-muted-foreground line-clamp-2 mb-2">{{ message.content }}</p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="px-2 py-0.5 rounded-full" :class="message.type === 'campaign' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'">
+                {{ message.type === 'campaign' ? 'Campagne' : 'Immédiat' }}
+              </span>
+              <span class="font-semibold text-primary">{{ message.cost }} XAF</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="mt-6 flex justify-center gap-2">
+      <div v-if="totalPages > 1" class="mt-4 sm:mt-6 flex justify-center gap-2">
         <button
           @click="currentPage--"
           :disabled="currentPage === 1"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3"
         >
           <ChevronLeftIcon class="w-4 h-4" />
         </button>
-        <span class="inline-flex items-center px-4 text-sm">
-          Page {{ currentPage }} sur {{ totalPages }}
+        <span class="inline-flex items-center px-2 sm:px-4 text-xs sm:text-sm">
+          {{ currentPage }}/{{ totalPages }}
         </span>
         <button
           @click="currentPage++"
           :disabled="currentPage === totalPages"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3"
         >
           <ChevronRightIcon class="w-4 h-4" />
         </button>
@@ -225,10 +248,10 @@
     <!-- Message Details Modal -->
     <div
       v-if="selectedMessage"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4"
       @click.self="selectedMessage = null"
     >
-      <div class="bg-background rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="bg-background rounded-lg shadow-xl w-full max-w-sm sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b flex items-center justify-between">
           <h2 class="text-2xl font-bold">Détails du message</h2>
           <button
