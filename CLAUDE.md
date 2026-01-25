@@ -537,14 +537,14 @@ Les fichiers de documentation detaillee sont dans `/docs/` (non commite):
 ## 16. Plan d'Action
 
 ### Version 3.0 (Complété)
-Voir `PLAN_ACTION.md` pour le plan initial:
+Voir `docs/PLAN_ACTION.md` pour le plan initial:
 - **Phase 1**: Bugs critiques et securite ✅
 - **Phase 2**: Coherence backend ✅
 - **Phase 3**: Interfaces manquantes ✅
 - **Phase 4**: Ameliorations ✅
 
 ### Version 3.1 (En cours)
-Voir `PLAN_ACTION_V2.md` pour les nouvelles fonctionnalités:
+Voir `docs/PLAN_ACTION_V2.md` pour les nouvelles fonctionnalités:
 
 #### Phase 1 - Comptabilité Analytique (Priorité Haute)
 - [ ] Table `sms_analytics` - Traçabilité complète par SMS
