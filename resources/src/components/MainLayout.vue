@@ -148,6 +148,7 @@ const userInitials = computed(() => {
 const menuItems = [
   { path: '/dashboard', label: 'Tableau de bord', icon: ChartBarIcon },
   { path: '/send-sms', label: 'Envoyer SMS', icon: PaperAirplaneIcon },
+  { path: '/transactional', label: 'Transactionnel', icon: Cog6ToothIcon },
   { path: '/campaign/create', label: 'Nouvelle campagne', icon: PlusIcon },
   { path: '/contacts', label: 'Contacts', icon: UsersIcon },
   { path: '/database', label: 'Base de donnees', icon: CircleStackIcon },
