@@ -1,9 +1,9 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold">Configuration SMS</h1>
-        <p class="text-muted-foreground mt-2">Configurez les opérateurs SMS (Airtel et Moov Gabon)</p>
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8">
+        <h1 class="text-xl sm:text-3xl font-bold">Configuration SMS</h1>
+        <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Configurez les opérateurs SMS (Airtel et Moov Gabon)</p>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-12">
@@ -13,15 +13,15 @@
       <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Airtel Config -->
         <div class="rounded-lg border bg-card shadow-sm">
-          <div class="p-6 border-b">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                  <SignalIcon class="w-6 h-6 text-red-600" />
+          <div class="p-4 sm:p-6 border-b">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2 sm:gap-3">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <SignalIcon class="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                 </div>
-                <div>
-                  <h2 class="text-xl font-bold">Airtel Gabon</h2>
-                  <p class="text-sm text-muted-foreground">Préfixes: 77, 74, 76</p>
+                <div class="min-w-0">
+                  <h2 class="text-base sm:text-xl font-bold">Airtel Gabon</h2>
+                  <p class="text-xs sm:text-sm text-muted-foreground">Préfixes: 77, 74, 76</p>
                 </div>
               </div>
               <button
@@ -38,25 +38,25 @@
             </div>
           </div>
 
-          <form @submit.prevent="saveConfig('airtel')" class="p-6 space-y-4">
+          <form @submit.prevent="saveConfig('airtel')" class="p-4 sm:p-6 space-y-4">
             <div class="space-y-2">
               <label class="text-sm font-medium">URL API</label>
               <input
                 v-model="airtelForm.api_url"
                 type="text"
                 placeholder="https://messaging.airtel.ga:9002/smshttp/qs/"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div class="space-y-2">
                 <label class="text-sm font-medium">Nom d'utilisateur</label>
                 <input
                   v-model="airtelForm.username"
                   type="text"
                   placeholder="Username"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
               <div class="space-y-2">
@@ -68,20 +68,20 @@
                   v-model="airtelForm.password"
                   type="password"
                   :placeholder="configs.airtel?.password_set ? '••••••••' : 'Entrez le mot de passe'"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
                 <p v-if="configs.airtel?.password_set" class="text-xs text-muted-foreground">Laissez vide pour conserver l'actuel</p>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div class="space-y-2">
                 <label class="text-sm font-medium">Expéditeur (Origin)</label>
                 <input
                   v-model="airtelForm.origin_addr"
                   type="text"
                   placeholder="SENDWAVE"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
               <div class="space-y-2">
@@ -91,16 +91,16 @@
                   type="number"
                   min="0"
                   placeholder="20"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
             </div>
 
-            <div class="flex gap-3 pt-4 border-t">
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 border-t">
               <button
                 type="submit"
                 :disabled="savingAirtel"
-                class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-4 py-2"
               >
                 <div v-if="savingAirtel" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 <span>{{ savingAirtel ? 'Enregistrement...' : 'Enregistrer' }}</span>
@@ -109,7 +109,7 @@
                 type="button"
                 @click="openTestModal('airtel')"
                 :disabled="!configs.airtel?.is_active"
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-4 py-2"
               >
                 <BeakerIcon class="w-4 h-4" />
                 <span>Tester</span>
@@ -120,15 +120,15 @@
 
         <!-- Moov Config -->
         <div class="rounded-lg border bg-card shadow-sm">
-          <div class="p-6 border-b">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                  <SignalIcon class="w-6 h-6 text-blue-600" />
+          <div class="p-4 sm:p-6 border-b">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2 sm:gap-3">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <SignalIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
-                <div>
-                  <h2 class="text-xl font-bold">Moov Gabon</h2>
-                  <p class="text-sm text-muted-foreground">Préfixes: 60, 62, 65, 66 (SMPP)</p>
+                <div class="min-w-0">
+                  <h2 class="text-base sm:text-xl font-bold">Moov Gabon</h2>
+                  <p class="text-xs sm:text-sm text-muted-foreground">Préfixes: 60, 62, 65, 66 (SMPP)</p>
                 </div>
               </div>
               <button
@@ -145,21 +145,21 @@
             </div>
           </div>
 
-          <form @submit.prevent="saveConfig('moov')" class="p-6 space-y-4">
-            <div class="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p class="text-sm text-blue-700 dark:text-blue-300">
+          <form @submit.prevent="saveConfig('moov')" class="p-4 sm:p-6 space-y-4">
+            <div class="p-2 sm:p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p class="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
                 Moov utilise le protocole SMPP v3.4 sur le port 12775
               </p>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div class="space-y-2">
                 <label class="text-sm font-medium">Hôte SMPP</label>
                 <input
                   v-model="moovForm.api_url"
                   type="text"
                   placeholder="172.16.59.66"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
               <div class="space-y-2">
@@ -168,19 +168,19 @@
                   v-model.number="moovForm.port"
                   type="number"
                   placeholder="12775"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div class="space-y-2">
                 <label class="text-sm font-medium">System ID</label>
                 <input
                   v-model="moovForm.username"
                   type="text"
                   placeholder="system_id"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
               <div class="space-y-2">
@@ -192,20 +192,20 @@
                   v-model="moovForm.password"
                   type="password"
                   :placeholder="configs.moov?.password_set ? '••••••••' : 'Entrez le mot de passe'"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
                 <p v-if="configs.moov?.password_set" class="text-xs text-muted-foreground">Laissez vide pour conserver l'actuel</p>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div class="space-y-2">
                 <label class="text-sm font-medium">Source Address</label>
                 <input
                   v-model="moovForm.origin_addr"
                   type="text"
                   placeholder="SENDWAVE"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
               <div class="space-y-2">
@@ -215,16 +215,16 @@
                   type="number"
                   min="0"
                   placeholder="20"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
             </div>
 
-            <div class="flex gap-3 pt-4 border-t">
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 border-t">
               <button
                 type="submit"
                 :disabled="savingMoov"
-                class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-4 py-2"
               >
                 <div v-if="savingMoov" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 <span>{{ savingMoov ? 'Enregistrement...' : 'Enregistrer' }}</span>
@@ -233,7 +233,7 @@
                 type="button"
                 @click="openTestModal('moov')"
                 :disabled="!configs.moov?.is_active"
-                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-4 py-2"
               >
                 <BeakerIcon class="w-4 h-4" />
                 <span>Tester</span>
@@ -244,11 +244,11 @@
       </div>
 
       <!-- Info Card -->
-      <div class="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
-        <div class="flex items-start gap-3">
-          <InformationCircleIcon class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-          <div class="text-sm">
-            <p class="font-medium mb-2">Configuration des opérateurs</p>
+      <div class="mt-4 sm:mt-6 p-3 sm:p-4 bg-primary/10 rounded-lg border border-primary/20">
+        <div class="flex items-start gap-2 sm:gap-3">
+          <InformationCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 mt-0.5" />
+          <div class="text-xs sm:text-sm">
+            <p class="font-medium mb-1 sm:mb-2">Configuration des opérateurs</p>
             <ul class="space-y-1 text-muted-foreground">
               <li>Les SMS sont automatiquement routés vers l'opérateur approprié selon le préfixe du numéro</li>
               <li>Airtel: HTTP API classique | Moov: Protocole SMPP v3.4</li>
@@ -262,12 +262,12 @@
     <!-- Modal Test -->
     <div
       v-if="showTestModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4"
       @click.self="showTestModal = false"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-md p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold">Tester {{ testProvider === 'airtel' ? 'Airtel' : 'Moov' }}</h2>
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 class="text-lg sm:text-xl font-bold">Tester {{ testProvider === 'airtel' ? 'Airtel' : 'Moov' }}</h2>
           <button @click="showTestModal = false" class="hover:bg-accent rounded-full p-1">
             <XMarkIcon class="w-5 h-5" />
           </button>
@@ -280,7 +280,7 @@
               v-model="testForm.phone_number"
               type="tel"
               :placeholder="testProvider === 'airtel' ? '+24177000000' : '+24160000000'"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </div>
 
@@ -294,18 +294,18 @@
             ></textarea>
           </div>
 
-          <div v-if="testResult" class="p-4 rounded-lg" :class="testResult.success ? 'bg-success/10' : 'bg-destructive/10'">
-            <p class="font-medium" :class="testResult.success ? 'text-success' : 'text-destructive'">
+          <div v-if="testResult" class="p-3 sm:p-4 rounded-lg" :class="testResult.success ? 'bg-success/10' : 'bg-destructive/10'">
+            <p class="font-medium text-sm sm:text-base" :class="testResult.success ? 'text-success' : 'text-destructive'">
               {{ testResult.success ? 'Test réussi !' : 'Test échoué' }}
             </p>
-            <p class="text-sm text-muted-foreground mt-1">{{ testResult.message }}</p>
+            <p class="text-xs sm:text-sm text-muted-foreground mt-1">{{ testResult.message }}</p>
           </div>
 
-          <div class="flex gap-3 pt-4 border-t">
+          <div class="flex gap-2 sm:gap-3 pt-4 border-t">
             <button
               type="button"
               @click="showTestModal = false"
-              class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+              class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-4 py-2"
             >
               Fermer
             </button>
@@ -313,7 +313,7 @@
               type="button"
               @click="runTest"
               :disabled="testing || !testForm.phone_number"
-              class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-4 py-2"
             >
               <div v-if="testing" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               <span>{{ testing ? 'Envoi...' : 'Envoyer le test' }}</span>

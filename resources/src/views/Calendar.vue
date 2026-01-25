@@ -1,9 +1,9 @@
 <template>
   <MainLayout>
-    <div class="p-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold">Calendrier</h1>
-        <p class="text-muted-foreground mt-2">Planifiez vos campagnes SMS</p>
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="mb-4 sm:mb-8">
+        <h1 class="text-xl sm:text-3xl font-bold">Calendrier</h1>
+        <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Planifiez vos campagnes SMS</p>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center py-12">
@@ -11,18 +11,18 @@
       </div>
 
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 rounded-lg border bg-card p-6">
-          <div class="flex items-center justify-between mb-4">
+        <div class="lg:col-span-2 rounded-lg border bg-card p-4 sm:p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div class="flex items-center gap-2">
               <CalendarIcon class="w-5 h-5 text-primary" />
-              <h3 class="font-semibold">Campagnes planifiées</h3>
+              <h3 class="font-semibold text-sm sm:text-base">Campagnes planifiées</h3>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1 sm:gap-2">
               <button
                 v-for="view in views"
                 :key="view.value"
                 @click="currentView = view.value"
-                class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors"
+                class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-md transition-colors"
                 :class="currentView === view.value ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-accent'"
               >
                 {{ view.label }}
@@ -41,39 +41,53 @@
             </button>
           </div>
 
-          <!-- Calendar Grid View (Month) -->
+          <!-- Calendar Grid View (Month) - Hidden on mobile, use list view instead -->
           <div v-if="currentView === 'month'" class="mb-6">
-            <div class="grid grid-cols-7 gap-1 mb-2">
-              <div v-for="day in weekDays" :key="day" class="text-center text-xs font-medium text-muted-foreground py-2">
-                {{ day }}
-              </div>
-            </div>
-            <div class="grid grid-cols-7 gap-1">
-              <div
-                v-for="(day, index) in calendarDays"
-                :key="index"
-                class="min-h-[80px] p-1 border rounded-md transition-colors"
-                :class="[
-                  day.isCurrentMonth ? 'bg-background' : 'bg-muted/30',
-                  day.isToday ? 'border-primary border-2' : 'border-border',
-                  day.campaigns.length > 0 ? 'cursor-pointer hover:bg-accent/50' : ''
-                ]"
-                @click="day.campaigns.length > 0 && selectDay(day)"
+            <!-- Mobile: Show message to use list view -->
+            <div class="sm:hidden text-center py-8">
+              <CalendarDaysIcon class="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <p class="text-sm text-muted-foreground mb-3">Vue mensuelle non disponible sur mobile</p>
+              <button
+                @click="currentView = 'list'"
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
               >
-                <div class="text-xs font-medium mb-1" :class="day.isToday ? 'text-primary' : day.isCurrentMonth ? '' : 'text-muted-foreground'">
-                  {{ day.date }}
+                Voir la liste
+              </button>
+            </div>
+            <!-- Desktop: Show calendar grid -->
+            <div class="hidden sm:block">
+              <div class="grid grid-cols-7 gap-1 mb-2">
+                <div v-for="day in weekDays" :key="day" class="text-center text-xs font-medium text-muted-foreground py-2">
+                  {{ day }}
                 </div>
-                <div v-if="day.campaigns.length > 0" class="space-y-0.5">
-                  <div
-                    v-for="campaign in day.campaigns.slice(0, 2)"
-                    :key="campaign.id"
-                    class="text-[10px] px-1 py-0.5 rounded bg-primary/10 text-primary truncate"
-                    :title="campaign.name"
-                  >
-                    {{ campaign.name }}
+              </div>
+              <div class="grid grid-cols-7 gap-1">
+                <div
+                  v-for="(day, index) in calendarDays"
+                  :key="index"
+                  class="min-h-[80px] p-1 border rounded-md transition-colors"
+                  :class="[
+                    day.isCurrentMonth ? 'bg-background' : 'bg-muted/30',
+                    day.isToday ? 'border-primary border-2' : 'border-border',
+                    day.campaigns.length > 0 ? 'cursor-pointer hover:bg-accent/50' : ''
+                  ]"
+                  @click="day.campaigns.length > 0 && selectDay(day)"
+                >
+                  <div class="text-xs font-medium mb-1" :class="day.isToday ? 'text-primary' : day.isCurrentMonth ? '' : 'text-muted-foreground'">
+                    {{ day.date }}
                   </div>
-                  <div v-if="day.campaigns.length > 2" class="text-[10px] text-muted-foreground">
-                    +{{ day.campaigns.length - 2 }} autres
+                  <div v-if="day.campaigns.length > 0" class="space-y-0.5">
+                    <div
+                      v-for="campaign in day.campaigns.slice(0, 2)"
+                      :key="campaign.id"
+                      class="text-[10px] px-1 py-0.5 rounded bg-primary/10 text-primary truncate"
+                      :title="campaign.name"
+                    >
+                      {{ campaign.name }}
+                    </div>
+                    <div v-if="day.campaigns.length > 2" class="text-[10px] text-muted-foreground">
+                      +{{ day.campaigns.length - 2 }} autres
+                    </div>
                   </div>
                 </div>
               </div>
@@ -86,35 +100,38 @@
               <button @click="previousWeek" class="p-2 hover:bg-accent rounded-md">
                 <ChevronLeftIcon class="w-5 h-5" />
               </button>
-              <h4 class="font-semibold">{{ weekRangeLabel }}</h4>
+              <h4 class="font-semibold text-sm sm:text-base">{{ weekRangeLabel }}</h4>
               <button @click="nextWeek" class="p-2 hover:bg-accent rounded-md">
                 <ChevronRightIcon class="w-5 h-5" />
               </button>
             </div>
-            <div class="grid grid-cols-7 gap-2">
-              <div
-                v-for="day in weekViewDays"
-                :key="day.dateStr"
-                class="border rounded-lg p-2 min-h-[120px]"
-                :class="day.isToday ? 'border-primary border-2' : 'border-border'"
-              >
-                <div class="text-center mb-2">
-                  <div class="text-xs text-muted-foreground">{{ day.dayName }}</div>
-                  <div class="text-lg font-semibold" :class="day.isToday ? 'text-primary' : ''">{{ day.date }}</div>
-                </div>
-                <div v-if="day.campaigns.length > 0" class="space-y-1">
-                  <div
-                    v-for="campaign in day.campaigns"
-                    :key="campaign.id"
-                    class="text-xs p-1.5 rounded bg-primary/10 text-primary cursor-pointer hover:bg-primary/20"
-                    @click="openEditModal(campaign)"
-                  >
-                    <div class="font-medium truncate">{{ campaign.name }}</div>
-                    <div class="text-[10px] text-muted-foreground">{{ formatTime(campaign.scheduled_at) }}</div>
+            <!-- Mobile: Horizontal scroll for week view -->
+            <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div class="grid grid-cols-7 gap-1 sm:gap-2 min-w-[600px] sm:min-w-0">
+                <div
+                  v-for="day in weekViewDays"
+                  :key="day.dateStr"
+                  class="border rounded-lg p-1.5 sm:p-2 min-h-[100px] sm:min-h-[120px]"
+                  :class="day.isToday ? 'border-primary border-2' : 'border-border'"
+                >
+                  <div class="text-center mb-2">
+                    <div class="text-[10px] sm:text-xs text-muted-foreground">{{ day.dayName }}</div>
+                    <div class="text-sm sm:text-lg font-semibold" :class="day.isToday ? 'text-primary' : ''">{{ day.date }}</div>
                   </div>
-                </div>
-                <div v-else class="text-xs text-muted-foreground text-center mt-4">
-                  Aucune
+                  <div v-if="day.campaigns.length > 0" class="space-y-1">
+                    <div
+                      v-for="campaign in day.campaigns"
+                      :key="campaign.id"
+                      class="text-[10px] sm:text-xs p-1 sm:p-1.5 rounded bg-primary/10 text-primary cursor-pointer hover:bg-primary/20"
+                      @click="openEditModal(campaign)"
+                    >
+                      <div class="font-medium truncate">{{ campaign.name }}</div>
+                      <div class="text-[8px] sm:text-[10px] text-muted-foreground">{{ formatTime(campaign.scheduled_at) }}</div>
+                    </div>
+                  </div>
+                  <div v-else class="text-[10px] sm:text-xs text-muted-foreground text-center mt-4">
+                    Aucune
+                  </div>
                 </div>
               </div>
             </div>
@@ -134,39 +151,45 @@
             </button>
           </div>
 
-          <div v-if="currentView === 'list' && scheduledCampaigns.length > 0" class="space-y-3">
-            <div v-for="campaign in scheduledCampaigns" :key="campaign.id" class="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
-              <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center font-semibold">
-                <div class="text-center">
-                  <div class="text-xs">{{ formatMonth(campaign.scheduled_at) }}</div>
-                  <div class="text-lg">{{ formatDay(campaign.scheduled_at) }}</div>
+          <div v-if="currentView === 'list' && scheduledCampaigns.length > 0" class="space-y-2 sm:space-y-3">
+            <div v-for="campaign in scheduledCampaigns" :key="campaign.id" class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center font-semibold flex-shrink-0">
+                  <div class="text-center">
+                    <div class="text-[10px] sm:text-xs">{{ formatMonth(campaign.scheduled_at) }}</div>
+                    <div class="text-sm sm:text-lg">{{ formatDay(campaign.scheduled_at) }}</div>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-sm sm:text-base truncate">{{ campaign.name }}</div>
+                  <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <div class="flex items-center gap-1">
+                      <ClockIcon class="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>{{ formatTime(campaign.scheduled_at) }}</span>
+                    </div>
+                    <span class="hidden sm:inline">•</span>
+                    <div class="flex items-center gap-1">
+                      <UsersIcon class="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span>{{ formatNumber(campaign.messages_sent || 0) }} dest.</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="flex-1">
-                <div class="font-medium">{{ campaign.name }}</div>
-                <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                  <ClockIcon class="w-4 h-4" />
-                  <span>{{ formatTime(campaign.scheduled_at) }}</span>
-                  <span>•</span>
-                  <UsersIcon class="w-4 h-4" />
-                  <span>{{ formatNumber(campaign.messages_sent || 0) }} destinataires</span>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-2 py-1 rounded-full bg-warning/10 text-warning flex items-center gap-1">
+              <div class="flex items-center gap-2 sm:ml-auto pl-13 sm:pl-0">
+                <span class="text-[10px] sm:text-xs px-2 py-1 rounded-full bg-warning/10 text-warning flex items-center gap-1">
                   <ClockIcon class="w-3 h-3" />
                   <span>Planifiée</span>
                 </span>
                 <button
                   @click="openEditModal(campaign)"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-accent h-8 w-8"
+                  class="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-accent h-8 w-8"
                   title="Modifier"
                 >
                   <PencilIcon class="w-4 h-4" />
                 </button>
                 <button
                   @click="cancelCampaign(campaign)"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-destructive/10 hover:text-destructive h-8 w-8"
+                  class="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-destructive/10 hover:text-destructive h-8 w-8"
                   title="Annuler"
                 >
                   <XMarkIcon class="w-4 h-4" />
@@ -176,20 +199,20 @@
           </div>
         </div>
 
-        <div class="rounded-lg border bg-card p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <BellAlertIcon class="w-5 h-5 text-primary" />
-            <h3 class="font-semibold">À venir</h3>
+        <div class="rounded-lg border bg-card p-4 sm:p-6">
+          <div class="flex items-center gap-2 mb-3 sm:mb-4">
+            <BellAlertIcon class="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <h3 class="font-semibold text-sm sm:text-base">À venir</h3>
           </div>
-          <div class="text-2xl font-bold mb-2">{{ upcomingCount }} campagne{{ upcomingCount > 1 ? 's' : '' }}</div>
-          <p class="text-sm text-muted-foreground">dans les 7 prochains jours</p>
+          <div class="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{{ upcomingCount }} campagne{{ upcomingCount > 1 ? 's' : '' }}</div>
+          <p class="text-xs sm:text-sm text-muted-foreground">dans les 7 prochains jours</p>
 
-          <div class="mt-6 space-y-2">
-            <div class="flex items-center justify-between text-sm">
+          <div class="mt-4 sm:mt-6 space-y-2">
+            <div class="flex items-center justify-between text-xs sm:text-sm">
               <span class="text-muted-foreground">Ce mois-ci</span>
               <span class="font-semibold">{{ thisMonthCount }}</span>
             </div>
-            <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center justify-between text-xs sm:text-sm">
               <span class="text-muted-foreground">Total planifiées</span>
               <span class="font-semibold">{{ scheduledCampaigns.length }}</span>
             </div>
@@ -201,12 +224,12 @@
     <!-- Modal d'édition -->
     <div
       v-if="showEditModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4"
       @click.self="closeEditModal"
     >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-md p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold">Reprogrammer la campagne</h2>
+      <div class="bg-background rounded-lg shadow-lg w-full max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 class="text-lg sm:text-xl font-bold">Reprogrammer la campagne</h2>
           <button @click="closeEditModal" class="hover:bg-accent rounded-full p-1">
             <XMarkIcon class="w-5 h-5" />
           </button>
@@ -219,18 +242,18 @@
               v-model="editForm.name"
               type="text"
               readonly
-              class="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm"
+              class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm"
             />
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div class="space-y-2">
               <label class="text-sm font-medium">Date *</label>
               <input
                 v-model="editForm.scheduled_date"
                 type="date"
                 required
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
             </div>
             <div class="space-y-2">
@@ -239,7 +262,7 @@
                 v-model="editForm.scheduled_time"
                 type="time"
                 required
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                class="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
             </div>
           </div>
@@ -248,14 +271,14 @@
             <button
               type="button"
               @click="closeEditModal"
-              class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+              class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 sm:h-10 px-4 py-2"
             >
               Annuler
             </button>
             <button
               type="submit"
               :disabled="saving"
-              class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-4 py-2"
             >
               <div v-if="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               <span>{{ saving ? 'Enregistrement...' : 'Reprogrammer' }}</span>
