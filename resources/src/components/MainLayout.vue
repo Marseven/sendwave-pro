@@ -124,7 +124,8 @@ import {
   InboxIcon,
   NoSymbolIcon,
   SignalIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  CircleStackIcon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -146,9 +147,10 @@ const userInitials = computed(() => {
 
 const menuItems = [
   { path: '/dashboard', label: 'Tableau de bord', icon: ChartBarIcon },
-  { path: '/send-message', label: 'Envoyer un message', icon: PaperAirplaneIcon },
+  { path: '/send-sms', label: 'Envoyer SMS', icon: PaperAirplaneIcon },
   { path: '/campaign/create', label: 'Nouvelle campagne', icon: PlusIcon },
   { path: '/contacts', label: 'Contacts', icon: UsersIcon },
+  { path: '/database', label: 'Base de donnees', icon: CircleStackIcon },
   { path: '/templates', label: 'Modèles', icon: DocumentTextIcon },
   { path: '/calendar', label: 'Calendrier', icon: CalendarIcon },
   { path: '/campaigns/history', label: 'Historique campagnes', icon: ClockIcon },

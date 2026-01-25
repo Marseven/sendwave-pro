@@ -30,6 +30,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/send-sms',
+      name: 'SendSms',
+      component: () => import('@/views/SendSms.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/profile',
       name: 'Profile',
       component: () => import('@/views/Profile.vue'),
@@ -39,6 +45,12 @@ const router = createRouter({
       path: '/contacts',
       name: 'Contacts',
       component: () => import('@/views/Contacts.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/database',
+      name: 'Database',
+      component: () => import('@/views/Database.vue'),
       meta: { requiresAuth: true }
     },
     {
