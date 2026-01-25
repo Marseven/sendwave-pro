@@ -4,7 +4,7 @@
 
 ## 1. Vue d'ensemble
 
-**SendWave Pro** est une plateforme de gestion de campagnes SMS pour le marche gabonais.
+**SendWave Pro** (rebrand: **JOBS SMS**) est une plateforme de gestion de campagnes SMS pour le marche gabonais.
 
 | Info | Valeur |
 |------|--------|
@@ -13,16 +13,18 @@
 | Devise | FCFA |
 | Langue par defaut | Francais |
 | Timezone | Africa/Libreville |
+| URL Production | http://161.35.159.160 |
 
 ## 2. Stack technique
 
 ### Backend
-- **PHP 8.2+** avec **Laravel 12**
+- **PHP 8.2+** avec **Laravel 11**
 - **MySQL 5.7+** ou **MariaDB 10.3+**
 - **Laravel Sanctum** (authentification API)
 - **Laravel Queue** (jobs en arriere-plan)
 - **Maatwebsite/Excel** (exports Excel)
 - **BarryVDH/Laravel-DomPDF** (exports PDF)
+- **SMPP Client natif** (pour Moov Gabon)
 
 ### Frontend
 - **Vue 3** (Composition API)
@@ -89,7 +91,7 @@ sendwave-pro/
 │   └── web.php
 ├── resources/
 │   └── src/                       # Frontend Vue 3
-│       ├── views/                 # 20 composants pages
+│       ├── views/                 # 22 composants pages
 │       │   ├── Login.vue
 │       │   ├── Dashboard.vue
 │       │   ├── Contacts.vue
@@ -103,11 +105,14 @@ sendwave-pro/
 │       │   ├── Reports.vue
 │       │   ├── Calendar.vue
 │       │   ├── Accounts.vue
-│       │   ├── ApiConfiguration.vue
-│       │   ├── ApiIntegrations.vue
+│       │   ├── ApiConfiguration.vue   # Ancienne config (deprecated)
+│       │   ├── ApiIntegrations.vue    # Clés API clients (/api-keys)
+│       │   ├── SmsConfig.vue          # Config opérateurs (/sms-config)
+│       │   ├── Blacklist.vue          # Liste noire
+│       │   ├── AuditLogs.vue          # Journal d'audit
 │       │   ├── Profile.vue
 │       │   ├── Settings.vue
-│       │   └── MainLayout.vue
+│       │   └── NotFound.vue
 │       ├── components/            # Composants reutilisables
 │       ├── services/              # Services API
 │       ├── router/                # Configuration routes
@@ -148,17 +153,29 @@ sendwave-pro/
 
 ### Airtel Gabon
 - **Prefixes**: 74, 76, 77
-- **API**: HTTP REST
-- **Config env**: `AIRTEL_API_URL`, `AIRTEL_USERNAME`, `AIRTEL_PASSWORD`
+- **API**: HTTP REST (avec SSL bypass car certificat auto-signé)
+- **Service**: `app/Services/SMS/Operators/AirtelService.php`
+- **Format numéro**: Le système ajoute automatiquement le préfixe `241` (ex: `77123456` -> `24177123456`)
+- **Config env**: `AIRTEL_API_URL`, `AIRTEL_USERNAME`, `AIRTEL_PASSWORD`, `AIRTEL_ORIGIN_ADDR`
 
 ### Moov Gabon
 - **Prefixes**: 60, 62, 65, 66
 - **Protocole**: SMPP v3.4
+- **Service**: `app/Services/SMS/Operators/MoovService.php`
+- **Client SMPP**: `app/Services/SMS/SmppClient.php` (client natif PHP)
+- **Note**: Nécessite VPN pour accéder au serveur SMPP (IP privée)
 - **Config env**: `MOOV_SMPP_HOST`, `MOOV_SMPP_PORT`, `MOOV_SMPP_SYSTEM_ID`, `MOOV_SMPP_PASSWORD`, `MOOV_SOURCE_ADDR`
-- **Service**: `app/Services/SMS/SmppClient.php` (client SMPP natif PHP)
 
-### Detection automatique
-Le `OperatorDetector` detecte l'operateur via le prefixe du numero et le `SmsRouter` route automatiquement vers le bon provider.
+### Detection et routage automatique
+- `OperatorDetector::detect($phone)` - Détecte l'opérateur via le préfixe
+- `SmsRouter::sendSms($phone, $message)` - Route automatiquement vers le bon provider
+- **Vérification activation**: Avant chaque envoi, le système vérifie si l'opérateur est activé (DB puis .env)
+- **Codes d'erreur**: `OPERATOR_DISABLED`, `UNKNOWN_OPERATOR`
+
+### Configuration dynamique
+Les opérateurs peuvent être configurés via:
+1. **Interface admin** (`/sms-config`) - Prioritaire
+2. **Fichier .env** - Fallback
 
 ## 6. API Endpoints (102+)
 
@@ -287,15 +304,21 @@ GET    /api/audit-logs/actions
 GET    /api/audit-logs/{id}
 
 # SMS Config
+GET    /api/sms-configs
 GET    /api/sms-configs/{provider}
 PUT    /api/sms-configs/{provider}
 POST   /api/sms-configs/{provider}/test
 POST   /api/sms-configs/{provider}/toggle
+POST   /api/sms-configs/{provider}/reset
 
 # API Keys
 GET    /api/api-keys
 POST   /api/api-keys
+GET    /api/api-keys/{id}
+PUT    /api/api-keys/{id}
 DELETE /api/api-keys/{id}
+POST   /api/api-keys/{id}/revoke
+POST   /api/api-keys/{id}/regenerate
 ```
 
 ## 7. Roles et permissions
@@ -371,10 +394,32 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-### Cron (campagnes recurrentes)
+### Deploiement (serveur)
+```bash
+cd /var/www/sendwave-pro
+git pull
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+```
+
+### Commandes utiles
+```bash
+# Recalculer les analytics (si données manquantes)
+php artisan analytics:update --days=30
+php artisan analytics:update --user=1 --days=7
+
+# Vider tous les caches
+php artisan optimize:clear
+```
+
+### Cron (campagnes recurrentes et analytics)
 ```bash
 * * * * * cd /path/to/sendwave-pro && php artisan schedule:run >> /dev/null 2>&1
 ```
+
+### Jobs planifiés (routes/console.php)
+- `UpdateDailyAnalytics` - Mise à jour quotidienne des stats (00:05)
 
 ## 11. Variables d'environnement cles
 
@@ -455,21 +500,50 @@ Les fichiers de documentation detaillee sont dans `/docs/` (non commite):
 
 ## 14. Points d'attention
 
-1. **Rate limiting**: L'endpoint `/api/messages/send` est limite
+1. **Rate limiting**: L'endpoint `/api/messages/send` est limité (throttle:sms-send)
 2. **Authentification**: Sanctum tokens requis pour toutes les routes protegees
 3. **Scope utilisateur**: Toutes les requetes sont scopees par l'utilisateur authentifie
 4. **Webhooks**: Signature HMAC-SHA256 obligatoire pour la securite
 5. **Detection operateur**: Basee sur le prefixe du numero de telephone
 6. **Devise**: Tous les montants sont en FCFA
+7. **SPA Routing**: Route catch-all dans `routes/web.php` pour Vue Router
+8. **SSL Airtel**: Certificat auto-signé, `withoutVerifying()` utilisé
+9. **Format numéros**: Préfixe `241` ajouté automatiquement pour Gabon
+10. **Cache Analytics**: 5 minutes pour le dashboard, invalidé après chaque envoi
 
-## 15. Plan d'Action
+## 15. Routes Vue.js (SPA)
+
+| Route | Page | Description |
+|-------|------|-------------|
+| `/dashboard` | Dashboard.vue | Tableau de bord |
+| `/send-message` | SendMessage.vue | Envoi SMS rapide |
+| `/contacts` | Contacts.vue | Gestion contacts |
+| `/contact-groups` | ContactGroups.vue | Groupes de contacts |
+| `/templates` | Templates.vue | Modèles de messages |
+| `/campaign/create` | CampaignCreate.vue | Création campagne |
+| `/campaigns/history` | CampaignHistory.vue | Historique campagnes |
+| `/messages/history` | MessageHistory.vue | Historique messages |
+| `/calendar` | Calendar.vue | Calendrier |
+| `/reports` | Reports.vue | Rapports & exports |
+| `/accounts` | Accounts.vue | Sous-comptes |
+| `/sms-config` | SmsConfig.vue | Config opérateurs SMS |
+| `/api-keys` | ApiIntegrations.vue | Clés API clients |
+| `/webhooks` | Webhooks.vue | Configuration webhooks |
+| `/blacklist` | Blacklist.vue | Liste noire |
+| `/audit-logs` | AuditLogs.vue | Journal d'audit |
+| `/profile` | Profile.vue | Profil utilisateur |
+| `/settings` | Settings.vue | Paramètres |
+
+## 16. Plan d'Action
 
 Voir `PLAN_ACTION.md` pour le plan de corrections et ameliorations:
-- **Phase 1**: Bugs critiques et securite (10 items)
-- **Phase 2**: Coherence backend (7 items)
-- **Phase 3**: Interfaces manquantes (10 items)
-- **Phase 4**: Ameliorations (10 items)
+- **Phase 1**: Bugs critiques et securite ✅
+- **Phase 2**: Coherence backend ✅
+- **Phase 3**: Interfaces manquantes ✅
+- **Phase 4**: Ameliorations ✅
+
+**Statut**: 100% complété
 
 ---
 
-*Derniere mise a jour: Janvier 2026*
+*Derniere mise a jour: 25 Janvier 2026*
