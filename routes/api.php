@@ -15,6 +15,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\Api\IncomingSmsController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CustomRoleController;
+use App\Http\Controllers\Api\AccountController;
 use Illuminate\Support\Facades\Route;
 
 // Routes publiques
@@ -189,6 +190,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('budgets/check-send', [BudgetController::class, 'checkSend']);
     Route::get('budgets/history/{subAccountId?}', [BudgetController::class, 'history']);
 
+    // Account Management (SuperAdmin only for most operations)
+    Route::prefix('accounts')->group(function () {
+        Route::get('/', [AccountController::class, 'index']);
+        Route::post('/', [AccountController::class, 'store']);
+        Route::get('{id}', [AccountController::class, 'show']);
+        Route::put('{id}', [AccountController::class, 'update']);
+        Route::delete('{id}', [AccountController::class, 'destroy']);
+        Route::post('{id}/credits', [AccountController::class, 'addCredits']);
+        Route::post('{id}/suspend', [AccountController::class, 'suspend']);
+        Route::post('{id}/activate', [AccountController::class, 'activate']);
+        Route::get('{id}/stats', [AccountController::class, 'stats']);
+        Route::get('{id}/users', [AccountController::class, 'users']);
+    });
+
     // User Management (Admin can manage agents, SuperAdmin can manage all)
     Route::middleware('permission:manage_sub_accounts')->group(function () {
         Route::get('users/available-roles', [UserController::class, 'availableRoles']);
@@ -205,4 +220,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('{id}/duplicate', [CustomRoleController::class, 'duplicate']);
     });
     Route::apiResource('custom-roles', CustomRoleController::class);
+
+    // System Roles and Permissions (read-only)
+    Route::get('system-roles', [UserController::class, 'systemRoles']);
+    Route::get('system-permissions', [UserController::class, 'systemPermissions']);
 });

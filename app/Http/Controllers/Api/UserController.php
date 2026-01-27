@@ -19,21 +19,27 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $currentUser = $request->user();
-        $query = User::query();
+        $query = User::with('account:id,name');
 
         // Filter based on user's role
         if ($currentUser->isSuperAdmin()) {
             // SuperAdmin sees all users except themselves
             $query->where('id', '!=', $currentUser->id);
         } elseif ($currentUser->isAdmin()) {
-            // Admin sees only their children (agents they created)
-            $query->where('parent_id', $currentUser->id);
+            // Admin sees users in their account (excluding themselves)
+            $query->where('account_id', $currentUser->account_id)
+                  ->where('id', '!=', $currentUser->id);
         } else {
             // Agents cannot see other users
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'avez pas la permission de voir les utilisateurs.',
             ], 403);
+        }
+
+        // Filter by account (SuperAdmin only)
+        if ($currentUser->isSuperAdmin() && $request->has('account_id')) {
+            $query->where('account_id', $request->account_id);
         }
 
         // Apply filters
@@ -78,6 +84,7 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:20',
             'company' => 'nullable|string|max:255',
             'role' => 'required|string|in:super_admin,admin,agent',
+            'account_id' => 'nullable|exists:accounts,id',
             'custom_role_id' => 'nullable|exists:custom_roles,id',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string',
@@ -103,8 +110,19 @@ class UserController extends Controller
             }
         }
 
+        // Determine account_id
+        $accountId = null;
+        if ($currentUser->isSuperAdmin() && isset($validated['account_id'])) {
+            // SuperAdmin can specify account
+            $accountId = $validated['account_id'];
+        } elseif ($currentUser->account_id) {
+            // Admin creates users in their own account
+            $accountId = $currentUser->account_id;
+        }
+
         // Create user
         $user = User::create([
+            'account_id' => $accountId,
             'parent_id' => $currentUser->id,
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -428,6 +446,41 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => $grouped,
+        ]);
+    }
+
+    /**
+     * Get all system roles (read-only view)
+     */
+    public function systemRoles(Request $request)
+    {
+        $roles = [];
+
+        foreach (UserRole::cases() as $role) {
+            $roles[] = [
+                'value' => $role->value,
+                'label' => $role->label(),
+                'description' => $role->description(),
+                'level' => $role->level(),
+                'default_permissions' => $role->defaultPermissions(),
+                'is_system' => true,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $roles,
+        ]);
+    }
+
+    /**
+     * Get all system permissions (read-only view)
+     */
+    public function systemPermissions(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'data' => Permission::groupedByCategory(),
         ]);
     }
 }

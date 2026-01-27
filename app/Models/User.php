@@ -22,6 +22,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'account_id',
         'parent_id',
         'name',
         'email',
@@ -68,6 +69,14 @@ class User extends Authenticatable
     // =========================================================================
     // RELATIONSHIPS
     // =========================================================================
+
+    /**
+     * Account this user belongs to
+     */
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
+    }
 
     /**
      * Parent user (who created this user)

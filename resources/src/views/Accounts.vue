@@ -5,48 +5,184 @@
       <div class="mb-4 sm:mb-6 lg:mb-8">
         <h1 class="text-2xl sm:text-3xl font-bold">Gestion des comptes</h1>
         <p class="text-sm text-muted-foreground mt-1 sm:mt-2">
-          Gérez les utilisateurs, sous-comptes et rôles personnalisés
+          Gérez les comptes, utilisateurs et rôles de la plateforme
         </p>
       </div>
 
       <!-- Tabs -->
-      <div class="mb-6 border-b">
-        <nav class="flex gap-4 -mb-px">
+      <div class="mb-6 border-b overflow-x-auto">
+        <nav class="flex gap-2 sm:gap-4 -mb-px min-w-max">
+          <button
+            v-if="authStore.isSuperAdmin"
+            @click="activeTab = 'accounts'"
+            class="py-3 px-2 sm:px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+            :class="activeTab === 'accounts' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+          >
+            <BuildingOfficeIcon class="w-4 h-4 inline mr-1 sm:mr-2" />
+            Comptes
+          </button>
           <button
             v-if="authStore.canManageUsers"
             @click="activeTab = 'users'"
-            class="py-3 px-1 text-sm font-medium border-b-2 transition-colors"
+            class="py-3 px-2 sm:px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
             :class="activeTab === 'users' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
           >
-            <UsersIcon class="w-4 h-4 inline mr-2" />
+            <UsersIcon class="w-4 h-4 inline mr-1 sm:mr-2" />
             Utilisateurs
           </button>
           <button
-            @click="activeTab = 'subaccounts'"
-            class="py-3 px-1 text-sm font-medium border-b-2 transition-colors"
-            :class="activeTab === 'subaccounts' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            v-if="authStore.isSuperAdmin"
+            @click="activeTab = 'custom-roles'"
+            class="py-3 px-2 sm:px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+            :class="activeTab === 'custom-roles' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
           >
-            <UserGroupIcon class="w-4 h-4 inline mr-2" />
-            Sous-comptes
+            <WrenchScrewdriverIcon class="w-4 h-4 inline mr-1 sm:mr-2" />
+            Rôles personnalisés
           </button>
           <button
-            v-if="authStore.isSuperAdmin"
-            @click="activeTab = 'roles'"
-            class="py-3 px-1 text-sm font-medium border-b-2 transition-colors"
-            :class="activeTab === 'roles' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            @click="activeTab = 'system-roles'"
+            class="py-3 px-2 sm:px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+            :class="activeTab === 'system-roles' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
           >
-            <ShieldCheckIcon class="w-4 h-4 inline mr-2" />
-            Rôles personnalisés
+            <ShieldCheckIcon class="w-4 h-4 inline mr-1 sm:mr-2" />
+            Rôles système
+          </button>
+          <button
+            @click="activeTab = 'permissions'"
+            class="py-3 px-2 sm:px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+            :class="activeTab === 'permissions' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'"
+          >
+            <KeyIcon class="w-4 h-4 inline mr-1 sm:mr-2" />
+            Permissions
           </button>
         </nav>
       </div>
 
-      <!-- Users Tab -->
-      <div v-if="activeTab === 'users' && authStore.canManageUsers">
+      <!-- ============================================ -->
+      <!-- ACCOUNTS TAB (SuperAdmin only) -->
+      <!-- ============================================ -->
+      <div v-if="activeTab === 'accounts' && authStore.isSuperAdmin">
         <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <p class="text-sm text-muted-foreground">
-            {{ authStore.isSuperAdmin ? 'Gérez tous les utilisateurs de la plateforme' : 'Gérez vos agents' }}
+            Gérez les comptes (entreprises/organisations) de la plateforme
           </p>
+          <button
+            @click="openAccountModal()"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
+          >
+            <PlusIcon class="w-4 h-4" />
+            <span>Nouveau compte</span>
+          </button>
+        </div>
+
+        <div v-if="loadingAccounts" class="flex items-center justify-center py-8">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        </div>
+
+        <div v-else-if="accounts.length === 0" class="flex flex-col items-center justify-center py-12 rounded-lg border bg-card">
+          <BuildingOfficeIcon class="w-12 h-12 text-muted-foreground mb-4" />
+          <p class="text-lg font-medium">Aucun compte</p>
+          <p class="text-sm text-muted-foreground mt-1">Créez votre premier compte</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div
+            v-for="account in accounts"
+            :key="account.id"
+            class="rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div class="p-4 sm:p-5">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-base truncate">{{ account.name }}</h3>
+                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ account.email }}</p>
+                </div>
+                <span
+                  class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0"
+                  :class="{
+                    'bg-green-100 text-green-700': account.status === 'active',
+                    'bg-red-100 text-red-700': account.status === 'suspended',
+                    'bg-yellow-100 text-yellow-700': account.status === 'pending'
+                  }"
+                >
+                  {{ statusLabels[account.status] }}
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 text-sm mb-4">
+                <div>
+                  <p class="text-xs text-muted-foreground">Crédits SMS</p>
+                  <p class="font-semibold text-primary">{{ formatNumber(account.sms_credits) }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-muted-foreground">Utilisateurs</p>
+                  <p class="font-semibold">{{ account.users_count || 0 }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-muted-foreground">SMS envoyés</p>
+                  <p class="font-semibold">{{ formatNumber(account.sms_sent_total) }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-muted-foreground">Budget mensuel</p>
+                  <p class="font-semibold">{{ account.monthly_budget ? formatNumber(account.monthly_budget) : 'Illimité' }}</p>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 pt-3 border-t">
+                <button
+                  @click="openAccountModal(account)"
+                  class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border px-2 py-1.5 hover:bg-accent"
+                >
+                  <PencilIcon class="w-3 h-3" />
+                  Modifier
+                </button>
+                <button
+                  @click="openCreditsModal(account)"
+                  class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border px-2 py-1.5 hover:bg-accent"
+                >
+                  <BanknotesIcon class="w-3 h-3" />
+                  Crédits
+                </button>
+                <button
+                  v-if="account.status === 'active'"
+                  @click="suspendAccount(account)"
+                  class="inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border border-destructive text-destructive px-2 py-1.5 hover:bg-destructive/10"
+                >
+                  <NoSymbolIcon class="w-3 h-3" />
+                </button>
+                <button
+                  v-else
+                  @click="activateAccount(account)"
+                  class="inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border border-success text-success px-2 py-1.5 hover:bg-success/10"
+                >
+                  <CheckCircleIcon class="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- USERS TAB -->
+      <!-- ============================================ -->
+      <div v-if="activeTab === 'users' && authStore.canManageUsers">
+        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <p class="text-sm text-muted-foreground">
+              {{ authStore.isSuperAdmin ? 'Gérez tous les utilisateurs' : 'Gérez les utilisateurs de votre compte' }}
+            </p>
+            <!-- Account filter for SuperAdmin -->
+            <select
+              v-if="authStore.isSuperAdmin && accounts.length > 0"
+              v-model="selectedAccountId"
+              @change="loadUsers"
+              class="text-sm rounded-md border border-input bg-background px-2 py-1"
+            >
+              <option value="">Tous les comptes</option>
+              <option v-for="acc in accounts" :key="acc.id" :value="acc.id">{{ acc.name }}</option>
+            </select>
+          </div>
           <button
             v-if="authStore.canCreateAgents"
             @click="openUserModal()"
@@ -64,7 +200,7 @@
         <div v-else-if="users.length === 0" class="flex flex-col items-center justify-center py-12 rounded-lg border bg-card">
           <UsersIcon class="w-12 h-12 text-muted-foreground mb-4" />
           <p class="text-lg font-medium">Aucun utilisateur</p>
-          <p class="text-sm text-muted-foreground mt-1">Créez votre premier agent</p>
+          <p class="text-sm text-muted-foreground mt-1">Créez votre premier utilisateur</p>
         </div>
 
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -73,11 +209,12 @@
             :key="user.id"
             class="rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow"
           >
-            <div class="p-4 sm:p-6">
+            <div class="p-4 sm:p-5">
               <div class="flex items-start justify-between gap-2 mb-3">
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-base truncate">{{ user.name }}</h3>
                   <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ user.email }}</p>
+                  <p v-if="user.account" class="text-xs text-primary mt-0.5 truncate">{{ user.account.name }}</p>
                 </div>
                 <span
                   class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0"
@@ -87,7 +224,7 @@
                     'bg-yellow-100 text-yellow-700': user.status === 'pending'
                   }"
                 >
-                  {{ userStatusLabels[user.status] }}
+                  {{ statusLabels[user.status] }}
                 </span>
               </div>
 
@@ -100,183 +237,54 @@
                     'bg-teal-100 text-teal-700': user.role === 'agent'
                   }"
                 >
-                  {{ userRoleLabels[user.role] }}
-                </span>
-                <span v-if="user.custom_role_name" class="text-xs text-muted-foreground">
-                  ({{ user.custom_role_name }})
+                  {{ roleLabels[user.role] }}
                 </span>
               </div>
 
-              <div class="text-xs text-muted-foreground">
-                Créé le {{ formatDate(user.created_at) }}
+              <div class="flex flex-wrap gap-2 pt-3 border-t">
+                <button
+                  @click="openUserModal(user)"
+                  class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border px-2 py-1.5 hover:bg-accent"
+                >
+                  <PencilIcon class="w-3 h-3" />
+                  Modifier
+                </button>
+                <button
+                  v-if="user.status === 'active'"
+                  @click="suspendUser(user)"
+                  class="inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border border-destructive text-destructive px-2 py-1.5 hover:bg-destructive/10"
+                >
+                  <NoSymbolIcon class="w-3 h-3" />
+                </button>
+                <button
+                  v-else
+                  @click="activateUser(user)"
+                  class="inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border border-success text-success px-2 py-1.5 hover:bg-success/10"
+                >
+                  <CheckCircleIcon class="w-3 h-3" />
+                </button>
+                <button
+                  @click="deleteUser(user)"
+                  class="inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border border-destructive text-destructive px-2 py-1.5 hover:bg-destructive/10"
+                >
+                  <TrashIcon class="w-3 h-3" />
+                </button>
               </div>
-            </div>
-
-            <div class="border-t p-3 bg-muted/30 flex gap-2">
-              <button
-                @click="openUserModal(user)"
-                class="flex-1 inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-xs font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8"
-              >
-                <PencilIcon class="w-3 h-3" />
-                <span>Modifier</span>
-              </button>
-              <button
-                @click="openUserPermissionsModal(user)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-2"
-              >
-                <KeyIcon class="w-4 h-4" />
-              </button>
-              <button
-                v-if="user.status === 'active'"
-                @click="suspendUser(user)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-destructive/10 hover:text-destructive h-8 w-8"
-              >
-                <LockClosedIcon class="w-4 h-4" />
-              </button>
-              <button
-                v-else
-                @click="activateUser(user)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-green-100 hover:text-green-700 h-8 w-8"
-              >
-                <LockOpenIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click="deleteUser(user)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-destructive/10 hover:text-destructive h-8 w-8"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- SubAccounts Tab (existing functionality) -->
-      <div v-if="activeTab === 'subaccounts'">
+      <!-- ============================================ -->
+      <!-- CUSTOM ROLES TAB (SuperAdmin only) -->
+      <!-- ============================================ -->
+      <div v-if="activeTab === 'custom-roles' && authStore.isSuperAdmin">
         <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p class="text-sm text-muted-foreground">Accès cloisonnés avec permissions et crédits</p>
+          <p class="text-sm text-muted-foreground">
+            Créez et gérez des rôles personnalisés avec des permissions spécifiques
+          </p>
           <button
-            @click="openSubAccountModal()"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
-          >
-            <PlusIcon class="w-4 h-4" />
-            <span>Ajouter un sous-compte</span>
-          </button>
-        </div>
-
-        <div v-if="loadingSubAccounts" class="flex items-center justify-center py-8">
-          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-        </div>
-
-        <div v-else-if="subAccounts.length === 0" class="flex flex-col items-center justify-center py-12 rounded-lg border bg-card">
-          <UserGroupIcon class="w-12 h-12 text-muted-foreground mb-4" />
-          <p class="text-lg font-medium">Aucun sous-compte</p>
-          <p class="text-sm text-muted-foreground mt-1">Créez des comptes avec accès cloisonné</p>
-        </div>
-
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          <div
-            v-for="account in subAccounts"
-            :key="account.id"
-            class="rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div class="p-4 sm:p-6">
-              <div class="flex items-start justify-between gap-2 mb-3">
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-base truncate">{{ account.name }}</h3>
-                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ account.email }}</p>
-                </div>
-                <span
-                  class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0"
-                  :class="{
-                    'bg-green-100 text-green-700': account.status === 'active',
-                    'bg-red-100 text-red-700': account.status === 'suspended',
-                    'bg-gray-100 text-gray-700': account.status === 'inactive'
-                  }"
-                >
-                  {{ subAccountStatusLabels[account.status] }}
-                </span>
-              </div>
-
-              <div class="flex items-center gap-2 mb-3">
-                <span
-                  class="text-xs px-2 py-0.5 rounded-md font-medium"
-                  :class="{
-                    'bg-purple-100 text-purple-700': account.role === 'admin',
-                    'bg-blue-100 text-blue-700': account.role === 'manager',
-                    'bg-teal-100 text-teal-700': account.role === 'sender',
-                    'bg-gray-100 text-gray-700': account.role === 'viewer'
-                  }"
-                >
-                  {{ subAccountRoleLabels[account.role] }}
-                </span>
-              </div>
-
-              <div class="space-y-2 mb-3">
-                <div class="flex justify-between items-center text-xs">
-                  <span class="text-muted-foreground">Crédits SMS</span>
-                  <span class="font-semibold">
-                    {{ account.remaining_credits === null ? 'Illimité' : account.remaining_credits.toLocaleString('fr-FR') }}
-                  </span>
-                </div>
-                <div class="flex justify-between items-center text-xs">
-                  <span class="text-muted-foreground">Utilisés</span>
-                  <span>{{ (account.sms_used || 0).toLocaleString('fr-FR') }}</span>
-                </div>
-                <div v-if="account.remaining_credits !== null" class="w-full bg-gray-200 rounded-full h-1.5">
-                  <div
-                    class="bg-primary h-full rounded-full transition-all"
-                    :style="{ width: getSubAccountUsagePercentage(account) + '%' }"
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="border-t p-3 bg-muted/30 flex gap-2">
-              <button
-                @click="openSubAccountModal(account)"
-                class="flex-1 inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-xs font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8"
-              >
-                <PencilIcon class="w-3 h-3" />
-                <span>Modifier</span>
-              </button>
-              <button
-                @click="openSubAccountPermissionsModal(account)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-2"
-              >
-                <KeyIcon class="w-4 h-4" />
-              </button>
-              <button
-                v-if="account.status === 'active'"
-                @click="suspendSubAccount(account)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-destructive/10 hover:text-destructive h-8 w-8"
-              >
-                <LockClosedIcon class="w-4 h-4" />
-              </button>
-              <button
-                v-else
-                @click="activateSubAccount(account)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-green-100 hover:text-green-700 h-8 w-8"
-              >
-                <LockOpenIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click="deleteSubAccount(account)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-destructive/10 hover:text-destructive h-8 w-8"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Custom Roles Tab (SuperAdmin only) -->
-      <div v-if="activeTab === 'roles' && authStore.isSuperAdmin">
-        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p class="text-sm text-muted-foreground">Créez des rôles avec des permissions sur mesure</p>
-          <button
-            @click="openRoleModal()"
+            @click="openCustomRoleModal()"
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs sm:text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
           >
             <PlusIcon class="w-4 h-4" />
@@ -284,746 +292,842 @@
           </button>
         </div>
 
-        <div v-if="loadingRoles" class="flex items-center justify-center py-8">
+        <div v-if="loadingCustomRoles" class="flex items-center justify-center py-8">
           <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
         </div>
 
         <div v-else-if="customRoles.length === 0" class="flex flex-col items-center justify-center py-12 rounded-lg border bg-card">
-          <ShieldCheckIcon class="w-12 h-12 text-muted-foreground mb-4" />
+          <WrenchScrewdriverIcon class="w-12 h-12 text-muted-foreground mb-4" />
           <p class="text-lg font-medium">Aucun rôle personnalisé</p>
-          <p class="text-sm text-muted-foreground mt-1">Créez des rôles avec des permissions spécifiques</p>
+          <p class="text-sm text-muted-foreground mt-1">Créez votre premier rôle personnalisé</p>
         </div>
 
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <div
             v-for="role in customRoles"
             :key="role.id"
-            class="rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow"
+            class="rounded-lg border bg-card shadow-sm"
           >
-            <div class="p-4 sm:p-6">
-              <div class="flex items-start justify-between gap-2 mb-3">
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-base truncate">{{ role.name }}</h3>
-                  <p class="text-xs text-muted-foreground mt-0.5">{{ role.slug }}</p>
-                </div>
-                <span
-                  v-if="role.is_system"
-                  class="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-700"
-                >
-                  Système
-                </span>
+            <div class="p-4 sm:p-5">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <h3 class="font-semibold text-base">{{ role.name }}</h3>
+                <span v-if="role.is_system" class="text-xs px-2 py-0.5 rounded-full bg-muted">Système</span>
               </div>
-
-              <p v-if="role.description" class="text-sm text-muted-foreground mb-3">
-                {{ role.description }}
-              </p>
+              <p class="text-xs text-muted-foreground mb-3">{{ role.description || 'Aucune description' }}</p>
 
               <div class="flex flex-wrap gap-1 mb-3">
                 <span
-                  v-for="perm in role.permissions.slice(0, 3)"
+                  v-for="perm in (role.permissions || []).slice(0, 4)"
                   :key="perm"
-                  class="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-700"
+                  class="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary"
                 >
                   {{ perm }}
                 </span>
                 <span
-                  v-if="role.permissions.length > 3"
-                  class="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600"
+                  v-if="(role.permissions || []).length > 4"
+                  class="text-xs px-1.5 py-0.5 rounded bg-muted"
                 >
-                  +{{ role.permissions.length - 3 }}
+                  +{{ role.permissions.length - 4 }}
                 </span>
               </div>
 
-              <div class="text-xs text-muted-foreground">
-                {{ role.users_count || 0 }} utilisateur(s)
+              <div class="flex flex-wrap gap-2 pt-3 border-t">
+                <button
+                  v-if="!role.is_system"
+                  @click="openCustomRoleModal(role)"
+                  class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border px-2 py-1.5 hover:bg-accent"
+                >
+                  <PencilIcon class="w-3 h-3" />
+                  Modifier
+                </button>
+                <button
+                  @click="duplicateCustomRole(role)"
+                  class="flex-1 inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border px-2 py-1.5 hover:bg-accent"
+                >
+                  <DocumentDuplicateIcon class="w-3 h-3" />
+                  Dupliquer
+                </button>
+                <button
+                  v-if="!role.is_system && (role.users_count || 0) === 0"
+                  @click="deleteCustomRole(role)"
+                  class="inline-flex items-center justify-center gap-1 text-xs font-medium rounded-md border border-destructive text-destructive px-2 py-1.5 hover:bg-destructive/10"
+                >
+                  <TrashIcon class="w-3 h-3" />
+                </button>
               </div>
-            </div>
-
-            <div class="border-t p-3 bg-muted/30 flex gap-2">
-              <button
-                @click="openRoleModal(role)"
-                :disabled="role.is_system"
-                class="flex-1 inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-xs font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <PencilIcon class="w-3 h-3" />
-                <span>Modifier</span>
-              </button>
-              <button
-                @click="duplicateRole(role)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-2"
-                title="Dupliquer"
-              >
-                <DocumentDuplicateIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click="deleteRole(role)"
-                :disabled="role.is_system || (role.users_count && role.users_count > 0)"
-                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-destructive/10 hover:text-destructive h-8 w-8 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- User Modal -->
-    <div
-      v-if="showUserModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      @click.self="closeUserModal"
-    >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-background border-b p-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">{{ editingUser ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}</h2>
+      <!-- ============================================ -->
+      <!-- SYSTEM ROLES TAB (read-only) -->
+      <!-- ============================================ -->
+      <div v-if="activeTab === 'system-roles'">
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <InformationCircleIcon class="w-5 h-5 text-muted-foreground" />
+            <p class="text-sm text-muted-foreground">
+              Les rôles système sont prédéfinis et ne peuvent pas être modifiés
+            </p>
+          </div>
+        </div>
+
+        <div v-if="loadingSystemRoles" class="flex items-center justify-center py-8">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div
+            v-for="role in systemRoles"
+            :key="role.value"
+            class="rounded-lg border bg-card shadow-sm"
+          >
+            <div class="p-4 sm:p-5">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <h3 class="font-semibold text-base">{{ role.label }}</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-muted">Niveau {{ role.level }}</span>
+              </div>
+              <p class="text-xs text-muted-foreground mb-3">{{ role.description }}</p>
+
+              <div class="mb-2">
+                <p class="text-xs font-medium mb-1">Permissions par défaut :</p>
+                <div class="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+                  <span
+                    v-for="perm in role.default_permissions"
+                    :key="perm"
+                    class="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary"
+                  >
+                    {{ perm }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- PERMISSIONS TAB (read-only) -->
+      <!-- ============================================ -->
+      <div v-if="activeTab === 'permissions'">
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <InformationCircleIcon class="w-5 h-5 text-muted-foreground" />
+            <p class="text-sm text-muted-foreground">
+              Liste de toutes les permissions disponibles dans le système
+            </p>
+          </div>
+        </div>
+
+        <div v-if="loadingPermissions" class="flex items-center justify-center py-8">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            v-for="(permissions, category) in systemPermissions"
+            :key="category"
+            class="rounded-lg border bg-card shadow-sm"
+          >
+            <div class="p-4 sm:p-5">
+              <h3 class="font-semibold text-base mb-3 capitalize">{{ category }}</h3>
+              <div class="space-y-2">
+                <div
+                  v-for="perm in permissions"
+                  :key="perm.value"
+                  class="flex items-start gap-2 p-2 rounded-md bg-muted/50"
+                >
+                  <KeyIcon class="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p class="text-sm font-medium">{{ perm.label }}</p>
+                    <p class="text-xs text-muted-foreground">{{ perm.value }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- ACCOUNT MODAL -->
+      <!-- ============================================ -->
+      <div v-if="showAccountModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" @click="closeAccountModal"></div>
+        <div class="relative bg-background rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div class="sticky top-0 bg-background border-b p-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold">
+              {{ editingAccount ? 'Modifier le compte' : 'Nouveau compte' }}
+            </h2>
+            <button @click="closeAccountModal" class="hover:bg-accent rounded-full p-1">
+              <XMarkIcon class="w-5 h-5" />
+            </button>
+          </div>
+
+          <form @submit.prevent="saveAccount" class="p-4 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm font-medium">Nom du compte *</label>
+                <input
+                  v-model="accountForm.name"
+                  type="text"
+                  required
+                  class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  placeholder="Nom de l'entreprise"
+                />
+              </div>
+              <div>
+                <label class="text-sm font-medium">Email *</label>
+                <input
+                  v-model="accountForm.email"
+                  type="email"
+                  required
+                  class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  placeholder="contact@entreprise.com"
+                />
+              </div>
+              <div>
+                <label class="text-sm font-medium">Téléphone</label>
+                <input
+                  v-model="accountForm.phone"
+                  type="text"
+                  class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  placeholder="+229 XX XX XX XX"
+                />
+              </div>
+              <div>
+                <label class="text-sm font-medium">N° Entreprise (SIRET, etc.)</label>
+                <input
+                  v-model="accountForm.company_id"
+                  type="text"
+                  class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label class="text-sm font-medium">Crédits SMS initiaux</label>
+                <input
+                  v-model.number="accountForm.sms_credits"
+                  type="number"
+                  min="0"
+                  class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label class="text-sm font-medium">Budget mensuel</label>
+                <input
+                  v-model.number="accountForm.monthly_budget"
+                  type="number"
+                  min="0"
+                  class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  placeholder="Laisser vide pour illimité"
+                />
+              </div>
+            </div>
+
+            <!-- Admin user (only for new accounts) -->
+            <div v-if="!editingAccount" class="border-t pt-4 mt-4">
+              <h3 class="text-sm font-semibold mb-3">Administrateur du compte</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-sm font-medium">Nom *</label>
+                  <input
+                    v-model="accountForm.admin_name"
+                    type="text"
+                    required
+                    class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Email *</label>
+                  <input
+                    v-model="accountForm.admin_email"
+                    type="email"
+                    required
+                    class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="text-sm font-medium">Mot de passe *</label>
+                  <input
+                    v-model="accountForm.admin_password"
+                    type="password"
+                    required
+                    minlength="8"
+                    class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t">
+              <button
+                type="button"
+                @click="closeAccountModal"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-10 px-4"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                :disabled="savingAccount"
+                class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 disabled:opacity-50"
+              >
+                <div v-if="savingAccount" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                {{ editingAccount ? 'Mettre à jour' : 'Créer le compte' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- CREDITS MODAL -->
+      <!-- ============================================ -->
+      <div v-if="showCreditsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" @click="showCreditsModal = false"></div>
+        <div class="relative bg-background rounded-lg shadow-lg w-full max-w-md">
+          <div class="p-4 border-b flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Ajouter des crédits</h2>
+            <button @click="showCreditsModal = false" class="hover:bg-accent rounded-full p-1">
+              <XMarkIcon class="w-5 h-5" />
+            </button>
+          </div>
+
+          <form @submit.prevent="addCredits" class="p-4 space-y-4">
+            <div>
+              <label class="text-sm font-medium">Compte</label>
+              <p class="text-sm text-muted-foreground">{{ creditsForm.accountName }}</p>
+              <p class="text-sm">Solde actuel: <span class="font-semibold text-primary">{{ formatNumber(creditsForm.currentCredits) }}</span></p>
+            </div>
+            <div>
+              <label class="text-sm font-medium">Montant à ajouter *</label>
+              <input
+                v-model.number="creditsForm.amount"
+                type="number"
+                min="1"
+                required
+                class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Note (optionnel)</label>
+              <textarea
+                v-model="creditsForm.note"
+                rows="2"
+                class="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
+              ></textarea>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t">
+              <button
+                type="button"
+                @click="showCreditsModal = false"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-10 px-4"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                :disabled="savingCredits"
+                class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-success text-success-foreground hover:bg-success/90 h-10 px-4 disabled:opacity-50"
+              >
+                <div v-if="savingCredits" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Ajouter
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- USER MODAL -->
+      <!-- ============================================ -->
+      <div v-if="showUserModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" @click="closeUserModal"></div>
+        <div class="relative bg-background rounded-lg shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div class="sticky top-0 bg-background border-b p-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold">
+              {{ editingUser ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
+            </h2>
             <button @click="closeUserModal" class="hover:bg-accent rounded-full p-1">
               <XMarkIcon class="w-5 h-5" />
             </button>
           </div>
-        </div>
 
-        <form @submit.prevent="saveUser" class="p-6 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Nom complet *</label>
+          <form @submit.prevent="saveUser" class="p-4 space-y-4">
+            <div>
+              <label class="text-sm font-medium">Nom *</label>
               <input
                 v-model="userForm.name"
                 type="text"
                 required
-                placeholder="Jean Dupont"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
-
-            <div class="space-y-2">
+            <div>
               <label class="text-sm font-medium">Email *</label>
               <input
                 v-model="userForm.email"
                 type="email"
                 required
-                :disabled="!!editingUser"
-                placeholder="jean@example.com"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:opacity-50"
+                class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
-          </div>
-
-          <div v-if="!editingUser" class="space-y-2">
-            <label class="text-sm font-medium">Mot de passe *</label>
-            <input
-              v-model="userForm.password"
-              type="password"
-              :required="!editingUser"
-              placeholder="Minimum 8 caractères"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-2">
+            <div v-if="!editingUser">
+              <label class="text-sm font-medium">Mot de passe *</label>
+              <input
+                v-model="userForm.password"
+                type="password"
+                required
+                minlength="8"
+                class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </div>
+            <div v-if="authStore.isSuperAdmin">
+              <label class="text-sm font-medium">Compte</label>
+              <select
+                v-model="userForm.account_id"
+                class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Aucun compte</option>
+                <option v-for="acc in accounts" :key="acc.id" :value="acc.id">{{ acc.name }}</option>
+              </select>
+            </div>
+            <div>
               <label class="text-sm font-medium">Rôle *</label>
               <select
                 v-model="userForm.role"
                 required
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
-                <option v-for="role in availableUserRoles" :key="role.value" :value="role.value">
+                <option v-for="role in availableRoles" :key="role.value" :value="role.value">
                   {{ role.label }}
                 </option>
               </select>
             </div>
 
-            <div v-if="authStore.isSuperAdmin && customRoles.length > 0" class="space-y-2">
-              <label class="text-sm font-medium">Rôle personnalisé</label>
-              <select
-                v-model="userForm.custom_role_id"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <div class="flex justify-end gap-3 pt-4 border-t">
+              <button
+                type="button"
+                @click="closeUserModal"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-10 px-4"
               >
-                <option :value="null">-- Permissions par défaut --</option>
-                <option v-for="role in customRoles" :key="role.id" :value="role.id">
-                  {{ role.name }}
-                </option>
-              </select>
+                Annuler
+              </button>
+              <button
+                type="submit"
+                :disabled="savingUser"
+                class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 disabled:opacity-50"
+              >
+                <div v-if="savingUser" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                {{ editingUser ? 'Mettre à jour' : 'Créer' }}
+              </button>
             </div>
-          </div>
-
-          <div class="flex gap-3 pt-4 border-t">
-            <button
-              type="button"
-              @click="closeUserModal"
-              class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              :disabled="savingUser"
-              class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-            >
-              <div v-if="savingUser" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>{{ savingUser ? 'Enregistrement...' : (editingUser ? 'Modifier' : 'Créer') }}</span>
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
 
-    <!-- SubAccount Modal -->
-    <div
-      v-if="showSubAccountModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      @click.self="closeSubAccountModal"
-    >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-background border-b p-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">{{ editingSubAccount ? 'Modifier le sous-compte' : 'Nouveau sous-compte' }}</h2>
-            <button @click="closeSubAccountModal" class="hover:bg-accent rounded-full p-1">
+      <!-- ============================================ -->
+      <!-- CUSTOM ROLE MODAL -->
+      <!-- ============================================ -->
+      <div v-if="showCustomRoleModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50" @click="closeCustomRoleModal"></div>
+        <div class="relative bg-background rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div class="sticky top-0 bg-background border-b p-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold">
+              {{ editingCustomRole ? 'Modifier le rôle' : 'Nouveau rôle personnalisé' }}
+            </h2>
+            <button @click="closeCustomRoleModal" class="hover:bg-accent rounded-full p-1">
               <XMarkIcon class="w-5 h-5" />
             </button>
           </div>
-        </div>
 
-        <form @submit.prevent="saveSubAccount" class="p-6 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Nom complet *</label>
-              <input
-                v-model="subAccountForm.name"
-                type="text"
-                required
-                placeholder="Jean Dupont"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-            </div>
-
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Email *</label>
-              <input
-                v-model="subAccountForm.email"
-                type="email"
-                required
-                :disabled="!!editingSubAccount"
-                placeholder="jean@example.com"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:opacity-50"
-              />
-            </div>
-          </div>
-
-          <div v-if="!editingSubAccount" class="space-y-2">
-            <label class="text-sm font-medium">Mot de passe *</label>
-            <input
-              v-model="subAccountForm.password"
-              type="password"
-              :required="!editingSubAccount"
-              placeholder="Minimum 8 caractères"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Rôle *</label>
-              <select
-                v-model="subAccountForm.role"
-                required
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                <option value="admin">Admin (tous les droits)</option>
-                <option value="manager">Manager (gestion avancée)</option>
-                <option value="sender">Sender (envoi SMS)</option>
-                <option value="viewer">Viewer (consultation uniquement)</option>
-              </select>
-            </div>
-
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Statut</label>
-              <select
-                v-model="subAccountForm.status"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                <option value="active">Actif</option>
-                <option value="suspended">Suspendu</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Limite de crédits SMS</label>
-            <div class="flex gap-2">
-              <input
-                v-model.number="subAccountForm.sms_credit_limit"
-                type="number"
-                min="0"
-                :disabled="unlimitedCredits"
-                placeholder="1000"
-                class="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm disabled:opacity-50"
-              />
-              <label class="inline-flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-accent">
-                <input v-model="unlimitedCredits" type="checkbox" class="rounded border-gray-300" />
-                <span class="text-sm">Illimité</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="flex gap-3 pt-4 border-t">
-            <button
-              type="button"
-              @click="closeSubAccountModal"
-              class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              :disabled="savingSubAccount"
-              class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-            >
-              <div v-if="savingSubAccount" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>{{ savingSubAccount ? 'Enregistrement...' : (editingSubAccount ? 'Modifier' : 'Créer') }}</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Custom Role Modal -->
-    <div
-      v-if="showRoleModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      @click.self="closeRoleModal"
-    >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-background border-b p-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">{{ editingRole ? 'Modifier le rôle' : 'Nouveau rôle' }}</h2>
-            <button @click="closeRoleModal" class="hover:bg-accent rounded-full p-1">
-              <XMarkIcon class="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <form @submit.prevent="saveRole" class="p-6 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-2">
+          <form @submit.prevent="saveCustomRole" class="p-4 space-y-4">
+            <div>
               <label class="text-sm font-medium">Nom du rôle *</label>
               <input
-                v-model="roleForm.name"
+                v-model="customRoleForm.name"
                 type="text"
                 required
-                placeholder="Manager Marketing"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
-
-            <div class="space-y-2">
-              <label class="text-sm font-medium">Slug</label>
-              <input
-                v-model="roleForm.slug"
-                type="text"
-                placeholder="manager-marketing"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-              <p class="text-xs text-muted-foreground">Généré automatiquement si vide</p>
+            <div>
+              <label class="text-sm font-medium">Description</label>
+              <textarea
+                v-model="customRoleForm.description"
+                rows="2"
+                class="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
+              ></textarea>
             </div>
-          </div>
 
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Description</label>
-            <textarea
-              v-model="roleForm.description"
-              rows="2"
-              placeholder="Description du rôle..."
-              class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            ></textarea>
-          </div>
-
-          <div class="space-y-3">
-            <label class="text-sm font-medium">Permissions *</label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div v-for="perm in allPermissions" :key="perm.value" class="flex items-start gap-2">
-                <input
-                  v-model="roleForm.permissions"
-                  :value="perm.value"
-                  type="checkbox"
-                  :id="'role-perm-' + perm.value"
-                  class="mt-1 rounded border-gray-300"
-                />
-                <label :for="'role-perm-' + perm.value" class="flex-1 cursor-pointer">
-                  <div class="text-sm font-medium">{{ perm.label }}</div>
-                </label>
+            <div>
+              <label class="text-sm font-medium mb-2 block">Permissions</label>
+              <div class="border rounded-lg p-3 max-h-64 overflow-y-auto">
+                <div v-for="(perms, category) in systemPermissions" :key="category" class="mb-4 last:mb-0">
+                  <p class="text-xs font-semibold uppercase text-muted-foreground mb-2">{{ category }}</p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <label
+                      v-for="perm in perms"
+                      :key="perm.value"
+                      class="flex items-center gap-2 p-2 rounded hover:bg-accent cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        :value="perm.value"
+                        v-model="customRoleForm.permissions"
+                        class="rounded"
+                      />
+                      <span class="text-sm">{{ perm.label }}</span>
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="flex gap-3 pt-4 border-t">
-            <button
-              type="button"
-              @click="closeRoleModal"
-              class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              :disabled="savingRole || roleForm.permissions.length === 0"
-              class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-            >
-              <div v-if="savingRole" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>{{ savingRole ? 'Enregistrement...' : (editingRole ? 'Modifier' : 'Créer') }}</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Permissions Modal (for users) -->
-    <div
-      v-if="showUserPermissionsModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      @click.self="closeUserPermissionsModal"
-    >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-lg">
-        <div class="border-b p-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">Permissions utilisateur</h2>
-            <button @click="closeUserPermissionsModal" class="hover:bg-accent rounded-full p-1">
-              <XMarkIcon class="w-5 h-5" />
-            </button>
-          </div>
-          <p class="text-sm text-muted-foreground mt-1">{{ editingUser?.name }}</p>
-        </div>
-
-        <div class="p-6 space-y-4 max-h-96 overflow-y-auto">
-          <div v-for="perm in availableUserPermissions" :key="perm.value" class="flex items-start gap-3">
-            <input
-              v-model="selectedUserPermissions"
-              :value="perm.value"
-              type="checkbox"
-              :id="'user-perm-' + perm.value"
-              class="mt-1 rounded border-gray-300"
-            />
-            <label :for="'user-perm-' + perm.value" class="flex-1 cursor-pointer">
-              <div class="font-medium">{{ perm.label }}</div>
-            </label>
-          </div>
-        </div>
-
-        <div class="border-t p-6 flex gap-3">
-          <button
-            type="button"
-            @click="closeUserPermissionsModal"
-            class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-          >
-            Annuler
-          </button>
-          <button
-            @click="saveUserPermissions"
-            :disabled="savingUserPermissions"
-            class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            <div v-if="savingUserPermissions" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            <span>{{ savingUserPermissions ? 'Enregistrement...' : 'Enregistrer' }}</span>
-          </button>
+            <div class="flex justify-end gap-3 pt-4 border-t">
+              <button
+                type="button"
+                @click="closeCustomRoleModal"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent h-10 px-4"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                :disabled="savingCustomRole"
+                class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 disabled:opacity-50"
+              >
+                <div v-if="savingCustomRole" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                {{ editingCustomRole ? 'Mettre à jour' : 'Créer' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
 
-    <!-- Permissions Modal (for sub-accounts) -->
-    <div
-      v-if="showSubAccountPermissionsModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      @click.self="closeSubAccountPermissionsModal"
-    >
-      <div class="bg-background rounded-lg shadow-lg w-full max-w-lg">
-        <div class="border-b p-6">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">Permissions sous-compte</h2>
-            <button @click="closeSubAccountPermissionsModal" class="hover:bg-accent rounded-full p-1">
-              <XMarkIcon class="w-5 h-5" />
-            </button>
-          </div>
-          <p class="text-sm text-muted-foreground mt-1">{{ editingSubAccount?.name }}</p>
-        </div>
-
-        <div class="p-6 space-y-4 max-h-96 overflow-y-auto">
-          <div v-for="perm in subAccountPermissions" :key="perm.value" class="flex items-start gap-3">
-            <input
-              v-model="selectedSubAccountPermissions"
-              :value="perm.value"
-              type="checkbox"
-              :id="'sub-perm-' + perm.value"
-              class="mt-1 rounded border-gray-300"
-            />
-            <label :for="'sub-perm-' + perm.value" class="flex-1 cursor-pointer">
-              <div class="font-medium">{{ perm.label }}</div>
-              <div class="text-sm text-muted-foreground">{{ perm.description }}</div>
-            </label>
-          </div>
-        </div>
-
-        <div class="border-t p-6 flex gap-3">
-          <button
-            type="button"
-            @click="closeSubAccountPermissionsModal"
-            class="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-          >
-            Annuler
-          </button>
-          <button
-            @click="saveSubAccountPermissions"
-            :disabled="savingSubAccountPermissions"
-            class="flex-1 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            <div v-if="savingSubAccountPermissions" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            <span>{{ savingSubAccountPermissions ? 'Enregistrement...' : 'Enregistrer' }}</span>
-          </button>
-        </div>
-      </div>
     </div>
   </MainLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import MainLayout from '@/components/MainLayout.vue'
-import { useAuthStore } from '@/stores/auth'
 import {
-  PlusIcon, PencilIcon, TrashIcon, XMarkIcon, UsersIcon, UserGroupIcon,
-  KeyIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon, DocumentDuplicateIcon
+  UsersIcon,
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  XMarkIcon,
+  ShieldCheckIcon,
+  KeyIcon,
+  InformationCircleIcon,
+  CheckCircleIcon,
+  NoSymbolIcon,
+  BanknotesIcon,
+  BuildingOfficeIcon,
+  WrenchScrewdriverIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/vue/24/outline'
-import { subAccountService } from '@/services/subAccountService'
-import api from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
+import api from '@/services/api'
 
 const authStore = useAuthStore()
 
-// Tab state
-const activeTab = ref(authStore.canManageUsers ? 'users' : 'subaccounts')
+// Active tab
+const activeTab = ref(authStore.isSuperAdmin ? 'accounts' : 'users')
 
-// Users state
-interface User {
-  id: number
-  name: string
-  email: string
-  role: string
-  custom_role_id?: number
-  custom_role_name?: string
-  permissions: string[]
-  status: string
-  created_at: string
-}
-
-const users = ref<User[]>([])
+// Loading states
+const loadingAccounts = ref(false)
 const loadingUsers = ref(false)
-const showUserModal = ref(false)
-const editingUser = ref<User | null>(null)
+const loadingCustomRoles = ref(false)
+const loadingSystemRoles = ref(false)
+const loadingPermissions = ref(false)
+const savingAccount = ref(false)
 const savingUser = ref(false)
-const showUserPermissionsModal = ref(false)
-const selectedUserPermissions = ref<string[]>([])
-const savingUserPermissions = ref(false)
-const availableUserRoles = ref<{ value: string; label: string }[]>([])
-const availableUserPermissions = ref<{ value: string; label: string }[]>([])
+const savingCustomRole = ref(false)
+const savingCredits = ref(false)
+
+// Data
+const accounts = ref<any[]>([])
+const users = ref<any[]>([])
+const customRoles = ref<any[]>([])
+const systemRoles = ref<any[]>([])
+const systemPermissions = ref<Record<string, any[]>>({})
+const availableRoles = ref<any[]>([])
+
+// Filters
+const selectedAccountId = ref('')
+
+// Modals
+const showAccountModal = ref(false)
+const showUserModal = ref(false)
+const showCustomRoleModal = ref(false)
+const showCreditsModal = ref(false)
+
+// Editing states
+const editingAccount = ref<any>(null)
+const editingUser = ref<any>(null)
+const editingCustomRole = ref<any>(null)
+
+// Forms
+const accountForm = ref({
+  name: '',
+  email: '',
+  phone: '',
+  company_id: '',
+  sms_credits: 0,
+  monthly_budget: null as number | null,
+  admin_name: '',
+  admin_email: '',
+  admin_password: ''
+})
 
 const userForm = ref({
   name: '',
   email: '',
   password: '',
   role: 'agent',
-  custom_role_id: null as number | null
+  account_id: '' as string | number
 })
 
-const userRoleLabels: Record<string, string> = {
-  super_admin: 'Super Admin',
-  admin: 'Administrateur',
-  agent: 'Agent'
-}
+const customRoleForm = ref({
+  name: '',
+  description: '',
+  permissions: [] as string[]
+})
 
-const userStatusLabels: Record<string, string> = {
+const creditsForm = ref({
+  accountId: 0,
+  accountName: '',
+  currentCredits: 0,
+  amount: 0,
+  note: ''
+})
+
+// Labels
+const statusLabels: Record<string, string> = {
   active: 'Actif',
   suspended: 'Suspendu',
   pending: 'En attente'
 }
 
-// SubAccounts state
-interface SubAccount {
-  id: number
-  name: string
-  email: string
-  role: string
-  status: string
-  sms_credit_limit: number | null
-  sms_used: number
-  remaining_credits: number | null
-  permissions: string[]
+const roleLabels: Record<string, string> = {
+  super_admin: 'Super Admin',
+  admin: 'Admin',
+  agent: 'Agent'
 }
 
-const subAccounts = ref<SubAccount[]>([])
-const loadingSubAccounts = ref(false)
-const showSubAccountModal = ref(false)
-const editingSubAccount = ref<SubAccount | null>(null)
-const savingSubAccount = ref(false)
-const unlimitedCredits = ref(true)
-const showSubAccountPermissionsModal = ref(false)
-const selectedSubAccountPermissions = ref<string[]>([])
-const savingSubAccountPermissions = ref(false)
-
-const subAccountForm = ref({
-  name: '',
-  email: '',
-  password: '',
-  role: 'sender',
-  status: 'active',
-  sms_credit_limit: null as number | null
-})
-
-const subAccountRoleLabels: Record<string, string> = {
-  admin: 'Administrateur',
-  manager: 'Manager',
-  sender: 'Expéditeur',
-  viewer: 'Observateur'
+// Helpers
+function formatNumber(num: number): string {
+  return new Intl.NumberFormat('fr-FR').format(num)
 }
-
-const subAccountStatusLabels: Record<string, string> = {
-  active: 'Actif',
-  suspended: 'Suspendu',
-  inactive: 'Inactif'
-}
-
-const subAccountPermissions = [
-  { value: 'send_sms', label: 'Envoyer SMS', description: 'Permet d\'envoyer des SMS' },
-  { value: 'view_history', label: 'Voir l\'historique', description: 'Consulter l\'historique des SMS' },
-  { value: 'manage_contacts', label: 'Gérer les contacts', description: 'Ajouter, modifier et supprimer des contacts' },
-  { value: 'manage_groups', label: 'Gérer les groupes', description: 'Créer et gérer des groupes de contacts' },
-  { value: 'create_campaigns', label: 'Créer des campagnes', description: 'Créer et lancer des campagnes SMS' },
-  { value: 'view_analytics', label: 'Voir les statistiques', description: 'Accéder aux rapports et statistiques' },
-  { value: 'manage_templates', label: 'Gérer les modèles', description: 'Créer et modifier des modèles' },
-  { value: 'export_data', label: 'Exporter les données', description: 'Exporter les données' }
-]
-
-// Custom Roles state
-interface CustomRole {
-  id: number
-  name: string
-  slug: string
-  description?: string
-  permissions: string[]
-  is_system: boolean
-  users_count?: number
-}
-
-const customRoles = ref<CustomRole[]>([])
-const loadingRoles = ref(false)
-const showRoleModal = ref(false)
-const editingRole = ref<CustomRole | null>(null)
-const savingRole = ref(false)
-
-const roleForm = ref({
-  name: '',
-  slug: '',
-  description: '',
-  permissions: [] as string[]
-})
-
-const allPermissions = [
-  { value: 'manage_users', label: 'Gérer les utilisateurs' },
-  { value: 'manage_settings', label: 'Gérer les paramètres' },
-  { value: 'manage_api_keys', label: 'Gérer les clés API' },
-  { value: 'manage_webhooks', label: 'Gérer les webhooks' },
-  { value: 'manage_sub_accounts', label: 'Gérer les sous-comptes' },
-  { value: 'view_audit_logs', label: 'Voir les journaux d\'audit' },
-  { value: 'send_sms', label: 'Envoyer SMS' },
-  { value: 'view_history', label: 'Voir l\'historique' },
-  { value: 'manage_contacts', label: 'Gérer les contacts' },
-  { value: 'manage_groups', label: 'Gérer les groupes' },
-  { value: 'create_campaigns', label: 'Créer des campagnes' },
-  { value: 'view_analytics', label: 'Voir les analytics' },
-  { value: 'manage_templates', label: 'Gérer les modèles' },
-  { value: 'export_data', label: 'Exporter les données' }
-]
-
-// Watchers
-watch(unlimitedCredits, (value) => {
-  if (value) {
-    subAccountForm.value.sms_credit_limit = null
-  }
-})
 
 // Load functions
+async function loadAccounts() {
+  if (!authStore.isSuperAdmin) return
+
+  loadingAccounts.value = true
+  try {
+    const response = await api.get('/accounts')
+    accounts.value = response.data.data || []
+  } catch (err: any) {
+    showError('Erreur lors du chargement des comptes')
+  } finally {
+    loadingAccounts.value = false
+  }
+}
+
 async function loadUsers() {
-  if (!authStore.canManageUsers) return
   loadingUsers.value = true
   try {
-    const response = await api.get('/users')
-    users.value = response.data.data.data || response.data.data || []
+    const params: any = {}
+    if (selectedAccountId.value) {
+      params.account_id = selectedAccountId.value
+    }
+    const response = await api.get('/users', { params })
+    users.value = response.data.data || []
   } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur lors du chargement des utilisateurs')
+    showError('Erreur lors du chargement des utilisateurs')
   } finally {
     loadingUsers.value = false
+  }
+}
+
+async function loadCustomRoles() {
+  if (!authStore.isSuperAdmin) return
+
+  loadingCustomRoles.value = true
+  try {
+    const response = await api.get('/custom-roles')
+    customRoles.value = response.data.data || []
+  } catch (err: any) {
+    showError('Erreur lors du chargement des rôles personnalisés')
+  } finally {
+    loadingCustomRoles.value = false
+  }
+}
+
+async function loadSystemRoles() {
+  loadingSystemRoles.value = true
+  try {
+    const response = await api.get('/system-roles')
+    systemRoles.value = response.data.data || []
+  } catch (err: any) {
+    showError('Erreur lors du chargement des rôles système')
+  } finally {
+    loadingSystemRoles.value = false
+  }
+}
+
+async function loadSystemPermissions() {
+  loadingPermissions.value = true
+  try {
+    const response = await api.get('/system-permissions')
+    systemPermissions.value = response.data.data || {}
+  } catch (err: any) {
+    showError('Erreur lors du chargement des permissions')
+  } finally {
+    loadingPermissions.value = false
   }
 }
 
 async function loadAvailableRoles() {
   try {
     const response = await api.get('/users/available-roles')
-    availableUserRoles.value = response.data.data
-  } catch (err) {
-    console.error('Error loading available roles:', err)
-  }
-}
-
-async function loadAvailablePermissions() {
-  try {
-    const response = await api.get('/users/available-permissions')
-    const grouped = response.data.data
-    availableUserPermissions.value = Object.values(grouped).flat() as any[]
-  } catch (err) {
-    console.error('Error loading available permissions:', err)
-  }
-}
-
-async function loadSubAccounts() {
-  loadingSubAccounts.value = true
-  try {
-    const data = await subAccountService.getAll()
-    subAccounts.value = data as any[]
+    availableRoles.value = response.data.data || []
   } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur lors du chargement')
-  } finally {
-    loadingSubAccounts.value = false
+    console.error('Error loading roles:', err)
   }
 }
 
-async function loadCustomRoles() {
-  if (!authStore.isSuperAdmin) return
-  loadingRoles.value = true
+// Account functions
+function openAccountModal(account?: any) {
+  editingAccount.value = account || null
+  if (account) {
+    accountForm.value = {
+      name: account.name,
+      email: account.email,
+      phone: account.phone || '',
+      company_id: account.company_id || '',
+      sms_credits: account.sms_credits || 0,
+      monthly_budget: account.monthly_budget,
+      admin_name: '',
+      admin_email: '',
+      admin_password: ''
+    }
+  } else {
+    accountForm.value = {
+      name: '',
+      email: '',
+      phone: '',
+      company_id: '',
+      sms_credits: 0,
+      monthly_budget: null,
+      admin_name: '',
+      admin_email: '',
+      admin_password: ''
+    }
+  }
+  showAccountModal.value = true
+}
+
+function closeAccountModal() {
+  showAccountModal.value = false
+  editingAccount.value = null
+}
+
+async function saveAccount() {
+  savingAccount.value = true
   try {
-    const response = await api.get('/custom-roles')
-    customRoles.value = response.data.data || []
+    if (editingAccount.value) {
+      await api.put(`/accounts/${editingAccount.value.id}`, accountForm.value)
+      showSuccess('Compte mis à jour avec succès')
+    } else {
+      await api.post('/accounts', accountForm.value)
+      showSuccess('Compte créé avec succès')
+    }
+    closeAccountModal()
+    await loadAccounts()
   } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur lors du chargement des rôles')
+    showError(err.response?.data?.message || 'Erreur lors de la sauvegarde')
   } finally {
-    loadingRoles.value = false
+    savingAccount.value = false
+  }
+}
+
+function openCreditsModal(account: any) {
+  creditsForm.value = {
+    accountId: account.id,
+    accountName: account.name,
+    currentCredits: account.sms_credits,
+    amount: 0,
+    note: ''
+  }
+  showCreditsModal.value = true
+}
+
+async function addCredits() {
+  savingCredits.value = true
+  try {
+    await api.post(`/accounts/${creditsForm.value.accountId}/credits`, {
+      amount: creditsForm.value.amount,
+      note: creditsForm.value.note
+    })
+    showSuccess(`${creditsForm.value.amount} crédits ajoutés avec succès`)
+    showCreditsModal.value = false
+    await loadAccounts()
+  } catch (err: any) {
+    showError(err.response?.data?.message || 'Erreur lors de l\'ajout des crédits')
+  } finally {
+    savingCredits.value = false
+  }
+}
+
+async function suspendAccount(account: any) {
+  const confirmed = await showConfirm('Suspendre ce compte ?', 'Tous les utilisateurs de ce compte seront également suspendus.')
+  if (!confirmed) return
+
+  try {
+    await api.post(`/accounts/${account.id}/suspend`)
+    showSuccess('Compte suspendu')
+    await loadAccounts()
+  } catch (err: any) {
+    showError(err.response?.data?.message || 'Erreur lors de la suspension')
+  }
+}
+
+async function activateAccount(account: any) {
+  try {
+    await api.post(`/accounts/${account.id}/activate`)
+    showSuccess('Compte activé')
+    await loadAccounts()
+  } catch (err: any) {
+    showError(err.response?.data?.message || 'Erreur lors de l\'activation')
   }
 }
 
 // User functions
-function openUserModal(user?: User) {
+function openUserModal(user?: any) {
   editingUser.value = user || null
-  userForm.value = user ? {
-    name: user.name,
-    email: user.email,
-    password: '',
-    role: user.role,
-    custom_role_id: user.custom_role_id || null
-  } : {
-    name: '',
-    email: '',
-    password: '',
-    role: 'agent',
-    custom_role_id: null
+  if (user) {
+    userForm.value = {
+      name: user.name,
+      email: user.email,
+      password: '',
+      role: user.role,
+      account_id: user.account_id || ''
+    }
+  } else {
+    userForm.value = {
+      name: '',
+      email: '',
+      password: '',
+      role: 'agent',
+      account_id: authStore.user?.account_id || ''
+    }
   }
   showUserModal.value = true
 }
@@ -1037,295 +1141,136 @@ async function saveUser() {
   savingUser.value = true
   try {
     const data: any = { ...userForm.value }
-    if (editingUser.value && !data.password) {
-      delete data.password
-    }
+    if (!data.password) delete data.password
+    if (!data.account_id) delete data.account_id
 
     if (editingUser.value) {
       await api.put(`/users/${editingUser.value.id}`, data)
-      showSuccess('Utilisateur modifié avec succès')
+      showSuccess('Utilisateur mis à jour')
     } else {
       await api.post('/users', data)
-      showSuccess('Utilisateur créé avec succès')
+      showSuccess('Utilisateur créé')
     }
     closeUserModal()
     await loadUsers()
   } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur lors de l\'enregistrement')
+    showError(err.response?.data?.message || 'Erreur lors de la sauvegarde')
   } finally {
     savingUser.value = false
   }
 }
 
-function openUserPermissionsModal(user: User) {
-  editingUser.value = user
-  selectedUserPermissions.value = [...(user.permissions || [])]
-  showUserPermissionsModal.value = true
-}
+async function suspendUser(user: any) {
+  const confirmed = await showConfirm('Suspendre cet utilisateur ?')
+  if (!confirmed) return
 
-function closeUserPermissionsModal() {
-  showUserPermissionsModal.value = false
-  editingUser.value = null
-}
-
-async function saveUserPermissions() {
-  if (!editingUser.value) return
-  savingUserPermissions.value = true
   try {
-    await api.put(`/users/${editingUser.value.id}/permissions`, {
-      permissions: selectedUserPermissions.value
-    })
-    showSuccess('Permissions mises à jour')
-    closeUserPermissionsModal()
+    await api.post(`/users/${user.id}/suspend`)
+    showSuccess('Utilisateur suspendu')
     await loadUsers()
   } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur lors de la mise à jour')
-  } finally {
-    savingUserPermissions.value = false
+    showError(err.response?.data?.message || 'Erreur lors de la suspension')
   }
 }
 
-async function suspendUser(user: User) {
-  const confirmed = await showConfirm('Suspendre l\'utilisateur ?', `Voulez-vous suspendre "${user.name}" ?`)
-  if (confirmed) {
-    try {
-      await api.post(`/users/${user.id}/suspend`)
-      showSuccess('Utilisateur suspendu')
-      await loadUsers()
-    } catch (err: any) {
-      showError(err.response?.data?.message || 'Erreur')
-    }
-  }
-}
-
-async function activateUser(user: User) {
+async function activateUser(user: any) {
   try {
     await api.post(`/users/${user.id}/activate`)
     showSuccess('Utilisateur activé')
     await loadUsers()
   } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur')
+    showError(err.response?.data?.message || 'Erreur lors de l\'activation')
   }
 }
 
-async function deleteUser(user: User) {
-  const confirmed = await showConfirm('Supprimer l\'utilisateur ?', `Êtes-vous sûr de vouloir supprimer "${user.name}" ?`)
-  if (confirmed) {
-    try {
-      await api.delete(`/users/${user.id}`)
-      showSuccess('Utilisateur supprimé')
-      await loadUsers()
-    } catch (err: any) {
-      showError(err.response?.data?.message || 'Erreur')
-    }
-  }
-}
+async function deleteUser(user: any) {
+  const confirmed = await showConfirm('Supprimer cet utilisateur ?', 'Cette action est irréversible.')
+  if (!confirmed) return
 
-// SubAccount functions
-function openSubAccountModal(account?: SubAccount) {
-  editingSubAccount.value = account || null
-  subAccountForm.value = account ? {
-    name: account.name,
-    email: account.email,
-    password: '',
-    role: account.role,
-    status: account.status,
-    sms_credit_limit: account.sms_credit_limit
-  } : {
-    name: '',
-    email: '',
-    password: '',
-    role: 'sender',
-    status: 'active',
-    sms_credit_limit: null
-  }
-  unlimitedCredits.value = !account?.sms_credit_limit
-  showSubAccountModal.value = true
-}
-
-function closeSubAccountModal() {
-  showSubAccountModal.value = false
-  editingSubAccount.value = null
-}
-
-async function saveSubAccount() {
-  savingSubAccount.value = true
   try {
-    const data: any = { ...subAccountForm.value }
-    if (unlimitedCredits.value) {
-      data.sms_credit_limit = null
-    }
-    if (editingSubAccount.value && !data.password) {
-      delete data.password
-    }
+    await api.delete(`/users/${user.id}`)
+    showSuccess('Utilisateur supprimé')
+    await loadUsers()
+  } catch (err: any) {
+    showError(err.response?.data?.message || 'Erreur lors de la suppression')
+  }
+}
 
-    if (editingSubAccount.value) {
-      await subAccountService.update(editingSubAccount.value.id, data)
-      showSuccess('Sous-compte modifié')
+// Custom role functions
+function openCustomRoleModal(role?: any) {
+  editingCustomRole.value = role || null
+  if (role) {
+    customRoleForm.value = {
+      name: role.name,
+      description: role.description || '',
+      permissions: [...(role.permissions || [])]
+    }
+  } else {
+    customRoleForm.value = {
+      name: '',
+      description: '',
+      permissions: []
+    }
+  }
+  showCustomRoleModal.value = true
+}
+
+function closeCustomRoleModal() {
+  showCustomRoleModal.value = false
+  editingCustomRole.value = null
+}
+
+async function saveCustomRole() {
+  savingCustomRole.value = true
+  try {
+    if (editingCustomRole.value) {
+      await api.put(`/custom-roles/${editingCustomRole.value.id}`, customRoleForm.value)
+      showSuccess('Rôle mis à jour')
     } else {
-      await subAccountService.create(data)
-      showSuccess('Sous-compte créé')
-    }
-    closeSubAccountModal()
-    await loadSubAccounts()
-  } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur')
-  } finally {
-    savingSubAccount.value = false
-  }
-}
-
-function openSubAccountPermissionsModal(account: SubAccount) {
-  editingSubAccount.value = account
-  selectedSubAccountPermissions.value = [...(account.permissions || [])]
-  showSubAccountPermissionsModal.value = true
-}
-
-function closeSubAccountPermissionsModal() {
-  showSubAccountPermissionsModal.value = false
-  editingSubAccount.value = null
-}
-
-async function saveSubAccountPermissions() {
-  if (!editingSubAccount.value) return
-  savingSubAccountPermissions.value = true
-  try {
-    await api.post(`/sub-accounts/${editingSubAccount.value.id}/permissions`, {
-      permissions: selectedSubAccountPermissions.value
-    })
-    showSuccess('Permissions mises à jour')
-    closeSubAccountPermissionsModal()
-    await loadSubAccounts()
-  } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur')
-  } finally {
-    savingSubAccountPermissions.value = false
-  }
-}
-
-async function suspendSubAccount(account: SubAccount) {
-  const confirmed = await showConfirm('Suspendre le compte ?', `Voulez-vous suspendre "${account.name}" ?`)
-  if (confirmed) {
-    try {
-      await api.post(`/sub-accounts/${account.id}/suspend`)
-      showSuccess('Compte suspendu')
-      await loadSubAccounts()
-    } catch (err: any) {
-      showError(err.response?.data?.message || 'Erreur')
-    }
-  }
-}
-
-async function activateSubAccount(account: SubAccount) {
-  try {
-    await api.post(`/sub-accounts/${account.id}/activate`)
-    showSuccess('Compte activé')
-    await loadSubAccounts()
-  } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur')
-  }
-}
-
-async function deleteSubAccount(account: SubAccount) {
-  const confirmed = await showConfirm('Supprimer le compte ?', `Êtes-vous sûr de vouloir supprimer "${account.name}" ?`)
-  if (confirmed) {
-    try {
-      await subAccountService.delete(account.id)
-      showSuccess('Compte supprimé')
-      await loadSubAccounts()
-    } catch (err: any) {
-      showError(err.response?.data?.message || 'Erreur')
-    }
-  }
-}
-
-function getSubAccountUsagePercentage(account: SubAccount): number {
-  if (account.sms_credit_limit === null) return 0
-  return Math.min(100, (account.sms_used / account.sms_credit_limit) * 100)
-}
-
-// Custom Role functions
-function openRoleModal(role?: CustomRole) {
-  editingRole.value = role || null
-  roleForm.value = role ? {
-    name: role.name,
-    slug: role.slug,
-    description: role.description || '',
-    permissions: [...role.permissions]
-  } : {
-    name: '',
-    slug: '',
-    description: '',
-    permissions: []
-  }
-  showRoleModal.value = true
-}
-
-function closeRoleModal() {
-  showRoleModal.value = false
-  editingRole.value = null
-}
-
-async function saveRole() {
-  savingRole.value = true
-  try {
-    if (editingRole.value) {
-      await api.put(`/custom-roles/${editingRole.value.id}`, roleForm.value)
-      showSuccess('Rôle modifié')
-    } else {
-      await api.post('/custom-roles', roleForm.value)
+      await api.post('/custom-roles', customRoleForm.value)
       showSuccess('Rôle créé')
     }
-    closeRoleModal()
+    closeCustomRoleModal()
     await loadCustomRoles()
   } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur')
+    showError(err.response?.data?.message || 'Erreur lors de la sauvegarde')
   } finally {
-    savingRole.value = false
+    savingCustomRole.value = false
   }
 }
 
-async function duplicateRole(role: CustomRole) {
+async function duplicateCustomRole(role: any) {
   try {
     await api.post(`/custom-roles/${role.id}/duplicate`)
     showSuccess('Rôle dupliqué')
     await loadCustomRoles()
   } catch (err: any) {
-    showError(err.response?.data?.message || 'Erreur')
+    showError(err.response?.data?.message || 'Erreur lors de la duplication')
   }
 }
 
-async function deleteRole(role: CustomRole) {
-  const confirmed = await showConfirm('Supprimer le rôle ?', `Êtes-vous sûr de vouloir supprimer "${role.name}" ?`)
-  if (confirmed) {
-    try {
-      await api.delete(`/custom-roles/${role.id}`)
-      showSuccess('Rôle supprimé')
-      await loadCustomRoles()
-    } catch (err: any) {
-      showError(err.response?.data?.message || 'Erreur')
-    }
+async function deleteCustomRole(role: any) {
+  const confirmed = await showConfirm('Supprimer ce rôle ?')
+  if (!confirmed) return
+
+  try {
+    await api.delete(`/custom-roles/${role.id}`)
+    showSuccess('Rôle supprimé')
+    await loadCustomRoles()
+  } catch (err: any) {
+    showError(err.response?.data?.message || 'Erreur lors de la suppression')
   }
 }
 
-// Utilities
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  }).format(date)
-}
-
-// On mounted
+// Initialize
 onMounted(async () => {
   await Promise.all([
-    loadSubAccounts(),
-    authStore.canManageUsers ? loadUsers() : Promise.resolve(),
-    authStore.canManageUsers ? loadAvailableRoles() : Promise.resolve(),
-    authStore.canManageUsers ? loadAvailablePermissions() : Promise.resolve(),
-    authStore.isSuperAdmin ? loadCustomRoles() : Promise.resolve()
+    loadAccounts(),
+    loadUsers(),
+    loadCustomRoles(),
+    loadSystemRoles(),
+    loadSystemPermissions(),
+    loadAvailableRoles()
   ])
 })
 </script>
