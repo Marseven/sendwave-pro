@@ -12,6 +12,7 @@ export type UserStatus = 'active' | 'suspended' | 'pending'
 
 export interface User {
   id: number
+  account_id?: number
   parent_id?: number
   name: string
   email: string

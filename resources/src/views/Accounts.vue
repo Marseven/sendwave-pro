@@ -948,7 +948,9 @@ async function loadUsers() {
       params.account_id = selectedAccountId.value
     }
     const response = await api.get('/users', { params })
-    users.value = response.data.data || []
+    // Handle paginated data - the API returns { success, data: { data: [], ... } }
+    const data = response.data.data
+    users.value = Array.isArray(data) ? data : (data?.data || [])
   } catch (err: any) {
     showError('Erreur lors du chargement des utilisateurs')
   } finally {

@@ -317,6 +317,7 @@ class AuthController extends Controller
 
         return [
             'id' => $user->id,
+            'account_id' => $user->account_id,
             'parent_id' => $user->parent_id,
             'name' => $user->name,
             'email' => $user->email,
