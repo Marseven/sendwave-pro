@@ -812,7 +812,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import MainLayout from '@/components/MainLayout.vue'
 import {
   UsersIcon,
@@ -836,8 +836,20 @@ import api from '@/services/api'
 
 const authStore = useAuthStore()
 
-// Active tab
-const activeTab = ref(authStore.isSuperAdmin ? 'accounts' : 'users')
+// Active tab - default based on user role
+const getDefaultTab = () => {
+  if (authStore.isSuperAdmin) return 'accounts'
+  if (authStore.canManageUsers) return 'users'
+  return 'system-roles'
+}
+const activeTab = ref(getDefaultTab())
+
+// Watch for auth changes to update default tab
+watch(() => authStore.isSuperAdmin, (isSuperAdmin) => {
+  if (isSuperAdmin && activeTab.value === 'users') {
+    activeTab.value = 'accounts'
+  }
+}, { immediate: true })
 
 // Loading states
 const loadingAccounts = ref(false)
