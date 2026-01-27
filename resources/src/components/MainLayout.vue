@@ -176,7 +176,10 @@ import {
   ClipboardDocumentListIcon,
   CircleStackIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  BuildingOfficeIcon,
+  UserGroupIcon,
+  ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
 
 // Permission constants
@@ -202,6 +205,7 @@ interface MenuItem {
   label: string
   icon: any
   permission?: string
+  superAdminOnly?: boolean
 }
 
 const route = useRoute()
@@ -244,7 +248,12 @@ const menuItems: MenuItem[] = [
   { path: '/messages/history', label: 'Historique messages', icon: InboxIcon, permission: Permission.VIEW_HISTORY },
   { path: '/reports', label: 'Rapports', icon: ChartPieIcon, permission: Permission.VIEW_ANALYTICS },
   { path: '/blacklist', label: 'Liste noire', icon: NoSymbolIcon, permission: Permission.MANAGE_SETTINGS },
-  { path: '/accounts', label: 'Comptes', icon: CreditCardIcon, permission: Permission.MANAGE_SUB_ACCOUNTS },
+  // SuperAdmin only - Gestion des comptes (entreprises)
+  { path: '/accounts', label: 'Gestion Comptes', icon: BuildingOfficeIcon, superAdminOnly: true },
+  // SuperAdmin only - Gestion des utilisateurs et rôles
+  { path: '/accounts?tab=users', label: 'Gestion Utilisateurs', icon: UserGroupIcon, superAdminOnly: true },
+  // Admin - Gestion des sous-comptes/agents
+  { path: '/accounts', label: 'Sous-comptes', icon: CreditCardIcon, permission: Permission.MANAGE_SUB_ACCOUNTS },
   { path: '/sms-config', label: 'Config. Opérateurs', icon: SignalIcon, permission: Permission.MANAGE_SETTINGS },
   { path: '/api-keys', label: 'Clés API', icon: CodeBracketIcon, permission: Permission.MANAGE_API_KEYS },
   { path: '/webhooks', label: 'Webhooks', icon: LinkIcon, permission: Permission.MANAGE_WEBHOOKS },
@@ -252,9 +261,17 @@ const menuItems: MenuItem[] = [
   { path: '/settings', label: 'Paramètres', icon: Cog6ToothIcon, permission: Permission.MANAGE_SETTINGS },
 ]
 
-// Filter menu items based on user permissions
+// Filter menu items based on user permissions and role
 const filteredMenuItems = computed(() => {
   return menuItems.filter(item => {
+    // SuperAdmin only items
+    if (item.superAdminOnly) {
+      return authStore.isSuperAdmin
+    }
+    // Hide "Sous-comptes" from superadmin (they have "Gestion Comptes" instead)
+    if (item.path === '/accounts' && item.label === 'Sous-comptes' && authStore.isSuperAdmin) {
+      return false
+    }
     // If no permission required, show to all
     if (!item.permission) return true
     // Check if user has permission

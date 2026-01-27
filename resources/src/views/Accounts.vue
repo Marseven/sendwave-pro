@@ -813,6 +813,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import MainLayout from '@/components/MainLayout.vue'
 import {
   UsersIcon,
@@ -835,18 +836,32 @@ import { showSuccess, showError, showConfirm } from '@/utils/notifications'
 import api from '@/services/api'
 
 const authStore = useAuthStore()
+const route = useRoute()
 
-// Active tab - default based on user role
+// Active tab - default based on user role or query param
 const getDefaultTab = () => {
+  // Check query param first
+  const tabParam = route.query.tab as string
+  if (tabParam && ['accounts', 'users', 'custom-roles', 'system-roles', 'permissions'].includes(tabParam)) {
+    return tabParam
+  }
+  // Default based on role
   if (authStore.isSuperAdmin) return 'accounts'
   if (authStore.canManageUsers) return 'users'
   return 'system-roles'
 }
 const activeTab = ref(getDefaultTab())
 
+// Watch for route query changes
+watch(() => route.query.tab, (newTab) => {
+  if (newTab && ['accounts', 'users', 'custom-roles', 'system-roles', 'permissions'].includes(newTab as string)) {
+    activeTab.value = newTab as string
+  }
+})
+
 // Watch for auth changes to update default tab
 watch(() => authStore.isSuperAdmin, (isSuperAdmin) => {
-  if (isSuperAdmin && activeTab.value === 'users') {
+  if (isSuperAdmin && activeTab.value !== 'users' && !route.query.tab) {
     activeTab.value = 'accounts'
   }
 }, { immediate: true })
