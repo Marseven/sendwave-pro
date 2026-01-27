@@ -707,7 +707,7 @@ function addSelectedContacts() {
   selectedContacts.value.forEach(phone => currentRecipients.add(phone))
   recipients.value = Array.from(currentRecipients).join('\n')
   selectedContacts.value = []
-  showContactPicker = false
+  showContactPicker.value = false
 }
 
 function handleFileDrop(e: DragEvent) {

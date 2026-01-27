@@ -13,6 +13,8 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SmsAnalyticsController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\Api\IncomingSmsController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\CustomRoleController;
 use Illuminate\Support\Facades\Route;
 
 // Routes publiques
@@ -35,12 +37,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth (accessible à tous les utilisateurs authentifiés)
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::get('/auth/permissions', [AuthController::class, 'permissions']);
+    Route::get('/auth/available-permissions', [AuthController::class, 'availablePermissions']);
     Route::get('user/profile', [AuthController::class, 'profile']);
     Route::put('user/profile', [AuthController::class, 'updateProfile']);
 
     // Contacts (permission: manage_contacts)
     Route::middleware('permission:manage_contacts')->group(function () {
         Route::post('contacts/import', [ContactController::class, 'import']);
+        Route::post('contacts/preview-import', [ContactController::class, 'previewImport']);
         Route::apiResource('contacts', ContactController::class);
     });
 
@@ -183,4 +188,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('budgets/{subAccountId}', [BudgetController::class, 'update']);
     Route::post('budgets/check-send', [BudgetController::class, 'checkSend']);
     Route::get('budgets/history/{subAccountId?}', [BudgetController::class, 'history']);
+
+    // User Management (Admin can manage agents, SuperAdmin can manage all)
+    Route::middleware('permission:manage_sub_accounts')->group(function () {
+        Route::get('users/available-roles', [UserController::class, 'availableRoles']);
+        Route::get('users/available-permissions', [UserController::class, 'availablePermissions']);
+        Route::post('users/{id}/suspend', [UserController::class, 'suspend']);
+        Route::post('users/{id}/activate', [UserController::class, 'activate']);
+        Route::put('users/{id}/permissions', [UserController::class, 'updatePermissions']);
+        Route::apiResource('users', UserController::class);
+    });
+
+    // Custom Roles (SuperAdmin only)
+    Route::prefix('custom-roles')->group(function () {
+        Route::get('permissions', [CustomRoleController::class, 'permissions']);
+        Route::post('{id}/duplicate', [CustomRoleController::class, 'duplicate']);
+    });
+    Route::apiResource('custom-roles', CustomRoleController::class);
 });

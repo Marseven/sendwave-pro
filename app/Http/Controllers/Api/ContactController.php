@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use App\Services\WebhookService;
+use App\Imports\ContactsImport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ContactController extends Controller
 {
@@ -199,79 +201,142 @@ class ContactController extends Controller
     }
 
     /**
-     * Import contacts from CSV
+     * Import contacts from CSV, XLSX, or XLS file
      */
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:10240', // Max 10MB
+            'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:20480', // Max 20MB
+            'duplicate_action' => 'nullable|in:skip,update,create',
+            'column_mapping' => 'nullable|array',
         ]);
 
         try {
             $file = $request->file('file');
-            $contents = file_get_contents($file->getRealPath());
-            $lines = explode("\n", $contents);
+            $duplicateAction = $request->input('duplicate_action', 'skip');
+            $columnMapping = $request->input('column_mapping', []);
 
-            if (count($lines) === 0) {
-                return response()->json([
-                    'message' => 'Le fichier CSV est vide'
-                ], 400);
+            // Create the import instance
+            $import = new ContactsImport(
+                $request->user()->id,
+                $duplicateAction,
+                $columnMapping
+            );
+
+            // Import the file
+            Excel::import($import, $file);
+
+            // Get results
+            $results = $import->getResults();
+
+            // Build message
+            $messages = [];
+            if ($results['imported'] > 0) {
+                $messages[] = "{$results['imported']} contacts importés";
+            }
+            if ($results['updated'] > 0) {
+                $messages[] = "{$results['updated']} contacts mis à jour";
+            }
+            if ($results['skipped'] > 0) {
+                $messages[] = "{$results['skipped']} doublons ignorés";
             }
 
-            // Extract headers
-            $headers = str_getcsv($lines[0]);
-            $importedCount = 0;
-            $errors = [];
+            $message = !empty($messages)
+                ? implode(', ', $messages)
+                : 'Aucun contact importé';
 
-            // Process each line
-            for ($i = 1; $i < count($lines); $i++) {
-                if (empty(trim($lines[$i]))) {
-                    continue;
-                }
-
-                $row = str_getcsv($lines[$i]);
-
-                // Skip if row doesn't have enough columns
-                if (count($row) < count($headers)) {
-                    continue;
-                }
-
-                // Create associative array
-                $data = [];
-                foreach ($headers as $index => $header) {
-                    $data[$header] = $row[$index] ?? '';
-                }
-
-                // Validate required fields
-                if (empty($data['name']) || empty($data['email']) || empty($data['phone'])) {
-                    $errors[] = "Ligne {$i}: données manquantes";
-                    continue;
-                }
-
-                try {
-                    Contact::create([
-                        'user_id' => $request->user()->id,
-                        'name' => $data['name'],
-                        'email' => $data['email'],
-                        'phone' => $data['phone'],
-                        'group' => $data['group'] ?? null,
-                        'status' => $data['status'] ?? 'active',
-                        'last_connection' => now(),
-                    ]);
-                    $importedCount++;
-                } catch (\Exception $e) {
-                    $errors[] = "Ligne {$i}: " . $e->getMessage();
-                }
+            // Trigger webhook for bulk import
+            if ($results['imported'] > 0) {
+                $this->webhookService->trigger('contacts.imported', $request->user()->id, [
+                    'imported_count' => $results['imported'],
+                    'updated_count' => $results['updated'],
+                    'skipped_count' => $results['skipped'],
+                ]);
             }
 
             return response()->json([
-                'message' => "{$importedCount} contacts importés avec succès",
-                'imported' => $importedCount,
-                'errors' => $errors
+                'success' => true,
+                'message' => $message,
+                'imported' => $results['imported'],
+                'updated' => $results['updated'],
+                'skipped' => $results['skipped'],
+                'errors' => array_slice($results['errors'], 0, 50), // Limit errors to 50
+                'total_errors' => count($results['errors']),
             ]);
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'message' => 'Erreur lors de l\'importation',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Preview file for import (get headers and sample data)
+     */
+    public function previewImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:20480',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            // Read file content
+            if (in_array($extension, ['xlsx', 'xls'])) {
+                $data = Excel::toArray(null, $file);
+                $rows = $data[0] ?? [];
+            } else {
+                // CSV parsing
+                $content = file_get_contents($file->getRealPath());
+                $lines = array_filter(explode("\n", $content), fn($l) => trim($l) !== '');
+                $rows = array_map(fn($line) => str_getcsv($line), $lines);
+            }
+
+            if (empty($rows)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Le fichier est vide',
+                ], 400);
+            }
+
+            // Get headers (first row)
+            $headers = array_map(fn($h) => trim((string) $h), $rows[0]);
+
+            // Get preview data (up to 5 rows)
+            $preview = array_slice($rows, 1, 5);
+
+            // Auto-suggest column mapping
+            $suggestedMapping = [];
+            foreach ($headers as $header) {
+                $headerLower = strtolower($header);
+                if (str_contains($headerLower, 'nom') || str_contains($headerLower, 'name')) {
+                    $suggestedMapping[$header] = 'name';
+                } elseif (str_contains($headerLower, 'email') || str_contains($headerLower, 'mail')) {
+                    $suggestedMapping[$header] = 'email';
+                } elseif (str_contains($headerLower, 'tel') || str_contains($headerLower, 'phone') || str_contains($headerLower, 'mobile')) {
+                    $suggestedMapping[$header] = 'phone';
+                } elseif (str_contains($headerLower, 'group') || str_contains($headerLower, 'groupe')) {
+                    $suggestedMapping[$header] = 'group';
+                } elseif (str_contains($headerLower, 'status') || str_contains($headerLower, 'statut')) {
+                    $suggestedMapping[$header] = 'status';
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'headers' => $headers,
+                'preview' => $preview,
+                'suggested_mapping' => $suggestedMapping,
+                'total_rows' => count($rows) - 1, // Exclude header row
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la lecture du fichier',
                 'error' => $e->getMessage()
             ], 500);
         }

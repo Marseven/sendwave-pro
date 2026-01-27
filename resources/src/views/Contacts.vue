@@ -340,7 +340,7 @@
         <div class="flex items-center justify-between mb-6">
           <div>
             <h2 class="text-xl font-bold">Importer des contacts</h2>
-            <p class="text-sm text-muted-foreground mt-1">Importez vos contacts depuis un fichier CSV</p>
+            <p class="text-sm text-muted-foreground mt-1">Importez vos contacts depuis un fichier CSV, Excel (.xlsx) ou .xls</p>
           </div>
           <button @click="closeImportModal" class="hover:bg-accent rounded-full p-1">
             <XMarkIcon class="w-5 h-5" />
@@ -352,36 +352,73 @@
           <div class="border-2 border-dashed rounded-lg p-8 text-center">
             <DocumentArrowUpIcon class="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <div class="space-y-2">
-              <p class="text-sm font-medium">Glissez-déposez votre fichier CSV ici</p>
-              <p class="text-xs text-muted-foreground">ou cliquez pour sélectionner un fichier</p>
+              <p class="text-sm font-medium">Glissez-déposez votre fichier ici</p>
+              <p class="text-xs text-muted-foreground">CSV, Excel (.xlsx, .xls) - Max 20MB</p>
             </div>
             <input
               type="file"
-              accept=".csv"
+              accept=".csv,.xlsx,.xls"
               @change="handleFileUpload"
               class="hidden"
               ref="fileInput"
             />
             <button
-              @click="$refs.fileInput.click()"
+              @click="($refs.fileInput as HTMLInputElement)?.click()"
               class="mt-4 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
               Sélectionner un fichier
             </button>
           </div>
 
-          <div v-if="csvFile" class="p-4 bg-muted rounded-lg">
+          <div v-if="importFile" class="p-4 bg-muted rounded-lg">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <DocumentTextIcon class="w-8 h-8 text-primary" />
                 <div>
-                  <p class="font-medium">{{ csvFile.name }}</p>
-                  <p class="text-xs text-muted-foreground">{{ (csvFile.size / 1024).toFixed(2) }} KB</p>
+                  <p class="font-medium">{{ importFile.name }}</p>
+                  <p class="text-xs text-muted-foreground">{{ formatFileSize(importFile.size) }}</p>
                 </div>
               </div>
-              <button @click="csvFile = null" class="text-destructive hover:bg-destructive/10 rounded p-2">
+              <button @click="importFile = null" class="text-destructive hover:bg-destructive/10 rounded p-2">
                 <TrashIcon class="w-4 h-4" />
               </button>
+            </div>
+          </div>
+
+          <!-- Duplicate Handling Option -->
+          <div class="space-y-3">
+            <label class="text-sm font-medium">Gestion des doublons</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label
+                class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+                :class="duplicateAction === 'skip' ? 'border-primary bg-primary/5' : 'hover:bg-accent'"
+              >
+                <input type="radio" v-model="duplicateAction" value="skip" class="mt-1" />
+                <div>
+                  <p class="font-medium text-sm">Ignorer</p>
+                  <p class="text-xs text-muted-foreground">Les doublons sont ignorés</p>
+                </div>
+              </label>
+              <label
+                class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+                :class="duplicateAction === 'update' ? 'border-primary bg-primary/5' : 'hover:bg-accent'"
+              >
+                <input type="radio" v-model="duplicateAction" value="update" class="mt-1" />
+                <div>
+                  <p class="font-medium text-sm">Mettre à jour</p>
+                  <p class="text-xs text-muted-foreground">Les doublons sont mis à jour</p>
+                </div>
+              </label>
+              <label
+                class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+                :class="duplicateAction === 'create' ? 'border-primary bg-primary/5' : 'hover:bg-accent'"
+              >
+                <input type="radio" v-model="duplicateAction" value="create" class="mt-1" />
+                <div>
+                  <p class="font-medium text-sm">Créer</p>
+                  <p class="text-xs text-muted-foreground">Créer même si doublon</p>
+                </div>
+              </label>
             </div>
           </div>
 
@@ -389,12 +426,12 @@
             <div class="flex items-start gap-3">
               <InformationCircleIcon class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div class="text-sm">
-                <p class="font-medium mb-2">Format du fichier CSV :</p>
+                <p class="font-medium mb-2">Formats supportés :</p>
                 <ul class="space-y-1 text-muted-foreground">
-                  <li>• La première ligne doit contenir les en-têtes de colonnes</li>
-                  <li>• Les champs doivent être séparés par des virgules (,)</li>
-                  <li>• Format recommandé : nom, email, téléphone</li>
-                  <li>• Encodage UTF-8 recommandé</li>
+                  <li>• <strong>CSV</strong> : Séparateur virgule, encodage UTF-8</li>
+                  <li>• <strong>Excel</strong> : Formats .xlsx et .xls</li>
+                  <li>• La première ligne doit contenir les en-têtes</li>
+                  <li>• Colonnes requises : téléphone (obligatoire), nom, email</li>
                 </ul>
               </div>
             </div>
@@ -408,8 +445,8 @@
               Annuler
             </button>
             <button
-              @click="parseCSV"
-              :disabled="!csvFile || parsing"
+              @click="parseFile"
+              :disabled="!importFile || parsing"
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
               <div v-if="parsing" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -444,6 +481,8 @@
                   <option value="name">Nom</option>
                   <option value="email">Email</option>
                   <option value="phone">Téléphone</option>
+                  <option value="group">Groupe</option>
+                  <option value="status">Statut</option>
                 </select>
               </div>
             </div>
@@ -453,8 +492,8 @@
             <div class="flex items-start gap-3">
               <ExclamationTriangleIcon class="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
               <div class="text-sm">
-                <p class="font-medium mb-1">Champs obligatoires</p>
-                <p class="text-muted-foreground">Les champs Nom, Email et Téléphone sont obligatoires pour chaque contact.</p>
+                <p class="font-medium mb-1">Champ obligatoire</p>
+                <p class="text-muted-foreground">Le champ Téléphone est obligatoire pour chaque contact. Les doublons sont détectés par téléphone ou email.</p>
               </div>
             </div>
           </div>
@@ -479,43 +518,56 @@
         <!-- Step 3: Preview & Import -->
         <div v-if="importStep === 3" class="space-y-6">
           <div class="p-4 bg-muted/50 rounded-lg">
-            <p class="text-sm font-medium mb-2">Aperçu des données</p>
-            <p class="text-xs text-muted-foreground">
-              Vérifiez les données avant l'importation. {{ validContacts.length }} contacts valides sur {{ csvPreview.length }}.
-            </p>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium mb-1">Prêt à importer</p>
+                <p class="text-xs text-muted-foreground">
+                  {{ totalRows }} lignes détectées dans le fichier
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-primary">{{ totalRows }}</p>
+                <p class="text-xs text-muted-foreground">contacts</p>
+              </div>
+            </div>
           </div>
 
-          <div class="rounded-lg border overflow-hidden max-h-96 overflow-y-auto">
+          <!-- Preview table -->
+          <div class="rounded-lg border overflow-hidden max-h-64 overflow-y-auto">
             <table class="w-full">
               <thead class="border-b bg-muted/50 sticky top-0">
                 <tr>
-                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground text-xs">Nom</th>
-                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground text-xs">Email</th>
-                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground text-xs">Téléphone</th>
-                  <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground text-xs">Statut</th>
+                  <th v-for="header in importHeaders" :key="header" class="h-10 px-4 text-left align-middle font-medium text-muted-foreground text-xs">
+                    {{ header }}
+                    <span v-if="columnMapping[header]" class="text-primary">({{ getFieldLabel(columnMapping[header]) }})</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="(contact, index) in validContacts.slice(0, 20)"
-                  :key="index"
-                  class="border-b"
-                >
-                  <td class="p-3 text-sm">{{ contact.name }}</td>
-                  <td class="p-3 text-sm text-muted-foreground">{{ contact.email }}</td>
-                  <td class="p-3 text-sm">{{ contact.phone }}</td>
-                  <td class="p-3 text-sm">
-                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-success/10 text-success">
-                      Valide
-                    </span>
+                <tr v-for="(row, index) in importPreview.slice(0, 5)" :key="index" class="border-b">
+                  <td v-for="(cell, cellIndex) in row" :key="cellIndex" class="p-3 text-sm truncate max-w-[150px]">
+                    {{ cell || '-' }}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <div v-if="validContacts.length > 20" class="text-center text-sm text-muted-foreground">
-            ... et {{ validContacts.length - 20 }} autres contacts
+          <div v-if="totalRows > 5" class="text-center text-sm text-muted-foreground">
+            Aperçu des 5 premières lignes sur {{ totalRows }}
+          </div>
+
+          <!-- Import settings summary -->
+          <div class="p-4 bg-primary/5 rounded-lg border">
+            <p class="text-sm font-medium mb-2">Récapitulatif</p>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div class="text-muted-foreground">Fichier :</div>
+              <div class="font-medium">{{ importFile?.name }}</div>
+              <div class="text-muted-foreground">Gestion doublons :</div>
+              <div class="font-medium">{{ getDuplicateActionLabel(duplicateAction) }}</div>
+              <div class="text-muted-foreground">Colonnes mappées :</div>
+              <div class="font-medium">{{ Object.values(columnMapping).filter(v => v).length }}</div>
+            </div>
           </div>
 
           <div class="flex justify-between gap-3 pt-4 border-t">
@@ -527,12 +579,61 @@
             </button>
             <button
               @click="importContacts"
-              :disabled="importing || validContacts.length === 0"
+              :disabled="importing || totalRows === 0"
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-success text-success-foreground hover:bg-success/90 h-10 px-4 py-2"
             >
               <div v-if="importing" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               <ArrowDownTrayIcon v-else class="w-4 h-4" />
-              <span>{{ importing ? 'Importation...' : `Importer ${validContacts.length} contacts` }}</span>
+              <span>{{ importing ? 'Importation...' : `Importer ${totalRows} contacts` }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Results -->
+        <div v-if="importStep === 4" class="space-y-6">
+          <div class="text-center py-6">
+            <div v-if="importResults" class="space-y-4">
+              <CheckCircleIcon class="w-16 h-16 mx-auto text-success" />
+              <h3 class="text-xl font-bold">Importation terminée</h3>
+
+              <div class="grid grid-cols-3 gap-4 max-w-md mx-auto">
+                <div class="p-4 bg-success/10 rounded-lg">
+                  <p class="text-2xl font-bold text-success">{{ importResults.imported }}</p>
+                  <p class="text-xs text-muted-foreground">Importés</p>
+                </div>
+                <div class="p-4 bg-primary/10 rounded-lg">
+                  <p class="text-2xl font-bold text-primary">{{ importResults.updated }}</p>
+                  <p class="text-xs text-muted-foreground">Mis à jour</p>
+                </div>
+                <div class="p-4 bg-muted rounded-lg">
+                  <p class="text-2xl font-bold">{{ importResults.skipped }}</p>
+                  <p class="text-xs text-muted-foreground">Ignorés</p>
+                </div>
+              </div>
+
+              <!-- Errors if any -->
+              <div v-if="importResults.errors.length > 0" class="mt-4 text-left max-h-40 overflow-y-auto">
+                <div class="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+                  <p class="text-sm font-medium text-destructive mb-2">
+                    {{ importResults.total_errors }} erreur(s) rencontrée(s)
+                  </p>
+                  <ul class="text-xs text-muted-foreground space-y-1">
+                    <li v-for="(err, i) in importResults.errors.slice(0, 10)" :key="i">{{ err }}</li>
+                  </ul>
+                  <p v-if="importResults.total_errors > 10" class="text-xs text-muted-foreground mt-2">
+                    ... et {{ importResults.total_errors - 10 }} autres erreurs
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-center gap-3 pt-4 border-t">
+            <button
+              @click="closeImportModal"
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2"
+            >
+              Fermer
             </button>
           </div>
         </div>
@@ -618,7 +719,8 @@ import {
   ExclamationTriangleIcon,
   UsersIcon,
   UserGroupIcon,
-  TagIcon
+  TagIcon,
+  CheckCircleIcon
 } from '@heroicons/vue/24/outline'
 import { contactService, type Contact } from '@/services/contactService'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
@@ -661,15 +763,30 @@ const editingContact = ref<Contact | null>(null)
 const customFieldKey = ref('')
 const customFieldValue = ref('')
 
-// CSV Import
+// File Import (CSV, XLSX, XLS)
 const importStep = ref(1)
-const csvFile = ref<File | null>(null)
-const csvHeaders = ref<string[]>([])
-const csvPreview = ref<string[][]>([])
+const importFile = ref<File | null>(null)
+const importHeaders = ref<string[]>([])
+const importPreview = ref<any[][]>([])
 const columnMapping = ref<Record<string, string>>({})
+const duplicateAction = ref<'skip' | 'update' | 'create'>('skip')
+const totalRows = ref(0)
 const parsing = ref(false)
 const importing = ref(false)
+const importProgress = ref(0)
+const importResults = ref<{
+  imported: number
+  updated: number
+  skipped: number
+  errors: string[]
+  total_errors: number
+} | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+
+// Legacy aliases for template compatibility
+const csvFile = importFile
+const csvHeaders = importHeaders
+const csvPreview = importPreview
 
 const filteredContacts = computed(() => {
   let result = contacts.value
@@ -704,20 +821,22 @@ const newContacts = computed(() => {
 
 const isMappingValid = computed(() => {
   const mappedFields = Object.values(columnMapping.value).filter(v => v)
-  return mappedFields.includes('name') && mappedFields.includes('email') && mappedFields.includes('phone')
+  // Phone is required, name and email are optional
+  return mappedFields.includes('phone')
 })
 
+// Preview contacts based on mapping (for display purposes only)
 const validContacts = computed(() => {
-  return csvPreview.value.map(row => {
+  return importPreview.value.map(row => {
     const contact: any = { status: 'active' }
-    csvHeaders.value.forEach((header, index) => {
+    importHeaders.value.forEach((header, index) => {
       const field = columnMapping.value[header]
-      if (field) {
+      if (field && row[index]) {
         contact[field] = row[index]
       }
     })
     return contact
-  }).filter(c => c.name && c.email && c.phone)
+  }).filter(c => c.phone)
 })
 
 const allSelected = computed(() => {
@@ -856,88 +975,127 @@ async function deleteContact(contact: Contact) {
 function closeImportModal() {
   showImportModal.value = false
   importStep.value = 1
-  csvFile.value = null
-  csvHeaders.value = []
-  csvPreview.value = []
+  importFile.value = null
+  importHeaders.value = []
+  importPreview.value = []
   columnMapping.value = {}
+  duplicateAction.value = 'skip'
+  totalRows.value = 0
+  importResults.value = null
+  importProgress.value = 0
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+}
+
+function getFieldLabel(field: string): string {
+  const labels: Record<string, string> = {
+    name: 'Nom',
+    email: 'Email',
+    phone: 'Téléphone',
+    group: 'Groupe',
+    status: 'Statut'
+  }
+  return labels[field] || field
+}
+
+function getDuplicateActionLabel(action: string): string {
+  const labels: Record<string, string> = {
+    skip: 'Ignorer les doublons',
+    update: 'Mettre à jour les doublons',
+    create: 'Créer malgré les doublons'
+  }
+  return labels[action] || action
 }
 
 function handleFileUpload(event: Event) {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    csvFile.value = target.files[0]
+    importFile.value = target.files[0]
   }
 }
 
-async function parseCSV() {
-  if (!csvFile.value) return
+async function parseFile() {
+  if (!importFile.value) return
 
   parsing.value = true
   try {
-    const text = await csvFile.value.text()
-    const lines = text.split('\n').filter(line => line.trim())
+    const formData = new FormData()
+    formData.append('file', importFile.value)
 
-    if (lines.length === 0) {
-      showError('Le fichier CSV est vide')
+    const response = await api.post('/contacts/preview-import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+
+    if (!response.data.success) {
+      showError(response.data.message || 'Erreur lors de l\'analyse du fichier')
       parsing.value = false
       return
     }
 
-    // Parse headers
-    csvHeaders.value = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
+    // Set headers and preview from API response
+    importHeaders.value = response.data.headers
+    importPreview.value = response.data.preview
+    totalRows.value = response.data.total_rows
 
-    // Parse preview (first 100 rows)
-    csvPreview.value = lines.slice(1, 101).map(line => {
-      return line.split(',').map(cell => cell.trim().replace(/"/g, ''))
-    })
-
-    // Auto-map columns based on common names
-    csvHeaders.value.forEach(header => {
-      const lower = header.toLowerCase()
-      if (lower.includes('nom') || lower.includes('name')) {
-        columnMapping.value[header] = 'name'
-      } else if (lower.includes('email') || lower.includes('mail')) {
-        columnMapping.value[header] = 'email'
-      } else if (lower.includes('tel') || lower.includes('phone') || lower.includes('mobile')) {
-        columnMapping.value[header] = 'phone'
-      }
-    })
+    // Apply suggested mapping from API
+    columnMapping.value = response.data.suggested_mapping || {}
 
     importStep.value = 2
   } catch (err: any) {
-    showError('Erreur lors de la lecture du fichier: ' + err.message)
+    showError('Erreur lors de la lecture du fichier: ' + (err.response?.data?.message || err.message))
   } finally {
     parsing.value = false
   }
 }
 
+// Keep old function name as alias for compatibility
+const parseCSV = parseFile
+
 async function importContacts() {
-  if (validContacts.value.length === 0) return
+  if (!importFile.value || totalRows.value === 0) return
 
   importing.value = true
   try {
-    let successCount = 0
-    let errorCount = 0
+    const formData = new FormData()
+    formData.append('file', importFile.value)
+    formData.append('duplicate_action', duplicateAction.value)
 
-    for (const contact of validContacts.value) {
-      try {
-        await contactService.create(contact)
-        successCount++
-      } catch (err) {
-        errorCount++
-        console.error('Error importing contact:', err)
+    // Send column mapping as JSON
+    for (const [key, value] of Object.entries(columnMapping.value)) {
+      if (value) {
+        formData.append(`column_mapping[${key}]`, value)
       }
     }
 
-    if (errorCount > 0) {
-      showSuccess(`Importation terminée: ${successCount} contacts importés, ${errorCount} erreurs`)
+    const response = await api.post('/contacts/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+
+    if (response.data.success) {
+      importResults.value = {
+        imported: response.data.imported || 0,
+        updated: response.data.updated || 0,
+        skipped: response.data.skipped || 0,
+        errors: response.data.errors || [],
+        total_errors: response.data.total_errors || 0
+      }
+
+      // Show step 4 with results
+      importStep.value = 4
+
+      // Reload contacts
+      await loadContacts()
+
+      showSuccess(response.data.message)
     } else {
-      showSuccess(`${successCount} contacts importés avec succès !`)
+      showError(response.data.message || 'Erreur lors de l\'importation')
     }
-    await loadContacts()
-    closeImportModal()
   } catch (err: any) {
-    showError(err.message || 'Erreur lors de l\'importation')
+    showError(err.response?.data?.message || err.message || 'Erreur lors de l\'importation')
   } finally {
     importing.value = false
   }

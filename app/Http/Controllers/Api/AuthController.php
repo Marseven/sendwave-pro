@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Enums\UserRole;
+use App\Enums\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -34,7 +36,9 @@ class AuthController extends Controller
      *             @OA\Property(property="user", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="John Doe"),
-     *                 @OA\Property(property="email", type="string", example="admin@sendwave.com")
+     *                 @OA\Property(property="email", type="string", example="admin@sendwave.com"),
+     *                 @OA\Property(property="role", type="string", example="admin"),
+     *                 @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
      *             )
      *         )
      *     ),
@@ -67,7 +71,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user
+            'user' => $this->formatUserWithPermissions($user)
         ]);
     }
 
@@ -83,8 +87,7 @@ class AuthController extends Controller
      *             required={"name", "email", "password"},
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="password123", minLength=8),
-     *             @OA\Property(property="role", type="string", example="User")
+     *             @OA\Property(property="password", type="string", format="password", example="password123", minLength=8)
      *         )
      *     ),
      *     @OA\Response(
@@ -108,14 +111,17 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'nullable|string',
         ]);
+
+        // New users are created as Admin by default with default permissions
+        $defaultRole = UserRole::ADMIN;
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role ?? 'User',
+            'role' => $defaultRole->value,
+            'permissions' => $defaultRole->defaultPermissions(),
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -123,7 +129,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user
+            'user' => $this->formatUserWithPermissions($user)
         ], 201);
     }
 
@@ -161,7 +167,7 @@ class AuthController extends Controller
      *     path="/api/auth/me",
      *     tags={"Authentication"},
      *     summary="Get current user",
-     *     description="Get authenticated user information",
+     *     description="Get authenticated user information with permissions",
      *     security={{"sanctum":{}}},
      *     @OA\Response(
      *         response=200,
@@ -170,6 +176,8 @@ class AuthController extends Controller
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", example="john@example.com"),
+     *             @OA\Property(property="role", type="string", example="admin"),
+     *             @OA\Property(property="permissions", type="array", @OA\Items(type="string")),
      *             @OA\Property(property="created_at", type="string", format="date-time")
      *         )
      *     ),
@@ -181,7 +189,80 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json($this->formatUserWithPermissions($request->user()));
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/auth/permissions",
+     *     tags={"Authentication"},
+     *     summary="Get user permissions",
+     *     description="Get current user's permissions and role info",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="User permissions",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="role", type="string", example="admin"),
+     *             @OA\Property(property="role_label", type="string", example="Administrateur"),
+     *             @OA\Property(property="permissions", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="is_super_admin", type="boolean", example=false),
+     *             @OA\Property(property="is_admin", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
+     */
+    public function permissions(Request $request)
+    {
+        $user = $request->user();
+        $roleEnum = $user->getRoleEnum();
+
+        return response()->json([
+            'role' => $user->role,
+            'role_label' => $roleEnum?->label() ?? $user->role,
+            'permissions' => $user->getAllPermissions(),
+            'is_super_admin' => $user->isSuperAdmin(),
+            'is_admin' => $user->isAdmin(),
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/auth/available-permissions",
+     *     tags={"Authentication"},
+     *     summary="Get all available permissions",
+     *     description="Get list of all permissions grouped by category",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Available permissions",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="permissions", type="object"),
+     *             @OA\Property(property="roles", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
+     */
+    public function availablePermissions(Request $request)
+    {
+        return response()->json([
+            'permissions' => Permission::groupedByCategory(),
+            'roles' => collect(UserRole::cases())->map(fn($role) => [
+                'value' => $role->value,
+                'label' => $role->label(),
+                'description' => $role->description(),
+                'level' => $role->level(),
+                'default_permissions' => $role->defaultPermissions(),
+            ])->keyBy('value'),
+        ]);
     }
 
     public function profile(Request $request)
@@ -189,7 +270,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'data' => $user
+            'data' => $this->formatUserWithPermissions($user)
         ]);
     }
 
@@ -222,7 +303,43 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Profil mis à jour avec succès',
-            'data' => $user->fresh()
+            'data' => $this->formatUserWithPermissions($user->fresh())
         ]);
+    }
+
+    /**
+     * Format user data with permissions for API response
+     */
+    protected function formatUserWithPermissions(User $user): array
+    {
+        $roleEnum = $user->getRoleEnum();
+        $customRole = $user->customRole;
+
+        return [
+            'id' => $user->id,
+            'parent_id' => $user->parent_id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'company' => $user->company,
+            'avatar' => $user->avatar,
+            'role' => $user->role,
+            'role_label' => $roleEnum?->label() ?? $user->role,
+            'custom_role_id' => $user->custom_role_id,
+            'custom_role_name' => $customRole?->name,
+            'permissions' => $user->getAllPermissions(),
+            'status' => $user->status ?? 'active',
+            'is_super_admin' => $user->isSuperAdmin(),
+            'is_admin' => $user->isAdmin(),
+            'is_agent' => $user->isAgent(),
+            'can_manage_users' => $user->hasPermission('manage_sub_accounts'),
+            'can_create_agents' => $user->canCreateUserWithRole(UserRole::AGENT),
+            'email_notifications' => $user->email_notifications,
+            'weekly_reports' => $user->weekly_reports,
+            'campaign_alerts' => $user->campaign_alerts,
+            'email_verified_at' => $user->email_verified_at,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ];
     }
 }

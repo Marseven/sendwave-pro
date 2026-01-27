@@ -7,18 +7,49 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
   ? 'http://localhost:8888/sendwave-pro/public/api'
   : '/api'
 
+export type UserRole = 'super_admin' | 'admin' | 'agent'
+export type UserStatus = 'active' | 'suspended' | 'pending'
+
 export interface User {
   id: number
+  parent_id?: number
   name: string
   email: string
-  role: string
+  phone?: string
+  company?: string
   avatar?: string
+  role: UserRole
+  role_label: string
+  custom_role_id?: number
+  custom_role_name?: string
+  permissions: string[]
+  status: UserStatus
+  is_super_admin: boolean
+  is_admin: boolean
+  is_agent: boolean
+  can_manage_users: boolean
+  can_create_agents: boolean
+  email_notifications?: boolean
+  weekly_reports?: boolean
+  campaign_alerts?: boolean
+  email_verified_at?: string
+  created_at?: string
+  updated_at?: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const token = ref<string | null>(localStorage.getItem('auth_token'))
   const isAuthenticated = computed(() => !!token.value)
+
+  // Computed for permission checks
+  const isSuperAdmin = computed(() => user.value?.is_super_admin ?? false)
+  const isAdmin = computed(() => user.value?.is_admin ?? false)
+  const isAgent = computed(() => user.value?.is_agent ?? false)
+  const userRole = computed(() => user.value?.role)
+  const userPermissions = computed(() => user.value?.permissions ?? [])
+  const canManageUsers = computed(() => user.value?.can_manage_users ?? false)
+  const canCreateAgents = computed(() => user.value?.can_create_agents ?? false)
 
   // Configure axios interceptor
   if (token.value) {
@@ -77,12 +108,52 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /**
+   * Check if user has a specific permission
+   */
+  function hasPermission(permission: string): boolean {
+    if (isSuperAdmin.value) {
+      return true
+    }
+    return userPermissions.value.includes(permission)
+  }
+
+  /**
+   * Check if user has any of the given permissions
+   */
+  function hasAnyPermission(permissions: string[]): boolean {
+    if (isSuperAdmin.value) {
+      return true
+    }
+    return permissions.some(p => userPermissions.value.includes(p))
+  }
+
+  /**
+   * Check if user has all of the given permissions
+   */
+  function hasAllPermissions(permissions: string[]): boolean {
+    if (isSuperAdmin.value) {
+      return true
+    }
+    return permissions.every(p => userPermissions.value.includes(p))
+  }
+
   return {
     user,
     token,
     isAuthenticated,
+    isSuperAdmin,
+    isAdmin,
+    isAgent,
+    userRole,
+    userPermissions,
+    canManageUsers,
+    canCreateAgents,
     login,
     logout,
-    loadUser
+    loadUser,
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions
   }
 })
