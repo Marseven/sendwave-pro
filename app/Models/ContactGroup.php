@@ -30,8 +30,7 @@ class ContactGroup extends Model
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'contact_group_members', 'group_id', 'contact_id')
-            ->withPivot('added_at')
-            ->withTimestamps();
+            ->withPivot('added_at');
     }
 
     /**

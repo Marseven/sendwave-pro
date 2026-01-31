@@ -22,11 +22,15 @@ class BudgetController extends Controller
         if ($subAccountId) {
             $subAccount = SubAccount::where('parent_user_id', $user->id)
                 ->findOrFail($subAccountId);
+            $status = $this->budgetService->getBudgetStatus($subAccount);
         } else {
             $subAccount = null;
+            $status = [
+                'has_budget' => false,
+                'budget' => null,
+                'message' => 'Aucun sous-compte spécifié',
+            ];
         }
-
-        $status = $this->budgetService->getBudgetStatus($user->id, $subAccountId);
 
         return response()->json([
             'sub_account' => $subAccount ? [

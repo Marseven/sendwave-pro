@@ -207,7 +207,7 @@ class ContactsImport implements ToCollection, WithHeadingRow, WithChunkReading, 
     public function rules(): array
     {
         return [
-            '*.phone' => 'nullable|string',
+            '*.phone' => 'nullable',
             '*.email' => 'nullable|email',
         ];
     }

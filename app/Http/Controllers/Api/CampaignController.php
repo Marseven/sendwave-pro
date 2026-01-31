@@ -53,11 +53,12 @@ class CampaignController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'status' => ['nullable', Rule::in(CampaignStatus::values())],
+            'group_id' => 'nullable|integer|exists:contact_groups,id',
             'messages_sent' => 'nullable|integer',
             'delivery_rate' => 'nullable|numeric|min:0|max:100',
             'ctr' => 'nullable|numeric|min:0|max:100',
             'sms_provider' => 'nullable|string',
-            'message_content' => 'nullable|string',
+            'message' => 'nullable|string|max:320',
             'scheduled_at' => 'nullable|date',
         ]);
 
@@ -86,11 +87,12 @@ class CampaignController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'status' => ['sometimes', Rule::in(CampaignStatus::values())],
+            'group_id' => 'nullable|integer|exists:contact_groups,id',
             'messages_sent' => 'sometimes|integer',
             'delivery_rate' => 'sometimes|numeric|min:0|max:100',
             'ctr' => 'sometimes|numeric|min:0|max:100',
             'sms_provider' => 'sometimes|string',
-            'message_content' => 'sometimes|string',
+            'message' => 'sometimes|string|max:320',
             'scheduled_at' => 'nullable|date',
         ]);
 
