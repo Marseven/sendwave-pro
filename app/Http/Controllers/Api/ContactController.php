@@ -23,11 +23,16 @@ class ContactController extends Controller
      *     path="/api/contacts",
      *     tags={"Contacts"},
      *     summary="List all contacts",
-     *     description="Retrieve all contacts for the authenticated user",
+     *     description="Retrieve contacts for the authenticated user with search, filters and pagination",
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="search", in="query", required=false, description="Search by name, email or phone", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="group_id", in="query", required=false, description="Filter by contact group ID", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status (active, inactive)", @OA\Schema(type="string", enum={"active", "inactive"})),
+     *     @OA\Parameter(name="per_page", in="query", required=false, description="Results per page (default 15, max 100)", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="page", in="query", required=false, description="Page number", @OA\Schema(type="integer")),
      *     @OA\Response(
      *         response=200,
-     *         description="List of contacts",
+     *         description="Paginated list of contacts",
      *         @OA\JsonContent(
      *             @OA\Property(property="data", type="array", @OA\Items(type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
@@ -36,7 +41,13 @@ class ContactController extends Controller
      *                 @OA\Property(property="phone", type="string", example="+24177123456"),
      *                 @OA\Property(property="group", type="string", example="VIP"),
      *                 @OA\Property(property="status", type="string", example="active")
-     *             ))
+     *             )),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="last_page", type="integer", example=3),
+     *                 @OA\Property(property="per_page", type="integer", example=15),
+     *                 @OA\Property(property="total", type="integer", example=42)
+     *             )
      *         )
      *     ),
      *     @OA\Response(response=401, description="Unauthenticated")
@@ -44,11 +55,42 @@ class ContactController extends Controller
      */
     public function index(Request $request)
     {
-        $contacts = Contact::where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Contact::where('user_id', $request->user()->id);
 
-        return response()->json(['data' => $contacts]);
+        // Search by name, email or phone
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by contact group
+        if ($groupId = $request->input('group_id')) {
+            $query->whereHas('groups', function ($q) use ($groupId) {
+                $q->where('contact_groups.id', $groupId);
+            });
+        }
+
+        // Filter by status
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        $perPage = min((int) $request->input('per_page', 15), 100);
+
+        $contacts = $query->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return response()->json([
+            'data' => $contacts->items(),
+            'meta' => [
+                'current_page' => $contacts->currentPage(),
+                'last_page' => $contacts->lastPage(),
+                'per_page' => $contacts->perPage(),
+                'total' => $contacts->total(),
+            ],
+        ]);
     }
 
     /**
