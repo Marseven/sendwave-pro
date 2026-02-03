@@ -15,6 +15,7 @@ class ApiKey extends Model
         'provider',
         'permissions',
         'rate_limit',
+        'allowed_ips',
         'last_used',
         'is_active',
     ];
@@ -24,6 +25,7 @@ class ApiKey extends Model
         'is_active' => 'boolean',
         'permissions' => 'array',
         'rate_limit' => 'integer',
+        'allowed_ips' => 'array',
     ];
 
     /**
@@ -52,6 +54,19 @@ class ApiKey extends Model
     public function scopeForSubAccount($query, int $subAccountId)
     {
         return $query->where('sub_account_id', $subAccountId);
+    }
+
+    /**
+     * Check if the given IP address is allowed for this key.
+     * Returns true if no IP restrictions are set.
+     */
+    public function isIpAllowed(string $ip): bool
+    {
+        if (empty($this->allowed_ips)) {
+            return true;
+        }
+
+        return in_array($ip, $this->allowed_ips);
     }
 
     /**

@@ -127,6 +127,8 @@ Route::middleware('auth.api')->group(function () {
     Route::middleware('permission:send_sms')->group(function () {
         Route::post('messages/send', [MessageController::class, 'send'])
             ->middleware('throttle:sms-send');
+        Route::post('messages/send-otp', [MessageController::class, 'sendOtp'])
+            ->middleware('throttle:sms-send');
         Route::post('messages/analyze', [MessageController::class, 'analyzeNumbers']);
         Route::post('messages/number-info', [MessageController::class, 'getNumberInfo']);
     });

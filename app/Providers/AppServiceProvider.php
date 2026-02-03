@@ -22,9 +22,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Define SMS send rate limiter
+        // Define SMS send rate limiter (per API key or per user)
         RateLimiter::for('sms-send', function (Request $request) {
-            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+            $apiKey = $request->attributes->get('api_key');
+
+            if ($apiKey) {
+                return Limit::perMinute($apiKey->rate_limit ?? 100)
+                    ->by('api_key:' . $apiKey->id);
+            }
+
+            return Limit::perMinute(10)
+                ->by('user:' . ($request->user()?->id ?: $request->ip()));
         });
     }
 }

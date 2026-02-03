@@ -50,6 +50,14 @@ class AuthenticateApi
             ], 401);
         }
 
+        // Check IP whitelist
+        if (!$apiKey->isIpAllowed($request->ip())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Adresse IP non autorisée pour cette clé API.',
+            ], 403);
+        }
+
         // Resolve the owning user
         $user = $apiKey->user;
 

@@ -147,6 +147,31 @@ export const apiCategories: ApiCategory[] = [
     endpoints: [
       {
         method: 'POST',
+        path: '/api/messages/send-otp',
+        summary: 'Envoyer un SMS OTP',
+        description: "Endpoint simplifié pour l'envoi de codes OTP à un seul destinataire. Limité à 160 caractères (1 segment SMS). Inclut une référence optionnelle pour la traçabilité.",
+        auth: true,
+        permissions: ['send_sms'],
+        body: {
+          recipient: '+24177123456',
+          message: 'Votre code de vérification est : 4829',
+          reference: 'otp-login-12345'
+        },
+        response: {
+          success: true,
+          data: {
+            message_id: 42,
+            recipient: '+24177123456',
+            status: 'sent',
+            provider: 'airtel',
+            cost: 20,
+            reference: 'otp-login-12345'
+          }
+        },
+        curl: "curl -X POST {baseUrl}/api/messages/send-otp \\\n  -H 'X-API-Key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"recipient\":\"+24177123456\",\"message\":\"Votre code: 1234\",\"reference\":\"ref-001\"}'"
+      },
+      {
+        method: 'POST',
         path: '/api/messages/send',
         summary: 'Envoyer un SMS',
         description: "Envoie un ou plusieurs SMS aux destinataires spécifiés. Les numéros sont normalisés automatiquement et les numéros en liste noire sont filtrés. Le budget et les crédits sont vérifiés avant l'envoi (403 si insuffisants).",

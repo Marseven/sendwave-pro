@@ -68,6 +68,8 @@ class ApiKeyController extends Controller
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|in:send_sms,view_history,manage_contacts,view_balance',
             'rate_limit' => 'nullable|integer|min:1|max:10000',
+            'allowed_ips' => 'nullable|array',
+            'allowed_ips.*' => 'required|ip',
         ]);
 
         // Générer une clé unique
@@ -81,6 +83,7 @@ class ApiKeyController extends Controller
             'provider' => $validated['type'] ?? 'production',
             'permissions' => $validated['permissions'] ?? ['send_sms', 'view_history'],
             'rate_limit' => $validated['rate_limit'] ?? 100,
+            'allowed_ips' => $validated['allowed_ips'] ?? null,
             'is_active' => true,
         ]);
 
@@ -151,6 +154,8 @@ class ApiKeyController extends Controller
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|in:send_sms,view_history,manage_contacts,view_balance',
             'rate_limit' => 'nullable|integer|min:1|max:10000',
+            'allowed_ips' => 'nullable|array',
+            'allowed_ips.*' => 'required|ip',
         ]);
 
         $apiKey->update($validated);
@@ -276,6 +281,7 @@ class ApiKeyController extends Controller
             'status' => $apiKey->is_active ? 'active' : 'revoked',
             'permissions' => $apiKey->permissions ?? ['send_sms', 'view_history'],
             'rate_limit' => $apiKey->rate_limit ?? 100,
+            'allowed_ips' => $apiKey->allowed_ips,
             'last_used_at' => $apiKey->last_used?->toISOString(),
             'created_at' => $apiKey->created_at->toISOString(),
         ];

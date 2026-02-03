@@ -614,6 +614,234 @@ class MessageController extends Controller
 
     /**
      * @OA\Post(
+     *     path="/api/messages/send-otp",
+     *     tags={"Messages"},
+     *     summary="Send OTP SMS",
+     *     description="Envoyer un SMS OTP à un seul destinataire. Endpoint simplifié pour l'envoi de codes de vérification.",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"recipient", "message"},
+     *             @OA\Property(property="recipient", type="string", description="Numéro de téléphone du destinataire", example="+24177123456"),
+     *             @OA\Property(property="message", type="string", maxLength=160, description="Contenu du SMS (1 segment max)", example="Votre code de vérification est : 4829"),
+     *             @OA\Property(property="reference", type="string", maxLength=100, nullable=true, description="Référence externe pour traçabilité", example="otp-login-12345")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="OTP envoyé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="message_id", type="integer", example=42),
+     *                 @OA\Property(property="recipient", type="string", example="+24177123456"),
+     *                 @OA\Property(property="status", type="string", example="sent"),
+     *                 @OA\Property(property="provider", type="string", example="airtel"),
+     *                 @OA\Property(property="cost", type="integer", example=20),
+     *                 @OA\Property(property="reference", type="string", example="otp-login-12345")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Numéro blacklisté ou envoi échoué",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="string", example="BLACKLISTED"),
+     *             @OA\Property(property="message", type="string", example="Ce numéro est dans la liste noire.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Budget dépassé ou crédits insuffisants",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="string", example="BUDGET_EXCEEDED"),
+     *             @OA\Property(property="message", type="string", example="Budget mensuel dépassé. Envoi bloqué.")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="error", type="string", example="SERVER_ERROR"),
+     *             @OA\Property(property="message", type="string", example="Erreur lors de l'envoi du SMS.")
+     *         )
+     *     )
+     * )
+     */
+    public function sendOtp(Request $request)
+    {
+        $validated = $request->validate([
+            'recipient' => 'required|string',
+            'message' => 'required|string|max:160',
+            'reference' => 'nullable|string|max:100',
+        ]);
+
+        try {
+            $recipient = $validated['recipient'];
+            $message = $validated['message'];
+            $reference = $validated['reference'] ?? null;
+            $userId = $request->user()->id;
+
+            // Check blacklist
+            $blacklistFilter = $this->stopWordService->filterBlacklisted($userId, [$recipient]);
+            if (empty($blacklistFilter['allowed'])) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'BLACKLISTED',
+                    'message' => 'Ce numéro est dans la liste noire.',
+                ], 400);
+            }
+
+            // Budget check
+            $user = $request->user();
+            $account = null;
+            $estimatedCost = $this->calculateCost($message);
+
+            if ($user instanceof SubAccount) {
+                $budgetCheck = $this->budgetService->checkBudget($user, $estimatedCost);
+                if (!$budgetCheck['allowed']) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => $budgetCheck['error_code'] ?? 'BUDGET_EXCEEDED',
+                        'message' => $budgetCheck['message'] ?? 'Budget mensuel dépassé. Envoi bloqué.',
+                    ], 403);
+                }
+
+                if (!$user->canSendSms()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'CREDITS_EXCEEDED',
+                        'message' => 'Limite de crédits atteinte ou compte inactif.',
+                    ], 403);
+                }
+            } else {
+                $account = $user->account;
+
+                if ($account) {
+                    if (!$account->canSendSms()) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'ACCOUNT_BLOCKED',
+                            'message' => $account->isSuspended()
+                                ? 'Compte suspendu.'
+                                : ($account->sms_credits <= 0
+                                    ? 'Crédits SMS insuffisants.'
+                                    : 'Budget mensuel dépassé. Envoi bloqué.'),
+                        ], 403);
+                    }
+
+                    if ($account->sms_credits < $estimatedCost) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'CREDITS_INSUFFICIENT',
+                            'message' => 'Pas assez de crédits SMS pour cet envoi.',
+                        ], 403);
+                    }
+                }
+            }
+
+            // Send SMS
+            $result = $this->smsRouter->sendSms($recipient, $message);
+
+            $cost = $this->calculateCost($message, $result['provider'] ?? 'airtel');
+            $recipientPhone = $result['phone'] ?? $recipient;
+
+            // Get contact data
+            $contactData = $this->getContactData($userId, $recipient);
+
+            // Save to history
+            $messageRecord = $this->saveMessageToHistory([
+                'user_id' => $userId,
+                'contact_id' => $contactData['contact_id'],
+                'recipient_name' => $contactData['recipient_name'],
+                'recipient_phone' => $recipientPhone,
+                'content' => $message,
+                'type' => 'otp',
+                'status' => $result['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
+                'provider' => $result['provider'] ?? 'unknown',
+                'cost' => $cost,
+                'error_message' => $result['success'] ? null : ($result['message'] ?? 'Erreur inconnue'),
+                'provider_response' => $result,
+            ]);
+
+            // Record analytics
+            $this->analyticsRecordService->recordSms($messageRecord, [
+                'message_type' => 'otp',
+            ]);
+
+            if ($result['success']) {
+                // Debit credits
+                if ($user instanceof SubAccount) {
+                    $user->incrementSmsUsed(1);
+                } elseif ($account) {
+                    $account->useCredits($cost);
+                }
+
+                // Trigger webhook
+                $this->webhookService->trigger('message.sent', $userId, [
+                    'message_id' => $messageRecord->id,
+                    'recipient' => $recipientPhone,
+                    'content' => $message,
+                    'provider' => $result['provider'],
+                    'cost' => $cost,
+                    'type' => 'otp',
+                    'reference' => $reference,
+                ]);
+
+                $this->analyticsService->updateDailyAnalytics($userId);
+
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'message_id' => $messageRecord->id,
+                        'recipient' => $recipientPhone,
+                        'status' => 'sent',
+                        'provider' => $result['provider'],
+                        'cost' => $cost,
+                        'reference' => $reference,
+                    ],
+                ]);
+            }
+
+            // Failed
+            $this->webhookService->trigger('message.failed', $userId, [
+                'recipient' => $recipient,
+                'content' => $message,
+                'error' => $result['message'] ?? 'Erreur inconnue',
+                'provider' => $result['provider'] ?? 'unknown',
+                'type' => 'otp',
+                'reference' => $reference,
+            ]);
+
+            $this->analyticsService->updateDailyAnalytics($userId);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'SEND_FAILED',
+                'message' => $result['message'] ?? 'Erreur inconnue lors de l\'envoi.',
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('OTP Send Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'SERVER_ERROR',
+                'message' => 'Erreur lors de l\'envoi du SMS.',
+            ], 500);
+        }
+    }
+
+    /**
+     * @OA\Post(
      *     path="/api/messages/analyze",
      *     tags={"Messages"},
      *     summary="Analyze phone numbers",
