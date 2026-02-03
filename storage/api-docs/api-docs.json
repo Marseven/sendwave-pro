@@ -8849,6 +8849,43 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Budget dépassé ou crédits insuffisants",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Budget dépassé"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Budget mensuel dépassé. Envoi bloqué."
+                                        },
+                                        "error_code": {
+                                            "type": "string",
+                                            "example": "BUDGET_EXCEEDED"
+                                        },
+                                        "budget_info": {
+                                            "properties": {
+                                                "remaining": {
+                                                    "type": "number",
+                                                    "example": 500
+                                                },
+                                                "estimated_cost": {
+                                                    "type": "number",
+                                                    "example": 2000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "Unauthenticated"
                     },

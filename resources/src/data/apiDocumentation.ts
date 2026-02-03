@@ -149,7 +149,7 @@ export const apiCategories: ApiCategory[] = [
         method: 'POST',
         path: '/api/messages/send',
         summary: 'Envoyer un SMS',
-        description: "Envoie un ou plusieurs SMS aux destinataires spécifiés. Les numéros sont normalisés automatiquement et les numéros en liste noire sont filtrés.",
+        description: "Envoie un ou plusieurs SMS aux destinataires spécifiés. Les numéros sont normalisés automatiquement et les numéros en liste noire sont filtrés. Le budget et les crédits sont vérifiés avant l'envoi (403 si insuffisants).",
         auth: true,
         permissions: ['send_sms'],
         body: {
