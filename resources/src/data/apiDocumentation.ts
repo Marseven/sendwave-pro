@@ -170,7 +170,7 @@ export const apiCategories: ApiCategory[] = [
             ]
           }
         },
-        curl: "curl -X POST {baseUrl}/api/messages/send \\\n  -H 'Authorization: Bearer YOUR_TOKEN' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"recipients\":[\"+24177123456\"],\"message\":\"Hello!\"}'"
+        curl: "# Via Bearer token:\ncurl -X POST {baseUrl}/api/messages/send \\\n  -H 'Authorization: Bearer YOUR_TOKEN' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"recipients\":[\"+24177123456\"],\"message\":\"Hello!\"}'\n\n# Via X-API-Key:\ncurl -X POST {baseUrl}/api/messages/send \\\n  -H 'X-API-Key: YOUR_API_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"recipients\":[\"+24177123456\"],\"message\":\"Hello!\"}'"
       },
       {
         method: 'POST',

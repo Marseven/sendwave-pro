@@ -35,6 +35,14 @@ namespace App\Http\Controllers;
  *     description="Enter your bearer token in the format: Bearer {token}"
  * )
  *
+ * @OA\SecurityScheme(
+ *     securityScheme="apiKey",
+ *     type="apiKey",
+ *     in="header",
+ *     name="X-API-Key",
+ *     description="API key generated from the API Keys management page"
+ * )
+ *
  * @OA\Tag(
  *     name="Authentication",
  *     description="User authentication endpoints"

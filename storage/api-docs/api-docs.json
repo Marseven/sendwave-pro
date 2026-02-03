@@ -10307,6 +10307,12 @@
                 "description": "Enter your bearer token in the format: Bearer {token}",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
+            },
+            "apiKey": {
+                "type": "apiKey",
+                "description": "API key generated from the API Keys management page",
+                "name": "X-API-Key",
+                "in": "header"
             }
         }
     },

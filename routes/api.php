@@ -33,8 +33,8 @@ Route::prefix('webhooks/incoming')->group(function () {
 // Phone Normalization (public utility)
 Route::get('/phone/countries', [IncomingSmsController::class, 'getSupportedCountries']);
 
-// Routes protégées
-Route::middleware('auth:sanctum')->group(function () {
+// Routes protégées (Bearer token via Sanctum OU header X-API-Key)
+Route::middleware('auth.api')->group(function () {
     // Auth (accessible à tous les utilisateurs authentifiés)
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);

@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,
+            'auth.api' => \App\Http\Middleware\AuthenticateApi::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

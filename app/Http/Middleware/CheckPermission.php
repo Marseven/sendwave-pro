@@ -28,6 +28,18 @@ class CheckPermission
             ], 401);
         }
 
+        // Handle API Key authentication — check API key permissions
+        $apiKey = $request->attributes->get('api_key');
+        if ($apiKey) {
+            if (!$apiKey->hasPermission($permission)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Permission refusée. La clé API n'a pas l'autorisation: {$permission}",
+                ], 403);
+            }
+            return $next($request);
+        }
+
         // Handle SubAccount authentication
         if ($user instanceof SubAccount) {
             return $this->handleSubAccount($user, $permission, $next, $request);
