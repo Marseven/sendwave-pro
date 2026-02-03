@@ -10,6 +10,7 @@ use App\Services\AnalyticsService;
 use App\Services\AnalyticsRecordService;
 use App\Services\BudgetService;
 use App\Services\StopWordService;
+use App\Services\MessageVariableService;
 use App\Models\Message;
 use App\Models\Contact;
 use App\Models\ContactGroup;
@@ -24,7 +25,8 @@ class MessageController extends Controller
         protected AnalyticsService $analyticsService,
         protected AnalyticsRecordService $analyticsRecordService,
         protected BudgetService $budgetService,
-        protected StopWordService $stopWordService
+        protected StopWordService $stopWordService,
+        protected MessageVariableService $messageVariableService
     ) {}
 
     /**
@@ -90,7 +92,28 @@ class MessageController extends Controller
         return [
             'contact_id' => $contact?->id,
             'recipient_name' => $contact?->name,
+            'contact' => $contact,
         ];
+    }
+
+    /**
+     * Check if a message template contains variables
+     */
+    protected function hasVariables(string $message): bool
+    {
+        return (bool) preg_match('/\{[^}]+\}/', $message);
+    }
+
+    /**
+     * Personalize a message for a specific contact
+     */
+    protected function personalizeMessage(string $message, ?Contact $contact): string
+    {
+        if (!$contact || !$this->hasVariables($message)) {
+            return $message;
+        }
+
+        return $this->messageVariableService->replaceVariables($message, $contact);
     }
 
     /**
@@ -254,17 +277,21 @@ class MessageController extends Controller
                 'blacklisted_count' => $blacklistedCount,
             ]);
 
+            // Check if message contains variables for personalization
+            $messageHasVariables = $this->hasVariables($message);
+
             // Envoyer les messages avec routage automatique
             if (count($recipients) === 1) {
-                // Envoi simple
-                $result = $this->smsRouter->sendSms($recipients[0], $message);
+                // Envoi simple — personalize if needed
+                $contactData = $this->getContactData($userId, $recipients[0]);
+                $personalizedMessage = $this->personalizeMessage($message, $contactData['contact']);
+
+                $result = $this->smsRouter->sendSms($recipients[0], $personalizedMessage);
 
                 // Calculer le coût
-                $cost = $this->calculateCost($message, $result['provider'] ?? 'airtel');
+                $cost = $this->calculateCost($personalizedMessage, $result['provider'] ?? 'airtel');
 
-                // Trouver le contact associé au numéro
                 $recipientPhone = $result['phone'] ?? $recipients[0];
-                $contactData = $this->getContactData($userId, $recipientPhone);
 
                 // Enregistrer dans l'historique
                 $messageRecord = $this->saveMessageToHistory([
@@ -272,7 +299,7 @@ class MessageController extends Controller
                     'contact_id' => $contactData['contact_id'],
                     'recipient_name' => $contactData['recipient_name'],
                     'recipient_phone' => $recipientPhone,
-                    'content' => $message,
+                    'content' => $personalizedMessage,
                     'status' => $result['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
                     'provider' => $result['provider'] ?? 'unknown',
                     'cost' => $cost,
@@ -330,50 +357,90 @@ class MessageController extends Controller
 
             } else {
                 // Envoi en masse
-                $result = $this->smsRouter->sendBulkSms($recipients, $message);
-
-                // Enregistrer chaque message dans l'historique
                 $totalCost = 0;
                 $messageIds = [];
                 $contactCache = [];
+                $sentCount = 0;
+                $failedCount = 0;
 
-                foreach ($result['details'] as $detail) {
-                    $cost = $this->calculateCost($message, $detail['provider'] ?? 'airtel');
-                    $totalCost += $cost;
+                if ($messageHasVariables) {
+                    // Personalized sending: send individually to replace variables per contact
+                    foreach ($recipients as $recipientPhone) {
+                        if (!isset($contactCache[$recipientPhone])) {
+                            $contactCache[$recipientPhone] = $this->getContactData($userId, $recipientPhone);
+                        }
+                        $contactData = $contactCache[$recipientPhone];
 
-                    $recipientPhone = $detail['phone'] ?? '';
+                        $personalizedMessage = $this->personalizeMessage($message, $contactData['contact']);
+                        $detail = $this->smsRouter->sendSms($recipientPhone, $personalizedMessage);
 
-                    // Utiliser le cache ou chercher le contact
-                    if (!isset($contactCache[$recipientPhone])) {
-                        $contactCache[$recipientPhone] = $this->getContactData($userId, $recipientPhone);
+                        $cost = $this->calculateCost($personalizedMessage, $detail['provider'] ?? 'airtel');
+                        $totalCost += $cost;
+
+                        $phone = $detail['phone'] ?? $recipientPhone;
+
+                        $messageRecord = $this->saveMessageToHistory([
+                            'user_id' => $userId,
+                            'contact_id' => $contactData['contact_id'],
+                            'recipient_name' => $contactData['recipient_name'],
+                            'recipient_phone' => $phone,
+                            'content' => $personalizedMessage,
+                            'status' => $detail['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
+                            'provider' => $detail['provider'] ?? 'unknown',
+                            'cost' => $cost,
+                            'error_message' => $detail['success'] ? null : ($detail['message'] ?? 'Erreur inconnue'),
+                            'provider_response' => $detail,
+                        ]);
+
+                        $this->analyticsRecordService->recordSms($messageRecord, [
+                            'message_type' => $request->input('type', 'transactional'),
+                        ]);
+
+                        $messageIds[] = $messageRecord->id;
+                        $detail['success'] ? $sentCount++ : $failedCount++;
                     }
-                    $contactData = $contactCache[$recipientPhone];
+                } else {
+                    // No variables: use bulk send for performance
+                    $result = $this->smsRouter->sendBulkSms($recipients, $message);
 
-                    $messageRecord = $this->saveMessageToHistory([
-                        'user_id' => $userId,
-                        'contact_id' => $contactData['contact_id'],
-                        'recipient_name' => $contactData['recipient_name'],
-                        'recipient_phone' => $recipientPhone,
-                        'content' => $message,
-                        'status' => $detail['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
-                        'provider' => $detail['provider'] ?? 'unknown',
-                        'cost' => $cost,
-                        'error_message' => $detail['success'] ? null : ($detail['message'] ?? 'Erreur inconnue'),
-                        'provider_response' => $detail,
-                    ]);
+                    foreach ($result['details'] as $detail) {
+                        $cost = $this->calculateCost($message, $detail['provider'] ?? 'airtel');
+                        $totalCost += $cost;
 
-                    // Enregistrer dans sms_analytics pour la comptabilité
-                    $this->analyticsRecordService->recordSms($messageRecord, [
-                        'message_type' => $request->input('type', 'transactional'),
-                    ]);
+                        $recipientPhone = $detail['phone'] ?? '';
 
-                    $messageIds[] = $messageRecord->id;
+                        if (!isset($contactCache[$recipientPhone])) {
+                            $contactCache[$recipientPhone] = $this->getContactData($userId, $recipientPhone);
+                        }
+                        $contactData = $contactCache[$recipientPhone];
+
+                        $messageRecord = $this->saveMessageToHistory([
+                            'user_id' => $userId,
+                            'contact_id' => $contactData['contact_id'],
+                            'recipient_name' => $contactData['recipient_name'],
+                            'recipient_phone' => $recipientPhone,
+                            'content' => $message,
+                            'status' => $detail['success'] ? MessageStatus::SENT->value : MessageStatus::FAILED->value,
+                            'provider' => $detail['provider'] ?? 'unknown',
+                            'cost' => $cost,
+                            'error_message' => $detail['success'] ? null : ($detail['message'] ?? 'Erreur inconnue'),
+                            'provider_response' => $detail,
+                        ]);
+
+                        $this->analyticsRecordService->recordSms($messageRecord, [
+                            'message_type' => $request->input('type', 'transactional'),
+                        ]);
+
+                        $messageIds[] = $messageRecord->id;
+                        $detail['success'] ? $sentCount++ : $failedCount++;
+                    }
                 }
 
                 Log::info('Bulk SMS sent', [
-                    'total' => $result['total'],
-                    'sent' => $result['sent'],
-                    'failed' => $result['failed'],
+                    'total' => count($recipients),
+                    'sent' => $sentCount,
+                    'failed' => $failedCount,
+                    'personalized' => $messageHasVariables,
                     'total_cost' => $totalCost,
                 ]);
 
@@ -383,12 +450,13 @@ class MessageController extends Controller
                 return response()->json([
                     'message' => 'Envoi terminé',
                     'data' => [
-                        'total' => $result['total'],
-                        'sent' => $result['sent'],
-                        'failed' => $result['failed'],
+                        'total' => count($recipients),
+                        'sent' => $sentCount,
+                        'failed' => $failedCount,
                         'blacklisted_skipped' => $blacklistedCount,
                         'sms_count' => ceil(strlen($message) / 160),
                         'total_cost' => $totalCost,
+                        'personalized' => $messageHasVariables,
                         'by_operator' => [
                             'airtel' => $analysis['airtel_count'],
                             'moov' => $analysis['moov_count'],
