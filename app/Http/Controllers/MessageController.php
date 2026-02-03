@@ -12,6 +12,7 @@ use App\Services\BudgetService;
 use App\Services\StopWordService;
 use App\Models\Message;
 use App\Models\Contact;
+use App\Models\ContactGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -127,8 +128,10 @@ class MessageController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"recipients", "message"},
-     *             @OA\Property(property="recipients", type="array", @OA\Items(type="string"), example={"77123456", "60123456"}),
+     *             required={"message"},
+     *             @OA\Property(property="recipients", type="array", @OA\Items(type="string"), description="Numéros de téléphone", example={"77123456", "60123456"}),
+     *             @OA\Property(property="contact_ids", type="array", @OA\Items(type="integer"), description="IDs de contacts existants", example={1, 2, 3}),
+     *             @OA\Property(property="group_ids", type="array", @OA\Items(type="integer"), description="IDs de groupes de contacts", example={1}),
      *             @OA\Property(property="message", type="string", maxLength=320, example="Bonjour, ceci est un message de test."),
      *             @OA\Property(property="type", type="string", enum={"immediate", "scheduled"}, example="immediate")
      *         )
@@ -171,16 +174,60 @@ class MessageController extends Controller
     public function send(Request $request)
     {
         $validated = $request->validate([
-            'recipients' => 'required|array|min:1',
+            'recipients' => 'nullable|array',
             'recipients.*' => 'required|string',
+            'contact_ids' => 'nullable|array',
+            'contact_ids.*' => 'required|integer|exists:contacts,id',
+            'group_ids' => 'nullable|array',
+            'group_ids.*' => 'required|integer|exists:contact_groups,id',
             'message' => 'required|string|max:320',
             'type' => 'nullable|in:immediate,scheduled',
         ]);
 
+        // At least one source of recipients is required
+        if (empty($validated['recipients']) && empty($validated['contact_ids']) && empty($validated['group_ids'])) {
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => [
+                    'recipients' => ['Au moins un des champs recipients, contact_ids ou group_ids est requis.'],
+                ],
+            ], 422);
+        }
+
         try {
-            $recipients = $validated['recipients'];
             $message = $validated['message'];
             $userId = $request->user()->id;
+
+            // Resolve all phone numbers from the three sources
+            $phoneNumbers = collect($validated['recipients'] ?? []);
+
+            // Resolve contact_ids to phone numbers
+            if (!empty($validated['contact_ids'])) {
+                $contactPhones = Contact::where('user_id', $userId)
+                    ->whereIn('id', $validated['contact_ids'])
+                    ->pluck('phone');
+                $phoneNumbers = $phoneNumbers->merge($contactPhones);
+            }
+
+            // Resolve group_ids to phone numbers
+            if (!empty($validated['group_ids'])) {
+                $groupPhones = Contact::where('user_id', $userId)
+                    ->whereHas('groups', function ($query) use ($validated) {
+                        $query->whereIn('contact_groups.id', $validated['group_ids']);
+                    })
+                    ->pluck('phone');
+                $phoneNumbers = $phoneNumbers->merge($groupPhones);
+            }
+
+            // Deduplicate and filter empty values
+            $recipients = $phoneNumbers->filter()->unique()->values()->all();
+
+            if (empty($recipients)) {
+                return response()->json([
+                    'message' => 'Aucun destinataire valide',
+                    'error' => 'Aucun numéro de téléphone trouvé pour les critères fournis.',
+                ], 400);
+            }
 
             // Filter out blacklisted numbers
             $blacklistFilter = $this->stopWordService->filterBlacklisted($userId, $recipients);

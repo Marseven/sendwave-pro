@@ -154,8 +154,10 @@ export const apiCategories: ApiCategory[] = [
         permissions: ['send_sms'],
         body: {
           recipients: ['+24177123456', '+24162987654'],
+          contact_ids: [1, 2, 3],
+          group_ids: [1],
           message: 'Votre message ici',
-          sender_id: 'SENDWAVE'
+          _comment: 'Au moins un des champs recipients, contact_ids ou group_ids est requis'
         },
         response: {
           message: 'Messages envoyés avec succès',

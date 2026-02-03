@@ -8587,11 +8587,11 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "recipients",
                                     "message"
                                 ],
                                 "properties": {
                                     "recipients": {
+                                        "description": "Numéros de téléphone",
                                         "type": "array",
                                         "items": {
                                             "type": "string"
@@ -8599,6 +8599,28 @@
                                         "example": [
                                             "77123456",
                                             "60123456"
+                                        ]
+                                    },
+                                    "contact_ids": {
+                                        "description": "IDs de contacts existants",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "group_ids": {
+                                        "description": "IDs de groupes de contacts",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1
                                         ]
                                     },
                                     "message": {
