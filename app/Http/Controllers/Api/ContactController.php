@@ -5,18 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use App\Services\WebhookService;
+use App\Services\PhoneNormalizationService;
 use App\Imports\ContactsImport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ContactController extends Controller
 {
-    protected WebhookService $webhookService;
-
-    public function __construct(WebhookService $webhookService)
-    {
-        $this->webhookService = $webhookService;
-    }
+    public function __construct(
+        protected WebhookService $webhookService,
+        protected PhoneNormalizationService $phoneService
+    ) {}
 
     /**
      * @OA\Get(
@@ -129,18 +128,43 @@ class ContactController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
+            'phone' => ['required', 'string', 'max:20', 'regex:/^[+]?[0-9\s\-]{7,20}$/'],
             'group' => 'nullable|string|max:100',
             'status' => 'nullable|in:active,inactive',
             'last_connection' => 'nullable|date',
             'custom_fields' => 'nullable|array',
         ]);
 
+        $userId = $request->user()->id;
+
+        // Normalize phone number
+        $normalization = $this->phoneService->normalize($validated['phone']);
+        $normalizedPhone = $normalization['is_valid'] ? $normalization['normalized'] : $validated['phone'];
+
+        // Check for duplicate phone number (on normalized form)
+        $existing = Contact::where('user_id', $userId)
+            ->where(function ($q) use ($normalizedPhone, $validated) {
+                $q->where('phone', $normalizedPhone)
+                  ->orWhere('phone', $validated['phone']);
+            })
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'message' => 'Un contact avec ce numéro de téléphone existe déjà',
+                'existing_contact' => [
+                    'id' => $existing->id,
+                    'name' => $existing->name,
+                    'phone' => $existing->phone,
+                ],
+            ], 409);
+        }
+
         $contact = Contact::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $userId,
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'phone' => $validated['phone'],
+            'phone' => $normalizedPhone,
             'group' => $validated['group'] ?? null,
             'status' => $validated['status'] ?? 'active',
             'last_connection' => $validated['last_connection'] ?? now(),
@@ -148,7 +172,7 @@ class ContactController extends Controller
         ]);
 
         // Trigger webhook for contact.created
-        $this->webhookService->trigger('contact.created', $request->user()->id, [
+        $this->webhookService->trigger('contact.created', $userId, [
             'contact_id' => $contact->id,
             'name' => $contact->name,
             'phone' => $contact->phone,
@@ -237,12 +261,39 @@ class ContactController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|max:255',
-            'phone' => 'sometimes|string|max:20',
+            'phone' => ['sometimes', 'string', 'max:20', 'regex:/^[+]?[0-9\s\-]{7,20}$/'],
             'group' => 'nullable|string|max:100',
             'status' => 'sometimes|in:active,inactive',
             'last_connection' => 'nullable|date',
             'custom_fields' => 'nullable|array',
         ]);
+
+        // If phone is being updated, normalize and check for duplicates
+        if (isset($validated['phone'])) {
+            $normalization = $this->phoneService->normalize($validated['phone']);
+            $normalizedPhone = $normalization['is_valid'] ? $normalization['normalized'] : $validated['phone'];
+
+            $existing = Contact::where('user_id', $request->user()->id)
+                ->where('id', '!=', $contact->id)
+                ->where(function ($q) use ($normalizedPhone, $validated) {
+                    $q->where('phone', $normalizedPhone)
+                      ->orWhere('phone', $validated['phone']);
+                })
+                ->first();
+
+            if ($existing) {
+                return response()->json([
+                    'message' => 'Un autre contact avec ce numéro de téléphone existe déjà',
+                    'existing_contact' => [
+                        'id' => $existing->id,
+                        'name' => $existing->name,
+                        'phone' => $existing->phone,
+                    ],
+                ], 409);
+            }
+
+            $validated['phone'] = $normalizedPhone;
+        }
 
         $contact->update($validated);
 
