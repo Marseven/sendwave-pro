@@ -260,6 +260,66 @@ class ContactController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/contacts/delete-many",
+     *     tags={"Contacts"},
+     *     summary="Delete multiple contacts",
+     *     description="Supprime plusieurs contacts en une seule requête",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"ids"},
+     *             @OA\Property(property="ids", type="array", @OA\Items(type="integer"), example={1, 2, 3})
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contacts deleted",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="3 contacts supprimés"),
+     *             @OA\Property(property="deleted_count", type="integer", example=3)
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
+    public function destroyMany(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'required|integer',
+        ]);
+
+        $userId = $request->user()->id;
+
+        $contacts = Contact::where('user_id', $userId)
+            ->whereIn('id', $validated['ids'])
+            ->get();
+
+        $deletedCount = 0;
+
+        foreach ($contacts as $contact) {
+            $contactData = [
+                'contact_id' => $contact->id,
+                'name' => $contact->name,
+                'phone' => $contact->phone,
+            ];
+
+            $contact->delete();
+            $deletedCount++;
+
+            $this->webhookService->trigger('contact.deleted', $userId, $contactData);
+        }
+
+        return response()->json([
+            'message' => "{$deletedCount} contact(s) supprimé(s)",
+            'deleted_count' => $deletedCount,
+        ]);
+    }
+
+    /**
      * @OA\Get(
      *     path="/api/contacts/export",
      *     tags={"Contacts"},

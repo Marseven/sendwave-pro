@@ -346,6 +346,21 @@ export const apiCategories: ApiCategory[] = [
       },
       {
         method: 'POST',
+        path: '/api/contacts/delete-many',
+        summary: 'Suppression multiple de contacts',
+        description: "Supprime plusieurs contacts en une seule requête. Seuls les contacts appartenant à l'utilisateur sont supprimés.",
+        auth: true,
+        permissions: ['manage_contacts'],
+        body: {
+          ids: [1, 2, 3]
+        },
+        response: {
+          message: '3 contact(s) supprimé(s)',
+          deleted_count: 3
+        }
+      },
+      {
+        method: 'POST',
         path: '/api/contacts/import',
         summary: 'Importer des contacts (CSV/Excel)',
         description: "Upload d'un fichier CSV ou Excel pour importer des contacts en masse.",

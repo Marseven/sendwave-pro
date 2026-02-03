@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('permission:manage_contacts')->group(function () {
         Route::post('contacts/import', [ContactController::class, 'import']);
         Route::post('contacts/preview-import', [ContactController::class, 'previewImport']);
+        Route::post('contacts/delete-many', [ContactController::class, 'destroyMany']);
         Route::apiResource('contacts', ContactController::class);
     });
 
