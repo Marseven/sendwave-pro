@@ -13,6 +13,19 @@ class CustomRoleController extends Controller
 {
     /**
      * Get list of custom roles
+     *
+     * @OA\Get(
+     *     path="/api/custom-roles",
+     *     tags={"Custom Roles"},
+     *     summary="List all custom roles (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function index(Request $request)
     {
@@ -39,6 +52,28 @@ class CustomRoleController extends Controller
 
     /**
      * Create a new custom role
+     *
+     * @OA\Post(
+     *     path="/api/custom-roles",
+     *     tags={"Custom Roles"},
+     *     summary="Create a new custom role (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"name", "permissions"},
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="slug", type="string", maxLength=255),
+     *         @OA\Property(property="description", type="string"),
+     *         @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
+     *     )),
+     *     @OA\Response(response=201, description="Custom role created", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function store(Request $request)
     {
@@ -87,6 +122,21 @@ class CustomRoleController extends Controller
 
     /**
      * Get a specific custom role
+     *
+     * @OA\Get(
+     *     path="/api/custom-roles/{id}",
+     *     tags={"Custom Roles"},
+     *     summary="Get a specific custom role by ID (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Custom role not found")
+     * )
      */
     public function show(Request $request, $id)
     {
@@ -116,6 +166,29 @@ class CustomRoleController extends Controller
 
     /**
      * Update a custom role
+     *
+     * @OA\Put(
+     *     path="/api/custom-roles/{id}",
+     *     tags={"Custom Roles"},
+     *     summary="Update an existing custom role (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="slug", type="string", maxLength=255),
+     *         @OA\Property(property="description", type="string"),
+     *         @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
+     *     )),
+     *     @OA\Response(response=200, description="Custom role updated", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden - system roles cannot be modified"),
+     *     @OA\Response(response=404, description="Custom role not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function update(Request $request, $id)
     {
@@ -169,6 +242,22 @@ class CustomRoleController extends Controller
 
     /**
      * Delete a custom role
+     *
+     * @OA\Delete(
+     *     path="/api/custom-roles/{id}",
+     *     tags={"Custom Roles"},
+     *     summary="Delete a custom role (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Custom role deleted", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=400, description="Role is in use by users"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden - system roles cannot be deleted"),
+     *     @OA\Response(response=404, description="Custom role not found")
+     * )
      */
     public function destroy(Request $request, $id)
     {
@@ -216,6 +305,22 @@ class CustomRoleController extends Controller
 
     /**
      * Duplicate a custom role
+     *
+     * @OA\Post(
+     *     path="/api/custom-roles/{id}/duplicate",
+     *     tags={"Custom Roles"},
+     *     summary="Duplicate an existing custom role (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=201, description="Custom role duplicated", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Custom role not found")
+     * )
      */
     public function duplicate(Request $request, $id)
     {
@@ -264,6 +369,19 @@ class CustomRoleController extends Controller
 
     /**
      * Get available permissions for role creation
+     *
+     * @OA\Get(
+     *     path="/api/custom-roles/permissions",
+     *     tags={"Custom Roles"},
+     *     summary="Get available permissions for role creation (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function permissions(Request $request)
     {

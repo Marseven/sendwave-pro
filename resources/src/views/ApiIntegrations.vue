@@ -1,12 +1,13 @@
 <template>
   <MainLayout>
     <div class="p-4 sm:p-6 lg:p-8">
-      <div class="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 class="text-xl sm:text-3xl font-bold">Clés API</h1>
-          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Gérez vos clés API pour intégrer SendWave dans vos applications</p>
+          <p class="text-sm text-muted-foreground mt-1 sm:mt-2">Gérez vos clés API et consultez la documentation complète</p>
         </div>
         <button
+          v-if="activeTab === 'keys'"
           @click="openCreateModal"
           class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 sm:h-10 px-3 sm:px-4 py-2"
         >
@@ -16,8 +17,11 @@
         </button>
       </div>
 
-      <!-- API Keys List -->
-      <div class="space-y-6">
+      <!-- Tab Navigation -->
+      <TabNav v-model="activeTab" :tabs="tabs" class="mb-6" />
+
+      <!-- Tab: Mes Clés -->
+      <div v-if="activeTab === 'keys'" class="space-y-6">
         <div class="rounded-lg border bg-card">
           <div class="p-6 border-b">
             <h3 class="font-semibold">Clés API actives</h3>
@@ -104,97 +108,74 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Documentation Section -->
-        <div class="rounded-lg border bg-card">
-          <div class="p-6 border-b">
-            <h3 class="font-semibold flex items-center gap-2">
-              <BookOpenIcon class="w-5 h-5" />
-              Documentation API
-            </h3>
+      <!-- Tab: Documentation API -->
+      <div v-if="activeTab === 'docs'" class="space-y-6">
+        <!-- Search & Filters -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Rechercher un endpoint (ex: /messages/send, contacts, webhook...)"
+              class="flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
           </div>
+          <select
+            v-model="methodFilter"
+            class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[140px]"
+          >
+            <option value="">Toutes les méthodes</option>
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+        </div>
 
-          <div class="p-6 space-y-6">
-            <!-- Base URL -->
-            <div>
-              <h4 class="font-medium mb-2">URL de base</h4>
-              <code class="block p-3 bg-muted rounded-lg text-sm font-mono">{{ baseUrl }}/api</code>
-            </div>
-
-            <!-- Authentication -->
-            <div>
-              <h4 class="font-medium mb-2">Authentification</h4>
-              <p class="text-sm text-muted-foreground mb-2">Ajoutez votre clé API dans l'en-tête de chaque requête:</p>
-              <pre class="p-3 bg-muted rounded-lg text-sm font-mono overflow-x-auto">Authorization: Bearer sk_live_xxxxxxxxxxxxx</pre>
-            </div>
-
-            <!-- Send SMS -->
-            <div>
-              <h4 class="font-medium mb-2">Envoyer un SMS</h4>
-              <div class="p-3 bg-muted rounded-lg">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="px-2 py-0.5 bg-green-600 text-white text-xs rounded font-medium">POST</span>
-                  <code class="text-sm font-mono">/api/messages/send</code>
-                </div>
-                <pre class="text-sm font-mono text-muted-foreground overflow-x-auto">
-{
-  "recipients": ["+24177123456", "+24162987654"],
-  "message": "Votre message ici"
-}</pre>
-              </div>
-            </div>
-
-            <!-- Response Example -->
-            <div>
-              <h4 class="font-medium mb-2">Exemple de réponse</h4>
-              <pre class="p-3 bg-muted rounded-lg text-sm font-mono overflow-x-auto text-green-600 dark:text-green-400">
-{
-  "message": "Message envoyé avec succès",
-  "data": {
-    "message_id": 12345,
-    "provider": "airtel",
-    "phone": "24177123456",
-    "sms_count": 1,
-    "cost": 20
-  }
-}</pre>
-            </div>
-
-            <!-- Other Endpoints -->
-            <div>
-              <h4 class="font-medium mb-2">Autres endpoints</h4>
-              <div class="space-y-2">
-                <div class="flex items-center gap-2 p-2 bg-muted/50 rounded">
-                  <span class="px-2 py-0.5 bg-blue-600 text-white text-xs rounded font-medium">GET</span>
-                  <code class="text-sm font-mono">/api/messages/history</code>
-                  <span class="text-xs text-muted-foreground ml-auto">Historique des messages</span>
-                </div>
-                <div class="flex items-center gap-2 p-2 bg-muted/50 rounded">
-                  <span class="px-2 py-0.5 bg-blue-600 text-white text-xs rounded font-medium">GET</span>
-                  <code class="text-sm font-mono">/api/contacts</code>
-                  <span class="text-xs text-muted-foreground ml-auto">Liste des contacts</span>
-                </div>
-                <div class="flex items-center gap-2 p-2 bg-muted/50 rounded">
-                  <span class="px-2 py-0.5 bg-green-600 text-white text-xs rounded font-medium">POST</span>
-                  <code class="text-sm font-mono">/api/contacts</code>
-                  <span class="text-xs text-muted-foreground ml-auto">Créer un contact</span>
-                </div>
-                <div class="flex items-center gap-2 p-2 bg-muted/50 rounded">
-                  <span class="px-2 py-0.5 bg-blue-600 text-white text-xs rounded font-medium">GET</span>
-                  <code class="text-sm font-mono">/api/analytics/dashboard</code>
-                  <span class="text-xs text-muted-foreground ml-auto">Statistiques</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Rate Limits -->
-            <div class="p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <h4 class="font-medium text-yellow-800 dark:text-yellow-200 mb-1">Limites de requêtes</h4>
-              <p class="text-sm text-yellow-700 dark:text-yellow-300">
-                Chaque clé API a une limite de requêtes par minute. En cas de dépassement, vous recevrez une erreur 429 (Too Many Requests).
-              </p>
-            </div>
+        <!-- Quick Info -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="rounded-lg border bg-card p-4">
+            <div class="text-2xl font-bold text-primary">{{ totalEndpoints }}</div>
+            <div class="text-sm text-muted-foreground">Endpoints API</div>
           </div>
+          <div class="rounded-lg border bg-card p-4">
+            <div class="text-sm font-medium mb-1">URL de base</div>
+            <code class="text-xs font-mono text-muted-foreground">{{ baseUrl }}/api</code>
+          </div>
+          <div class="rounded-lg border bg-card p-4">
+            <div class="text-sm font-medium mb-1">Authentification</div>
+            <code class="text-xs font-mono text-muted-foreground">Authorization: Bearer &#123;token&#125;</code>
+          </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="space-y-3">
+          <ApiCategorySection
+            v-for="category in visibleCategories"
+            :key="category.id"
+            :category="category"
+            :base-url="baseUrl"
+            :search-query="searchQuery"
+            :method-filter="methodFilter"
+            :default-open="!!searchQuery || !!methodFilter"
+          />
+        </div>
+
+        <div v-if="visibleCategories.length === 0" class="text-center py-12 text-muted-foreground">
+          <MagnifyingGlassIcon class="w-10 h-10 mx-auto mb-3 opacity-50" />
+          <p>Aucun endpoint trouvé pour "{{ searchQuery }}"</p>
+        </div>
+
+        <!-- Rate Limits -->
+        <div class="p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
+          <h4 class="font-medium text-yellow-800 dark:text-yellow-200 mb-1">Limites de requêtes</h4>
+          <p class="text-sm text-yellow-700 dark:text-yellow-300">
+            Chaque clé API a une limite de requêtes par minute. En cas de dépassement, vous recevrez une erreur 429 (Too Many Requests).
+            L'endpoint <code class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">/api/messages/send</code> a un rate limit additionnel spécifique.
+          </p>
         </div>
       </div>
     </div>
@@ -282,7 +263,7 @@
       </div>
     </div>
 
-    <!-- New Key Modal (shows the full key after creation) -->
+    <!-- New Key Modal -->
     <div
       v-if="showNewKeyModal"
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -317,20 +298,58 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import MainLayout from '@/components/MainLayout.vue'
+import TabNav from '@/components/ui/TabNav.vue'
+import ApiCategorySection from '@/components/ui/ApiCategorySection.vue'
 import {
   KeyIcon,
-  BookOpenIcon,
   XMarkIcon,
   PlusIcon,
   ArrowPathIcon,
   CheckCircleIcon,
-  ClipboardIcon
+  ClipboardIcon,
+  MagnifyingGlassIcon,
+  BookOpenIcon
 } from '@heroicons/vue/24/outline'
 import { apiKeyService, type ApiKey } from '@/services/apiKeyService'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
+import { apiCategories, getTotalEndpoints } from '@/data/apiDocumentation'
 
 const baseUrl = computed(() => window.location.origin)
+const totalEndpoints = getTotalEndpoints()
 
+// Tab state
+const activeTab = ref('keys')
+const tabs = [
+  { id: 'keys', label: 'Mes Clés', icon: KeyIcon },
+  { id: 'docs', label: 'Documentation API', icon: BookOpenIcon }
+]
+
+// Documentation filters
+const searchQuery = ref('')
+const methodFilter = ref('')
+
+const visibleCategories = computed(() => {
+  if (!searchQuery.value && !methodFilter.value) {
+    return apiCategories
+  }
+
+  return apiCategories.filter(category => {
+    const q = searchQuery.value.toLowerCase()
+    const m = methodFilter.value
+
+    return category.endpoints.some(e => {
+      const matchMethod = !m || e.method === m
+      const matchSearch = !q ||
+        e.path.toLowerCase().includes(q) ||
+        e.summary.toLowerCase().includes(q) ||
+        (e.description?.toLowerCase().includes(q)) ||
+        category.name.toLowerCase().includes(q)
+      return matchMethod && matchSearch
+    })
+  })
+})
+
+// API Keys state
 const apiKeys = ref<ApiKey[]>([])
 const loading = ref(false)
 const creating = ref(false)
@@ -382,7 +401,6 @@ async function createKey() {
     const result = await apiKeyService.create(createForm)
     showCreateModal.value = false
 
-    // Show the new key
     newKey.value = result.full_key || result.key
     showNewKeyModal.value = true
 

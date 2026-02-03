@@ -11,6 +11,18 @@ class BlacklistController extends Controller
 {
     /**
      * List all blacklisted numbers
+     *
+     * @OA\Get(
+     *     path="/api/blacklist",
+     *     tags={"Blacklist"},
+     *     summary="List all blacklisted numbers",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Paginated list of blacklisted numbers", @OA\JsonContent(
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -23,6 +35,24 @@ class BlacklistController extends Controller
 
     /**
      * Add number to blacklist
+     *
+     * @OA\Post(
+     *     path="/api/blacklist",
+     *     tags={"Blacklist"},
+     *     summary="Add a phone number to the blacklist",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"phone_number"},
+     *         @OA\Property(property="phone_number", type="string", example="24177123456"),
+     *         @OA\Property(property="reason", type="string", example="User requested opt-out")
+     *     )),
+     *     @OA\Response(response=201, description="Number added to blacklist", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=422, description="Number already blacklisted"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function store(Request $request)
     {
@@ -66,6 +96,19 @@ class BlacklistController extends Controller
 
     /**
      * Remove number from blacklist
+     *
+     * @OA\Delete(
+     *     path="/api/blacklist/{id}",
+     *     tags={"Blacklist"},
+     *     summary="Remove a phone number from the blacklist",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Number removed from blacklist", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=404, description="Blacklist entry not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function destroy(Request $request, int $id)
     {
@@ -92,6 +135,22 @@ class BlacklistController extends Controller
 
     /**
      * Check if number is blacklisted
+     *
+     * @OA\Post(
+     *     path="/api/blacklist/check",
+     *     tags={"Blacklist"},
+     *     summary="Check if a phone number is blacklisted",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"phone_number"},
+     *         @OA\Property(property="phone_number", type="string", example="24177123456")
+     *     )),
+     *     @OA\Response(response=200, description="Blacklist check result", @OA\JsonContent(
+     *         @OA\Property(property="phone_number", type="string"),
+     *         @OA\Property(property="is_blacklisted", type="boolean")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function check(Request $request)
     {

@@ -10,7 +10,62 @@ use Illuminate\Support\Facades\Auth;
 class CampaignHistoryController extends Controller
 {
     /**
-     * Récupérer l'historique des campagnes
+     * @OA\Get(
+     *     path="/api/campaigns/history",
+     *     tags={"Campaigns"},
+     *     summary="Get campaign history",
+     *     description="Retrieve paginated history of sent campaigns with optional filters",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         required=false,
+     *         description="Search by campaign name or message",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by campaign status",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="dateFrom",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by start date",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="dateTo",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by end date",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="perPage",
+     *         in="query",
+     *         required=false,
+     *         description="Number of items per page",
+     *         @OA\Schema(type="integer", default=10)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Paginated campaign history",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer"),
+     *                 @OA\Property(property="last_page", type="integer"),
+     *                 @OA\Property(property="per_page", type="integer"),
+     *                 @OA\Property(property="total", type="integer")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -58,7 +113,29 @@ class CampaignHistoryController extends Controller
     }
 
     /**
-     * Récupérer une campagne spécifique
+     * @OA\Get(
+     *     path="/api/campaigns/history/{id}",
+     *     tags={"Campaigns"},
+     *     summary="Get a specific campaign from history",
+     *     description="Retrieve a single campaign by ID from history",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Campaign details",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found")
+     * )
      */
     public function show($id)
     {
@@ -71,7 +148,28 @@ class CampaignHistoryController extends Controller
     }
 
     /**
-     * Obtenir les statistiques des campagnes
+     * @OA\Get(
+     *     path="/api/campaigns/stats",
+     *     tags={"Campaigns"},
+     *     summary="Get campaign statistics",
+     *     description="Retrieve aggregated statistics for all campaigns (total, completed, scheduled, failed, cost, recipients)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Campaign statistics",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="total", type="integer", example=50),
+     *                 @OA\Property(property="completed", type="integer", example=40),
+     *                 @OA\Property(property="scheduled", type="integer", example=5),
+     *                 @OA\Property(property="failed", type="integer", example=5),
+     *                 @OA\Property(property="totalCost", type="number", example=100000),
+     *                 @OA\Property(property="totalRecipients", type="integer", example=5000)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function stats()
     {

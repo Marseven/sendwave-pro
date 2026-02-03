@@ -9,6 +9,22 @@ use Illuminate\Http\Request;
 
 class MessageTemplateController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/templates",
+     *     tags={"Templates"},
+     *     summary="List all message templates",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="category", in="query", required=false, @OA\Schema(type="string"), description="Filter by category"),
+     *     @OA\Parameter(name="public_only", in="query", required=false, @OA\Schema(type="boolean"), description="Filter public templates only"),
+     *     @OA\Parameter(name="sort", in="query", required=false, @OA\Schema(type="string", enum={"popular","recent"}), description="Sort order"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *         @OA\Property(property="categories", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
     public function index(Request $request)
     {
         $query = MessageTemplate::query();
@@ -44,6 +60,27 @@ class MessageTemplateController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/templates",
+     *     tags={"Templates"},
+     *     summary="Create a new message template",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"name","content","category"},
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="content", type="string", maxLength=320),
+     *         @OA\Property(property="category", type="string"),
+     *         @OA\Property(property="is_public", type="boolean")
+     *     )),
+     *     @OA\Response(response=201, description="Template created", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -68,6 +105,18 @@ class MessageTemplateController extends Controller
         ], 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/templates/{id}",
+     *     tags={"Templates"},
+     *     summary="Get a specific message template",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(type="object")),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Template not found")
+     * )
+     */
     public function show(Request $request, string $id)
     {
         $template = MessageTemplate::where('user_id', $request->user()->id)
@@ -76,6 +125,28 @@ class MessageTemplateController extends Controller
         return response()->json($template);
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/templates/{id}",
+     *     tags={"Templates"},
+     *     summary="Update a message template",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="content", type="string"),
+     *         @OA\Property(property="category", type="string", maxLength=100),
+     *         @OA\Property(property="is_public", type="boolean")
+     *     )),
+     *     @OA\Response(response=200, description="Template updated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Template not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function update(Request $request, string $id)
     {
         $template = MessageTemplate::where('user_id', $request->user()->id)
@@ -103,6 +174,20 @@ class MessageTemplateController extends Controller
 
     /**
      * Toggle template public/private status
+     *
+     * @OA\Post(
+     *     path="/api/templates/{id}/toggle-public",
+     *     tags={"Templates"},
+     *     summary="Toggle template public/private status",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Status toggled", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Template not found")
+     * )
      */
     public function togglePublic(Request $request, string $id)
     {
@@ -120,6 +205,20 @@ class MessageTemplateController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/templates/{id}",
+     *     tags={"Templates"},
+     *     summary="Delete a message template",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Template deleted", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Template not found")
+     * )
+     */
     public function destroy(Request $request, string $id)
     {
         $template = MessageTemplate::where('user_id', $request->user()->id)
@@ -132,6 +231,20 @@ class MessageTemplateController extends Controller
 
     /**
      * Use a template (increment usage count)
+     *
+     * @OA\Post(
+     *     path="/api/templates/{id}/use",
+     *     tags={"Templates"},
+     *     summary="Use a template and increment its usage count",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Template used", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Template not found")
+     * )
      */
     public function use(Request $request, string $id)
     {
@@ -150,6 +263,24 @@ class MessageTemplateController extends Controller
 
     /**
      * Preview template with sample data
+     *
+     * @OA\Post(
+     *     path="/api/templates/{id}/preview",
+     *     tags={"Templates"},
+     *     summary="Preview a template with sample data",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\RequestBody(required=false, @OA\JsonContent(
+     *         @OA\Property(property="sample_data", type="object")
+     *     )),
+     *     @OA\Response(response=200, description="Template preview", @OA\JsonContent(
+     *         @OA\Property(property="original", type="string"),
+     *         @OA\Property(property="preview", type="string"),
+     *         @OA\Property(property="variables", type="array", @OA\Items(type="string"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Template not found")
+     * )
      */
     public function preview(Request $request, string $id)
     {
@@ -172,6 +303,17 @@ class MessageTemplateController extends Controller
 
     /**
      * Get template categories
+     *
+     * @OA\Get(
+     *     path="/api/templates/categories",
+     *     tags={"Templates"},
+     *     summary="Get all available template categories",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function categories()
     {

@@ -118,7 +118,55 @@ class MessageController extends Controller
     }
 
     /**
-     * Envoyer un ou plusieurs messages SMS avec routage automatique par opérateur
+     * @OA\Post(
+     *     path="/api/messages/send",
+     *     tags={"Messages"},
+     *     summary="Send SMS message(s)",
+     *     description="Envoyer un ou plusieurs messages SMS avec routage automatique par opérateur. Les numéros blacklistés sont automatiquement filtrés.",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"recipients", "message"},
+     *             @OA\Property(property="recipients", type="array", @OA\Items(type="string"), example={"77123456", "60123456"}),
+     *             @OA\Property(property="message", type="string", maxLength=320, example="Bonjour, ceci est un message de test."),
+     *             @OA\Property(property="type", type="string", enum={"immediate", "scheduled"}, example="immediate")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Message(s) envoyé(s) avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Message envoyé avec succès"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="message_id", type="integer", example=1),
+     *                 @OA\Property(property="provider", type="string", example="airtel"),
+     *                 @OA\Property(property="phone", type="string", example="24177123456"),
+     *                 @OA\Property(property="sms_count", type="integer", example=1),
+     *                 @OA\Property(property="cost", type="integer", example=20),
+     *                 @OA\Property(property="blacklisted_skipped", type="integer", example=0)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Échec de l'envoi ou aucun destinataire valide",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Aucun destinataire valide"),
+     *             @OA\Property(property="error", type="string", example="Tous les destinataires sont dans la liste noire")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Erreur lors de l'envoi du message"),
+     *             @OA\Property(property="error", type="string")
+     *         )
+     *     )
+     * )
      */
     public function send(Request $request)
     {
@@ -317,7 +365,34 @@ class MessageController extends Controller
     }
 
     /**
-     * Analyser des numéros de téléphone
+     * @OA\Post(
+     *     path="/api/messages/analyze",
+     *     tags={"Messages"},
+     *     summary="Analyze phone numbers",
+     *     description="Analyser des numéros de téléphone pour déterminer l'opérateur et la validité",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"phone_numbers"},
+     *             @OA\Property(property="phone_numbers", type="array", @OA\Items(type="string"), example={"77123456", "60123456", "invalid"})
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Analyse effectuée",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Analyse effectuée"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="airtel_count", type="integer", example=1),
+     *                 @OA\Property(property="moov_count", type="integer", example=1),
+     *                 @OA\Property(property="unknown_count", type="integer", example=1)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function analyzeNumbers(Request $request)
     {
@@ -335,7 +410,34 @@ class MessageController extends Controller
     }
 
     /**
-     * Obtenir les informations d'un numéro
+     * @OA\Post(
+     *     path="/api/messages/number-info",
+     *     tags={"Messages"},
+     *     summary="Get phone number info",
+     *     description="Obtenir les informations d'un numéro de téléphone (opérateur, pays, validité)",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"phone_number"},
+     *             @OA\Property(property="phone_number", type="string", example="77123456")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Informations du numéro",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Informations du numéro"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="operator", type="string", example="airtel"),
+     *                 @OA\Property(property="country", type="string", example="GA"),
+     *                 @OA\Property(property="is_valid", type="boolean", example=true)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function getNumberInfo(Request $request)
     {

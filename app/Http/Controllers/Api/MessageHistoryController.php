@@ -11,7 +11,69 @@ use Illuminate\Support\Facades\Auth;
 class MessageHistoryController extends Controller
 {
     /**
-     * Récupérer l'historique des messages
+     * @OA\Get(
+     *     path="/api/messages/history",
+     *     tags={"Messages"},
+     *     summary="Get message history",
+     *     description="Retrieve paginated history of sent messages with optional filters",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         required=false,
+     *         description="Search by recipient phone, name, or message content",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by message status",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by message type",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="dateFrom",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by start date",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="dateTo",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by end date",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="perPage",
+     *         in="query",
+     *         required=false,
+     *         description="Number of items per page",
+     *         @OA\Schema(type="integer", default=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Paginated message history",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer"),
+     *                 @OA\Property(property="last_page", type="integer"),
+     *                 @OA\Property(property="per_page", type="integer"),
+     *                 @OA\Property(property="total", type="integer")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -72,7 +134,29 @@ class MessageHistoryController extends Controller
     }
 
     /**
-     * Récupérer un message spécifique
+     * @OA\Get(
+     *     path="/api/messages/history/{id}",
+     *     tags={"Messages"},
+     *     summary="Get a specific message",
+     *     description="Retrieve a single message by ID with campaign details",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Message ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Message details",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Message not found")
+     * )
      */
     public function show($id)
     {
@@ -90,7 +174,27 @@ class MessageHistoryController extends Controller
     }
 
     /**
-     * Obtenir les statistiques des messages
+     * @OA\Get(
+     *     path="/api/messages/stats",
+     *     tags={"Messages"},
+     *     summary="Get message statistics",
+     *     description="Retrieve aggregated statistics for all messages (total, delivered, pending, failed, cost)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Message statistics",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="total", type="integer", example=1000),
+     *                 @OA\Property(property="delivered", type="integer", example=950),
+     *                 @OA\Property(property="pending", type="integer", example=20),
+     *                 @OA\Property(property="failed", type="integer", example=30),
+     *                 @OA\Property(property="totalCost", type="number", example=20000)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function stats()
     {
@@ -117,7 +221,56 @@ class MessageHistoryController extends Controller
     }
 
     /**
-     * Exporter l'historique en CSV
+     * @OA\Get(
+     *     path="/api/messages/export",
+     *     tags={"Messages"},
+     *     summary="Export message history to CSV",
+     *     description="Export filtered message history as a downloadable CSV file",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         required=false,
+     *         description="Search by recipient phone, name, or message content",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by message status",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by message type",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="dateFrom",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by start date",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="dateTo",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by end date",
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="CSV file download",
+     *         @OA\MediaType(
+     *             mediaType="text/csv"
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function export(Request $request)
     {

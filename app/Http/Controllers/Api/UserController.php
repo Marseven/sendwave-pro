@@ -15,6 +15,24 @@ class UserController extends Controller
 {
     /**
      * Get list of users manageable by current user
+     *
+     * @OA\Get(
+     *     path="/api/users",
+     *     tags={"Users"},
+     *     summary="List users manageable by current user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="account_id", in="query", required=false, @OA\Schema(type="integer"), description="Filter by account (SuperAdmin only)"),
+     *     @OA\Parameter(name="role", in="query", required=false, @OA\Schema(type="string"), description="Filter by role"),
+     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string"), description="Filter by status"),
+     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string"), description="Search by name or email"),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer"), description="Items per page"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function index(Request $request)
     {
@@ -71,6 +89,33 @@ class UserController extends Controller
 
     /**
      * Create a new user
+     *
+     * @OA\Post(
+     *     path="/api/users",
+     *     tags={"Users"},
+     *     summary="Create a new user",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"name", "email", "password", "role"},
+     *         @OA\Property(property="name", type="string", example="John Doe"),
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="password", type="string", minLength=8),
+     *         @OA\Property(property="phone", type="string"),
+     *         @OA\Property(property="company", type="string"),
+     *         @OA\Property(property="role", type="string", enum={"super_admin", "admin", "agent"}),
+     *         @OA\Property(property="account_id", type="integer"),
+     *         @OA\Property(property="custom_role_id", type="integer"),
+     *         @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
+     *     )),
+     *     @OA\Response(response=201, description="User created", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function store(Request $request)
     {
@@ -144,6 +189,21 @@ class UserController extends Controller
 
     /**
      * Get a specific user
+     *
+     * @OA\Get(
+     *     path="/api/users/{id}",
+     *     tags={"Users"},
+     *     summary="Get a specific user by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="User not found")
+     * )
      */
     public function show(Request $request, $id)
     {
@@ -173,6 +233,34 @@ class UserController extends Controller
 
     /**
      * Update a user
+     *
+     * @OA\Put(
+     *     path="/api/users/{id}",
+     *     tags={"Users"},
+     *     summary="Update an existing user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         @OA\Property(property="name", type="string"),
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="password", type="string", minLength=8),
+     *         @OA\Property(property="phone", type="string"),
+     *         @OA\Property(property="company", type="string"),
+     *         @OA\Property(property="role", type="string", enum={"super_admin", "admin", "agent"}),
+     *         @OA\Property(property="custom_role_id", type="integer"),
+     *         @OA\Property(property="permissions", type="array", @OA\Items(type="string")),
+     *         @OA\Property(property="status", type="string", enum={"active", "suspended", "pending"})
+     *     )),
+     *     @OA\Response(response=200, description="User updated", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="User not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function update(Request $request, $id)
     {
@@ -235,6 +323,22 @@ class UserController extends Controller
 
     /**
      * Delete a user
+     *
+     * @OA\Delete(
+     *     path="/api/users/{id}",
+     *     tags={"Users"},
+     *     summary="Delete a user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="User deleted", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=400, description="User has sub-users"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="User not found")
+     * )
      */
     public function destroy(Request $request, $id)
     {
@@ -274,6 +378,22 @@ class UserController extends Controller
 
     /**
      * Suspend a user
+     *
+     * @OA\Post(
+     *     path="/api/users/{id}/suspend",
+     *     tags={"Users"},
+     *     summary="Suspend a user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="User suspended", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="User not found")
+     * )
      */
     public function suspend(Request $request, $id)
     {
@@ -305,6 +425,22 @@ class UserController extends Controller
 
     /**
      * Activate a user
+     *
+     * @OA\Post(
+     *     path="/api/users/{id}/activate",
+     *     tags={"Users"},
+     *     summary="Activate a user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="User activated", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="User not found")
+     * )
      */
     public function activate(Request $request, $id)
     {
@@ -336,6 +472,27 @@ class UserController extends Controller
 
     /**
      * Update user permissions
+     *
+     * @OA\Put(
+     *     path="/api/users/{id}/permissions",
+     *     tags={"Users"},
+     *     summary="Update permissions for a user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"permissions"},
+     *         @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
+     *     )),
+     *     @OA\Response(response=200, description="Permissions updated", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="User not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function updatePermissions(Request $request, $id)
     {
@@ -390,6 +547,23 @@ class UserController extends Controller
 
     /**
      * Get available roles that current user can assign
+     *
+     * @OA\Get(
+     *     path="/api/users/available-roles",
+     *     tags={"Users"},
+     *     summary="Get roles the current user can assign",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object",
+     *             @OA\Property(property="value", type="string"),
+     *             @OA\Property(property="label", type="string"),
+     *             @OA\Property(property="description", type="string"),
+     *             @OA\Property(property="default_permissions", type="array", @OA\Items(type="string"))
+     *         ))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function availableRoles(Request $request)
     {
@@ -415,6 +589,18 @@ class UserController extends Controller
 
     /**
      * Get available permissions that current user can assign
+     *
+     * @OA\Get(
+     *     path="/api/users/available-permissions",
+     *     tags={"Users"},
+     *     summary="Get permissions the current user can assign",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function availablePermissions(Request $request)
     {
@@ -451,6 +637,25 @@ class UserController extends Controller
 
     /**
      * Get all system roles (read-only view)
+     *
+     * @OA\Get(
+     *     path="/api/users/system-roles",
+     *     tags={"Users"},
+     *     summary="Get all system roles (read-only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object",
+     *             @OA\Property(property="value", type="string"),
+     *             @OA\Property(property="label", type="string"),
+     *             @OA\Property(property="description", type="string"),
+     *             @OA\Property(property="level", type="integer"),
+     *             @OA\Property(property="default_permissions", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="is_system", type="boolean")
+     *         ))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function systemRoles(Request $request)
     {
@@ -475,6 +680,18 @@ class UserController extends Controller
 
     /**
      * Get all system permissions (read-only view)
+     *
+     * @OA\Get(
+     *     path="/api/users/system-permissions",
+     *     tags={"Users"},
+     *     summary="Get all system permissions (read-only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function systemPermissions(Request $request)
     {

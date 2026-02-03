@@ -20,6 +20,29 @@ class SubAccountController extends Controller
 
     /**
      * Liste tous les sous-comptes de l'utilisateur connecté
+     *
+     * @OA\Get(
+     *     path="/api/sub-accounts",
+     *     tags={"Sub-Accounts"},
+     *     summary="List all sub-accounts of the authenticated user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object",
+     *             @OA\Property(property="id", type="integer"),
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="role", type="string"),
+     *             @OA\Property(property="status", type="string"),
+     *             @OA\Property(property="sms_credit_limit", type="integer"),
+     *             @OA\Property(property="sms_used", type="integer"),
+     *             @OA\Property(property="remaining_credits", type="integer"),
+     *             @OA\Property(property="last_connection", type="string", format="date-time"),
+     *             @OA\Property(property="created_at", type="string", format="date-time")
+     *         ))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -52,6 +75,28 @@ class SubAccountController extends Controller
 
     /**
      * Créer un nouveau sous-compte
+     *
+     * @OA\Post(
+     *     path="/api/sub-accounts",
+     *     tags={"Sub-Accounts"},
+     *     summary="Create a new sub-account",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"name", "email", "password", "role"},
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="password", type="string", minLength=8),
+     *         @OA\Property(property="role", type="string", enum={"admin", "manager", "sender", "viewer"}),
+     *         @OA\Property(property="sms_credit_limit", type="integer", minimum=0)
+     *     )),
+     *     @OA\Response(response=201, description="Sub-account created", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function store(Request $request)
     {
@@ -118,6 +163,20 @@ class SubAccountController extends Controller
 
     /**
      * Afficher un sous-compte spécifique
+     *
+     * @OA\Get(
+     *     path="/api/sub-accounts/{id}",
+     *     tags={"Sub-Accounts"},
+     *     summary="Get a specific sub-account by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Sub-account not found")
+     * )
      */
     public function show(Request $request, int $id)
     {
@@ -144,6 +203,30 @@ class SubAccountController extends Controller
 
     /**
      * Mettre à jour un sous-compte
+     *
+     * @OA\Put(
+     *     path="/api/sub-accounts/{id}",
+     *     tags={"Sub-Accounts"},
+     *     summary="Update an existing sub-account",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="password", type="string", minLength=8),
+     *         @OA\Property(property="role", type="string", enum={"admin", "manager", "sender", "viewer"}),
+     *         @OA\Property(property="status", type="string", enum={"active", "suspended", "inactive"}),
+     *         @OA\Property(property="sms_credit_limit", type="integer", minimum=0)
+     *     )),
+     *     @OA\Response(response=200, description="Sub-account updated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Sub-account not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function update(Request $request, int $id)
     {
@@ -205,6 +288,20 @@ class SubAccountController extends Controller
 
     /**
      * Supprimer un sous-compte
+     *
+     * @OA\Delete(
+     *     path="/api/sub-accounts/{id}",
+     *     tags={"Sub-Accounts"},
+     *     summary="Delete a sub-account",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Sub-account deleted", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Sub-account not found"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function destroy(Request $request, int $id)
     {
@@ -238,6 +335,30 @@ class SubAccountController extends Controller
 
     /**
      * Ajouter des crédits SMS
+     *
+     * @OA\Post(
+     *     path="/api/sub-accounts/{id}/credits",
+     *     tags={"Sub-Accounts"},
+     *     summary="Add SMS credits to a sub-account",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"amount"},
+     *         @OA\Property(property="amount", type="integer", minimum=1)
+     *     )),
+     *     @OA\Response(response=200, description="Credits added", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object",
+     *             @OA\Property(property="sms_credit_limit", type="integer"),
+     *             @OA\Property(property="sms_used", type="integer"),
+     *             @OA\Property(property="remaining_credits", type="integer")
+     *         )
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Sub-account not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function addCredits(Request $request, int $id)
     {
@@ -281,6 +402,31 @@ class SubAccountController extends Controller
 
     /**
      * Mettre à jour les permissions
+     *
+     * @OA\Post(
+     *     path="/api/sub-accounts/{id}/permissions",
+     *     tags={"Sub-Accounts"},
+     *     summary="Update permissions for a sub-account",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"permissions"},
+     *         @OA\Property(property="permissions", type="array", @OA\Items(type="string", enum={
+     *             "send_sms", "view_history", "manage_contacts", "manage_groups",
+     *             "create_campaigns", "view_analytics", "manage_templates", "export_data"
+     *         }))
+     *     )),
+     *     @OA\Response(response=200, description="Permissions updated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object",
+     *             @OA\Property(property="permissions", type="array", @OA\Items(type="string"))
+     *         )
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Sub-account not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function updatePermissions(Request $request, int $id)
     {
@@ -322,6 +468,20 @@ class SubAccountController extends Controller
 
     /**
      * Suspendre un sous-compte
+     *
+     * @OA\Post(
+     *     path="/api/sub-accounts/{id}/suspend",
+     *     tags={"Sub-Accounts"},
+     *     summary="Suspend a sub-account",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Sub-account suspended", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Sub-account not found"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function suspend(Request $request, int $id)
     {
@@ -354,6 +514,20 @@ class SubAccountController extends Controller
 
     /**
      * Activer un sous-compte
+     *
+     * @OA\Post(
+     *     path="/api/sub-accounts/{id}/activate",
+     *     tags={"Sub-Accounts"},
+     *     summary="Activate a sub-account",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Sub-account activated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Sub-account not found"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function activate(Request $request, int $id)
     {
@@ -379,6 +553,34 @@ class SubAccountController extends Controller
 
     /**
      * Connexion pour sub-account
+     *
+     * @OA\Post(
+     *     path="/api/sub-accounts/login",
+     *     tags={"Sub-Accounts"},
+     *     summary="Login as a sub-account (public, no authentication required)",
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"email", "password"},
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="password", type="string")
+     *     )),
+     *     @OA\Response(response=200, description="Login successful", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object",
+     *             @OA\Property(property="token", type="string"),
+     *             @OA\Property(property="sub_account", type="object",
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="email", type="string"),
+     *                 @OA\Property(property="role", type="string"),
+     *                 @OA\Property(property="permissions", type="array", @OA\Items(type="string")),
+     *                 @OA\Property(property="remaining_credits", type="integer")
+     *             )
+     *         )
+     *     )),
+     *     @OA\Response(response=401, description="Invalid credentials"),
+     *     @OA\Response(response=403, description="Account suspended or inactive"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function login(Request $request)
     {

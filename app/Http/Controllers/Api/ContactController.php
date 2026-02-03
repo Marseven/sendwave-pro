@@ -19,7 +19,28 @@ class ContactController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/contacts",
+     *     tags={"Contacts"},
+     *     summary="List all contacts",
+     *     description="Retrieve all contacts for the authenticated user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of contacts",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="John Doe"),
+     *                 @OA\Property(property="email", type="string", example="john@example.com"),
+     *                 @OA\Property(property="phone", type="string", example="+24177123456"),
+     *                 @OA\Property(property="group", type="string", example="VIP"),
+     *                 @OA\Property(property="status", type="string", example="active")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -31,7 +52,35 @@ class ContactController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/contacts",
+     *     tags={"Contacts"},
+     *     summary="Create a new contact",
+     *     description="Store a newly created contact",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "email", "phone"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="phone", type="string", example="+24177123456"),
+     *             @OA\Property(property="group", type="string", example="VIP"),
+     *             @OA\Property(property="status", type="string", enum={"active", "inactive"}, example="active"),
+     *             @OA\Property(property="last_connection", type="string", format="date-time"),
+     *             @OA\Property(property="custom_fields", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Contact created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function store(Request $request)
     {
@@ -68,7 +117,29 @@ class ContactController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/contacts/{id}",
+     *     tags={"Contacts"},
+     *     summary="Get a specific contact",
+     *     description="Retrieve a single contact by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Contact ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contact details",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Contact not found")
+     * )
      */
     public function show(Request $request, string $id)
     {
@@ -79,7 +150,42 @@ class ContactController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/contacts/{id}",
+     *     tags={"Contacts"},
+     *     summary="Update a contact",
+     *     description="Update an existing contact by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Contact ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="phone", type="string", example="+24177123456"),
+     *             @OA\Property(property="group", type="string", example="VIP"),
+     *             @OA\Property(property="status", type="string", enum={"active", "inactive"}),
+     *             @OA\Property(property="last_connection", type="string", format="date-time"),
+     *             @OA\Property(property="custom_fields", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contact updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Contact not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function update(Request $request, string $id)
     {
@@ -110,7 +216,29 @@ class ContactController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/contacts/{id}",
+     *     tags={"Contacts"},
+     *     summary="Delete a contact",
+     *     description="Remove a contact by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Contact ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contact deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Contact supprime avec succes")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Contact not found")
+     * )
      */
     public function destroy(Request $request, string $id)
     {
@@ -132,7 +260,39 @@ class ContactController extends Controller
     }
 
     /**
-     * Export contacts to CSV
+     * @OA\Get(
+     *     path="/api/contacts/export",
+     *     tags={"Contacts"},
+     *     summary="Export contacts",
+     *     description="Export contacts to CSV or JSON format",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="format",
+     *         in="query",
+     *         required=false,
+     *         description="Export format (csv or json)",
+     *         @OA\Schema(type="string", enum={"csv", "json"}, default="csv")
+     *     ),
+     *     @OA\Parameter(
+     *         name="group",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by group",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by status",
+     *         @OA\Schema(type="string", enum={"active", "inactive"})
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contacts exported successfully"
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function export(Request $request)
     {
@@ -201,7 +361,41 @@ class ContactController extends Controller
     }
 
     /**
-     * Import contacts from CSV, XLSX, or XLS file
+     * @OA\Post(
+     *     path="/api/contacts/import",
+     *     tags={"Contacts"},
+     *     summary="Import contacts from file",
+     *     description="Import contacts from CSV, XLSX, or XLS file (max 20MB)",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"file"},
+     *                 @OA\Property(property="file", type="string", format="binary", description="CSV, XLSX, or XLS file"),
+     *                 @OA\Property(property="duplicate_action", type="string", enum={"skip", "update", "create"}, description="Action for duplicates"),
+     *                 @OA\Property(property="column_mapping", type="object", description="Column mapping configuration")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Import completed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="10 contacts importes"),
+     *             @OA\Property(property="imported", type="integer", example=10),
+     *             @OA\Property(property="updated", type="integer", example=2),
+     *             @OA\Property(property="skipped", type="integer", example=1),
+     *             @OA\Property(property="errors", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="total_errors", type="integer", example=0)
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Import error")
+     * )
      */
     public function import(Request $request)
     {
@@ -273,7 +467,38 @@ class ContactController extends Controller
     }
 
     /**
-     * Preview file for import (get headers and sample data)
+     * @OA\Post(
+     *     path="/api/contacts/preview-import",
+     *     tags={"Contacts"},
+     *     summary="Preview import file",
+     *     description="Preview headers and sample data from an import file before importing",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"file"},
+     *                 @OA\Property(property="file", type="string", format="binary", description="CSV, XLSX, or XLS file")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Preview data",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="headers", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="preview", type="array", @OA\Items(type="array", @OA\Items(type="string"))),
+     *             @OA\Property(property="suggested_mapping", type="object"),
+     *             @OA\Property(property="total_rows", type="integer", example=100)
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Empty file"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="File reading error")
+     * )
      */
     public function previewImport(Request $request)
     {

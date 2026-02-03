@@ -20,6 +20,18 @@ class WebhookController extends Controller
 
     /**
      * List all webhooks
+     *
+     * @OA\Get(
+     *     path="/api/webhooks",
+     *     tags={"Webhooks"},
+     *     summary="List all webhooks for the authenticated user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *         @OA\Property(property="meta", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -33,6 +45,17 @@ class WebhookController extends Controller
 
     /**
      * Get available webhook events
+     *
+     * @OA\Get(
+     *     path="/api/webhooks/events",
+     *     tags={"Webhooks"},
+     *     summary="Get all available webhook event types",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function events()
     {
@@ -43,6 +66,29 @@ class WebhookController extends Controller
 
     /**
      * Create new webhook
+     *
+     * @OA\Post(
+     *     path="/api/webhooks",
+     *     tags={"Webhooks"},
+     *     summary="Create a new webhook",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"name","url","events"},
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="url", type="string", format="url", maxLength=500),
+     *         @OA\Property(property="events", type="array", @OA\Items(type="string")),
+     *         @OA\Property(property="secret", type="string", minLength=16, maxLength=64),
+     *         @OA\Property(property="retry_limit", type="integer", minimum=0, maximum=10),
+     *         @OA\Property(property="timeout", type="integer", minimum=5, maximum=120),
+     *         @OA\Property(property="is_active", type="boolean")
+     *     )),
+     *     @OA\Response(response=201, description="Webhook created", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function store(Request $request)
     {
@@ -80,6 +126,19 @@ class WebhookController extends Controller
 
     /**
      * Get specific webhook
+     *
+     * @OA\Get(
+     *     path="/api/webhooks/{id}",
+     *     tags={"Webhooks"},
+     *     summary="Get a specific webhook with recent logs",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Webhook not found")
+     * )
      */
     public function show(Request $request, int $id)
     {
@@ -94,6 +153,30 @@ class WebhookController extends Controller
 
     /**
      * Update webhook
+     *
+     * @OA\Put(
+     *     path="/api/webhooks/{id}",
+     *     tags={"Webhooks"},
+     *     summary="Update an existing webhook",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="url", type="string", format="url", maxLength=500),
+     *         @OA\Property(property="events", type="array", @OA\Items(type="string")),
+     *         @OA\Property(property="secret", type="string", minLength=16, maxLength=64),
+     *         @OA\Property(property="retry_limit", type="integer", minimum=0, maximum=10),
+     *         @OA\Property(property="timeout", type="integer", minimum=5, maximum=120),
+     *         @OA\Property(property="is_active", type="boolean")
+     *     )),
+     *     @OA\Response(response=200, description="Webhook updated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Webhook not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function update(Request $request, int $id)
     {
@@ -132,6 +215,19 @@ class WebhookController extends Controller
 
     /**
      * Delete webhook
+     *
+     * @OA\Delete(
+     *     path="/api/webhooks/{id}",
+     *     tags={"Webhooks"},
+     *     summary="Delete a webhook",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Webhook deleted", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Webhook not found")
+     * )
      */
     public function destroy(Request $request, int $id)
     {
@@ -158,6 +254,21 @@ class WebhookController extends Controller
 
     /**
      * Test webhook delivery
+     *
+     * @OA\Post(
+     *     path="/api/webhooks/{id}/test",
+     *     tags={"Webhooks"},
+     *     summary="Send a test payload to the webhook URL",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Test successful", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="result", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Webhook not found"),
+     *     @OA\Response(response=422, description="Test failed")
+     * )
      */
     public function test(Request $request, int $id)
     {
@@ -173,6 +284,20 @@ class WebhookController extends Controller
 
     /**
      * Toggle webhook active status
+     *
+     * @OA\Post(
+     *     path="/api/webhooks/{id}/toggle",
+     *     tags={"Webhooks"},
+     *     summary="Toggle webhook active/inactive status",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Status toggled", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Webhook not found")
+     * )
      */
     public function toggle(Request $request, int $id)
     {
@@ -200,6 +325,22 @@ class WebhookController extends Controller
 
     /**
      * Get webhook logs
+     *
+     * @OA\Get(
+     *     path="/api/webhooks/{id}/logs",
+     *     tags={"Webhooks"},
+     *     summary="Get delivery logs for a specific webhook",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="event", in="query", required=false, @OA\Schema(type="string"), description="Filter by event type"),
+     *     @OA\Parameter(name="success", in="query", required=false, @OA\Schema(type="boolean"), description="Filter by success status"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *         @OA\Property(property="meta", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Webhook not found")
+     * )
      */
     public function logs(Request $request, int $id)
     {
@@ -221,6 +362,26 @@ class WebhookController extends Controller
 
     /**
      * Get webhook statistics
+     *
+     * @OA\Get(
+     *     path="/api/webhooks/{id}/stats",
+     *     tags={"Webhooks"},
+     *     summary="Get delivery statistics for a specific webhook",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="object",
+     *             @OA\Property(property="total_triggers", type="integer"),
+     *             @OA\Property(property="successful", type="integer"),
+     *             @OA\Property(property="failed", type="integer"),
+     *             @OA\Property(property="success_rate", type="number"),
+     *             @OA\Property(property="last_triggered_at", type="string", format="date-time", nullable=true),
+     *             @OA\Property(property="events_by_type", type="array", @OA\Items(type="object"))
+     *         )
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Webhook not found")
+     * )
      */
     public function stats(Request $request, int $id)
     {

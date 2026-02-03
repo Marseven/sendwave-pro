@@ -19,6 +19,19 @@ class AnalyticsController extends Controller
     /**
      * Get dashboard widgets
      * GET /api/analytics/dashboard
+     *
+     * @OA\Get(
+     *     path="/api/analytics/dashboard",
+     *     tags={"Analytics"},
+     *     summary="Get dashboard analytics widgets",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="period", in="query", required=false, @OA\Schema(type="string", enum={"today","week","month","year"}), description="Analytics period"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="object"),
+     *         @OA\Property(property="period", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function dashboard(Request $request)
     {
@@ -38,6 +51,16 @@ class AnalyticsController extends Controller
     /**
      * Get daily chart data
      * GET /api/analytics/chart
+     *
+     * @OA\Get(
+     *     path="/api/analytics/chart",
+     *     tags={"Analytics"},
+     *     summary="Get daily chart data for analytics",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="period", in="query", required=false, @OA\Schema(type="string", enum={"week","month","year"}), description="Chart period"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(type="object")),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function chart(Request $request)
     {
@@ -54,6 +77,20 @@ class AnalyticsController extends Controller
     /**
      * Get comprehensive report
      * GET /api/analytics/report
+     *
+     * @OA\Get(
+     *     path="/api/analytics/report",
+     *     tags={"Analytics"},
+     *     summary="Get a comprehensive analytics report",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="start_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report start date"),
+     *     @OA\Parameter(name="end_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report end date"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function report(Request $request)
     {
@@ -80,6 +117,18 @@ class AnalyticsController extends Controller
     /**
      * Export report to PDF
      * GET /api/analytics/export/pdf
+     *
+     * @OA\Get(
+     *     path="/api/analytics/export/pdf",
+     *     tags={"Analytics"},
+     *     summary="Export analytics report as PDF",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="start_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report start date"),
+     *     @OA\Parameter(name="end_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report end date"),
+     *     @OA\Response(response=200, description="PDF file download", @OA\MediaType(mediaType="application/pdf")),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function exportPdf(Request $request)
     {
@@ -111,6 +160,18 @@ class AnalyticsController extends Controller
     /**
      * Export report to Excel
      * GET /api/analytics/export/excel
+     *
+     * @OA\Get(
+     *     path="/api/analytics/export/excel",
+     *     tags={"Analytics"},
+     *     summary="Export analytics report as Excel",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="start_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report start date"),
+     *     @OA\Parameter(name="end_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report end date"),
+     *     @OA\Response(response=200, description="Excel file download", @OA\MediaType(mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function exportExcel(Request $request)
     {
@@ -138,6 +199,18 @@ class AnalyticsController extends Controller
     /**
      * Export report to CSV
      * GET /api/analytics/export/csv
+     *
+     * @OA\Get(
+     *     path="/api/analytics/export/csv",
+     *     tags={"Analytics"},
+     *     summary="Export analytics report as CSV",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="start_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report start date"),
+     *     @OA\Parameter(name="end_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report end date"),
+     *     @OA\Response(response=200, description="CSV file download", @OA\MediaType(mediaType="text/csv")),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function exportCsv(Request $request)
     {
@@ -193,6 +266,19 @@ class AnalyticsController extends Controller
     /**
      * Get provider statistics
      * GET /api/analytics/providers
+     *
+     * @OA\Get(
+     *     path="/api/analytics/providers",
+     *     tags={"Analytics"},
+     *     summary="Get SMS provider distribution statistics",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="period", in="query", required=false, @OA\Schema(type="string", enum={"week","month","year"}), description="Statistics period"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="object"),
+     *         @OA\Property(property="period", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function providers(Request $request)
     {
@@ -214,6 +300,20 @@ class AnalyticsController extends Controller
     /**
      * Get top campaigns
      * GET /api/analytics/top-campaigns
+     *
+     * @OA\Get(
+     *     path="/api/analytics/top-campaigns",
+     *     tags={"Analytics"},
+     *     summary="Get top performing campaigns",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="period", in="query", required=false, @OA\Schema(type="string", enum={"week","month","year"}), description="Statistics period"),
+     *     @OA\Parameter(name="limit", in="query", required=false, @OA\Schema(type="integer", default=5), description="Number of campaigns to return"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *         @OA\Property(property="period", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function topCampaigns(Request $request)
     {
@@ -236,6 +336,21 @@ class AnalyticsController extends Controller
     /**
      * Manually update analytics for today
      * POST /api/analytics/update
+     *
+     * @OA\Post(
+     *     path="/api/analytics/update",
+     *     tags={"Analytics"},
+     *     summary="Manually trigger analytics update for a given date",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=false, @OA\JsonContent(
+     *         @OA\Property(property="date", type="string", format="date", description="Date to update analytics for (defaults to today)")
+     *     )),
+     *     @OA\Response(response=200, description="Analytics updated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="date", type="string", format="date")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function update(Request $request)
     {

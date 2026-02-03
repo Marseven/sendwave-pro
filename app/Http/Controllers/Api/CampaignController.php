@@ -39,6 +39,27 @@ class CampaignController extends Controller
             })
             ->first();
     }
+    /**
+     * @OA\Get(
+     *     path="/api/campaigns",
+     *     tags={"Campaigns"},
+     *     summary="List all campaigns",
+     *     description="Retrieve all campaigns for the authenticated user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of campaigns",
+     *         @OA\JsonContent(type="array", @OA\Items(type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="name", type="string", example="Promo Noel"),
+     *             @OA\Property(property="status", type="string", example="draft"),
+     *             @OA\Property(property="messages_sent", type="integer", example=0),
+     *             @OA\Property(property="delivery_rate", type="number", example=95.5)
+     *         ))
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
     public function index(Request $request)
     {
         $campaigns = Campaign::where('user_id', $request->user()->id)
@@ -48,6 +69,37 @@ class CampaignController extends Controller
         return response()->json($campaigns);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/campaigns",
+     *     tags={"Campaigns"},
+     *     summary="Create a new campaign",
+     *     description="Store a newly created campaign",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Promo Noel"),
+     *             @OA\Property(property="status", type="string", example="draft"),
+     *             @OA\Property(property="group_id", type="integer", example=1),
+     *             @OA\Property(property="messages_sent", type="integer", example=0),
+     *             @OA\Property(property="delivery_rate", type="number", example=0),
+     *             @OA\Property(property="ctr", type="number", example=0),
+     *             @OA\Property(property="sms_provider", type="string", example="airtel"),
+     *             @OA\Property(property="message", type="string", example="Bonjour {prenom}, profitez de nos offres!"),
+     *             @OA\Property(property="scheduled_at", type="string", format="date-time")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Campaign created successfully",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -71,6 +123,29 @@ class CampaignController extends Controller
         return response()->json($campaign, 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/campaigns/{id}",
+     *     tags={"Campaigns"},
+     *     summary="Get a specific campaign",
+     *     description="Retrieve a single campaign by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Campaign details",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found")
+     * )
+     */
     public function show(Request $request, string $id)
     {
         $campaign = Campaign::where('user_id', $request->user()->id)
@@ -79,6 +154,44 @@ class CampaignController extends Controller
         return response()->json($campaign);
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/campaigns/{id}",
+     *     tags={"Campaigns"},
+     *     summary="Update a campaign",
+     *     description="Update an existing campaign by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Promo Noel Updated"),
+     *             @OA\Property(property="status", type="string", example="scheduled"),
+     *             @OA\Property(property="group_id", type="integer", example=1),
+     *             @OA\Property(property="messages_sent", type="integer"),
+     *             @OA\Property(property="delivery_rate", type="number"),
+     *             @OA\Property(property="ctr", type="number"),
+     *             @OA\Property(property="sms_provider", type="string"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="scheduled_at", type="string", format="date-time")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Campaign updated successfully",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function update(Request $request, string $id)
     {
         $campaign = Campaign::where('user_id', $request->user()->id)
@@ -101,6 +214,31 @@ class CampaignController extends Controller
         return response()->json($campaign);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/campaigns/{id}",
+     *     tags={"Campaigns"},
+     *     summary="Delete a campaign",
+     *     description="Remove a campaign by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Campaign deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Campagne supprimee avec succes")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found")
+     * )
+     */
     public function destroy(Request $request, string $id)
     {
         $campaign = Campaign::where('user_id', $request->user()->id)
@@ -112,7 +250,30 @@ class CampaignController extends Controller
     }
 
     /**
-     * Clone an existing campaign
+     * @OA\Post(
+     *     path="/api/campaigns/{id}/clone",
+     *     tags={"Campaigns"},
+     *     summary="Clone a campaign",
+     *     description="Create a copy of an existing campaign with reset counters and draft status",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID to clone",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Campaign cloned successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Campagne clonee avec succes"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found")
+     * )
      */
     public function clone(Request $request, string $id)
     {
@@ -155,7 +316,52 @@ class CampaignController extends Controller
     }
 
     /**
-     * Envoyer une campagne SMS
+     * @OA\Post(
+     *     path="/api/campaigns/{id}/send",
+     *     tags={"Campaigns"},
+     *     summary="Send a campaign",
+     *     description="Send SMS campaign to specified recipients with automatic operator routing",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"recipients", "message"},
+     *             @OA\Property(property="recipients", type="array", @OA\Items(type="string"), example={"+24177123456", "+24166123456"}),
+     *             @OA\Property(property="message", type="string", example="Bonjour, profitez de nos offres!")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Campaign sent successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Campagne envoyee avec succes"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="campaign_id", type="integer"),
+     *                 @OA\Property(property="total", type="integer"),
+     *                 @OA\Property(property="sent", type="integer"),
+     *                 @OA\Property(property="failed", type="integer"),
+     *                 @OA\Property(property="total_cost", type="number"),
+     *                 @OA\Property(property="by_operator", type="object",
+     *                     @OA\Property(property="airtel", type="integer"),
+     *                     @OA\Property(property="moov", type="integer"),
+     *                     @OA\Property(property="unknown", type="integer")
+     *                 ),
+     *                 @OA\Property(property="message_ids", type="array", @OA\Items(type="integer"))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Send error")
+     * )
      */
     public function send(Request $request, string $id)
     {
@@ -291,7 +497,44 @@ class CampaignController extends Controller
     }
 
     /**
-     * Create or update campaign schedule
+     * @OA\Post(
+     *     path="/api/campaigns/{id}/schedule",
+     *     tags={"Campaigns"},
+     *     summary="Create or update campaign schedule",
+     *     description="Set up recurring or one-time schedule for a campaign",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"frequency", "time"},
+     *             @OA\Property(property="frequency", type="string", enum={"once", "daily", "weekly", "monthly"}, example="weekly"),
+     *             @OA\Property(property="day_of_week", type="integer", minimum=1, maximum=7, description="Required for weekly frequency"),
+     *             @OA\Property(property="day_of_month", type="integer", minimum=1, maximum=31, description="Required for monthly frequency"),
+     *             @OA\Property(property="time", type="string", example="08:00"),
+     *             @OA\Property(property="start_date", type="string", format="date"),
+     *             @OA\Property(property="end_date", type="string", format="date"),
+     *             @OA\Property(property="is_active", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Schedule created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Planification creee avec succes"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function storeSchedule(Request $request, string $id)
     {
@@ -335,7 +578,29 @@ class CampaignController extends Controller
     }
 
     /**
-     * Get campaign schedule
+     * @OA\Get(
+     *     path="/api/campaigns/{id}/schedule",
+     *     tags={"Campaigns"},
+     *     summary="Get campaign schedule",
+     *     description="Retrieve the schedule configuration for a campaign",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Schedule details",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign or schedule not found")
+     * )
      */
     public function getSchedule(Request $request, string $id)
     {
@@ -352,7 +617,29 @@ class CampaignController extends Controller
     }
 
     /**
-     * Delete campaign schedule
+     * @OA\Delete(
+     *     path="/api/campaigns/{id}/schedule",
+     *     tags={"Campaigns"},
+     *     summary="Delete campaign schedule",
+     *     description="Remove the schedule configuration for a campaign",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Schedule deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Planification supprimee avec succes")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found")
+     * )
      */
     public function deleteSchedule(Request $request, string $id)
     {
@@ -365,7 +652,45 @@ class CampaignController extends Controller
     }
 
     /**
-     * Create or update campaign variants (A/B testing)
+     * @OA\Post(
+     *     path="/api/campaigns/{id}/variants",
+     *     tags={"Campaigns"},
+     *     summary="Create campaign variants for A/B testing",
+     *     description="Create or replace campaign variants. Percentages must sum to 100.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"variants"},
+     *             @OA\Property(property="variants", type="array", minItems=2, maxItems=5,
+     *                 @OA\Items(type="object",
+     *                     required={"variant_name", "message", "percentage"},
+     *                     @OA\Property(property="variant_name", type="string", example="Variant A"),
+     *                     @OA\Property(property="message", type="string", example="Bonjour!"),
+     *                     @OA\Property(property="percentage", type="integer", example=50)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Variants created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Variantes A/B creees avec succes"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found"),
+     *     @OA\Response(response=422, description="Validation error or percentages do not sum to 100")
+     * )
      */
     public function storeVariants(Request $request, string $id)
     {
@@ -405,7 +730,34 @@ class CampaignController extends Controller
     }
 
     /**
-     * Get campaign variants
+     * @OA\Get(
+     *     path="/api/campaigns/{id}/variants",
+     *     tags={"Campaigns"},
+     *     summary="Get campaign variants",
+     *     description="Retrieve all A/B testing variants for a campaign",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of campaign variants",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object",
+     *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="variant_name", type="string"),
+     *                 @OA\Property(property="message", type="string"),
+     *                 @OA\Property(property="percentage", type="integer")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found")
+     * )
      */
     public function getVariants(Request $request, string $id)
     {
@@ -418,7 +770,29 @@ class CampaignController extends Controller
     }
 
     /**
-     * Delete campaign variants
+     * @OA\Delete(
+     *     path="/api/campaigns/{id}/variants",
+     *     tags={"Campaigns"},
+     *     summary="Delete campaign variants",
+     *     description="Remove all A/B testing variants for a campaign",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Campaign ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Variants deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Variantes supprimees avec succes")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Campaign not found")
+     * )
      */
     public function deleteVariants(Request $request, string $id)
     {

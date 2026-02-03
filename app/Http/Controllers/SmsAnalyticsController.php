@@ -15,7 +15,44 @@ class SmsAnalyticsController extends Controller
     ) {}
 
     /**
-     * Vue d'ensemble des analytics pour la période en cours
+     * @OA\Get(
+     *     path="/api/sms-analytics/overview",
+     *     tags={"SMS Analytics"},
+     *     summary="Get analytics overview",
+     *     description="Vue d'ensemble des analytics pour une période donnée (par défaut la période en cours). Inclut les statistiques globales, par opérateur, par type et par sous-compte.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="period",
+     *         in="query",
+     *         required=false,
+     *         description="Période au format YYYY-MM",
+     *         @OA\Schema(type="string", example="2026-01")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vue d'ensemble des analytics",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="period", type="string", example="2026-01"),
+     *             @OA\Property(property="overview", type="object",
+     *                 @OA\Property(property="total_sms", type="integer", example=500),
+     *                 @OA\Property(property="total_cost", type="number", example=10000),
+     *                 @OA\Property(property="sent", type="integer", example=480),
+     *                 @OA\Property(property="failed", type="integer", example=15),
+     *                 @OA\Property(property="pending", type="integer", example=5),
+     *                 @OA\Property(property="success_rate", type="number", example=96.0)
+     *             ),
+     *             @OA\Property(property="by_operator", type="object"),
+     *             @OA\Property(property="by_type", type="object"),
+     *             @OA\Property(property="by_sub_account", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="daily_trend", type="array", @OA\Items(type="object",
+     *                 @OA\Property(property="date", type="string", format="date", example="2026-01-15"),
+     *                 @OA\Property(property="count", type="integer", example=25),
+     *                 @OA\Property(property="cost", type="number", example=500)
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function overview(Request $request)
     {
@@ -86,7 +123,67 @@ class SmsAnalyticsController extends Controller
     }
 
     /**
-     * Liste des analytics détaillés
+     * @OA\Get(
+     *     path="/api/sms-analytics",
+     *     tags={"SMS Analytics"},
+     *     summary="List detailed analytics",
+     *     description="Liste paginée des analytics SMS détaillés avec filtres optionnels",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Nombre d'éléments par page",
+     *         @OA\Schema(type="integer", default=50, example=50)
+     *     ),
+     *     @OA\Parameter(
+     *         name="period",
+     *         in="query",
+     *         required=false,
+     *         description="Filtrer par période (YYYY-MM)",
+     *         @OA\Schema(type="string", example="2026-01")
+     *     ),
+     *     @OA\Parameter(
+     *         name="operator",
+     *         in="query",
+     *         required=false,
+     *         description="Filtrer par opérateur",
+     *         @OA\Schema(type="string", enum={"airtel", "moov"}, example="airtel")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filtrer par statut",
+     *         @OA\Schema(type="string", enum={"sent", "failed", "pending"}, example="sent")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sub_account_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filtrer par sous-compte",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="message_type",
+     *         in="query",
+     *         required=false,
+     *         description="Filtrer par type de message",
+     *         @OA\Schema(type="string", example="transactional")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste paginée des analytics",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="last_page", type="integer", example=5),
+     *             @OA\Property(property="per_page", type="integer", example=50),
+     *             @OA\Property(property="total", type="integer", example=250)
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -123,7 +220,29 @@ class SmsAnalyticsController extends Controller
     }
 
     /**
-     * Liste des périodes disponibles
+     * @OA\Get(
+     *     path="/api/sms-analytics/periods",
+     *     tags={"SMS Analytics"},
+     *     summary="List available periods",
+     *     description="Liste des périodes disponibles avec statistiques agrégées pour chaque période",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des périodes",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="periods", type="array",
+     *                 @OA\Items(type="object",
+     *                     @OA\Property(property="period_key", type="string", example="2026-01"),
+     *                     @OA\Property(property="formatted", type="string", example="janvier 2026"),
+     *                     @OA\Property(property="total_sms", type="integer", example=500),
+     *                     @OA\Property(property="total_cost", type="number", example=10000),
+     *                     @OA\Property(property="is_closed", type="boolean", example=false)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function periods(Request $request)
     {
@@ -153,7 +272,23 @@ class SmsAnalyticsController extends Controller
     }
 
     /**
-     * Liste des clôtures de période
+     * @OA\Get(
+     *     path="/api/sms-analytics/closures",
+     *     tags={"SMS Analytics"},
+     *     summary="List period closures",
+     *     description="Liste des clôtures de période mensuelles",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des clôtures",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="closures", type="array",
+     *                 @OA\Items(type="object")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function closures(Request $request)
     {
@@ -167,7 +302,29 @@ class SmsAnalyticsController extends Controller
     }
 
     /**
-     * Détail d'une clôture
+     * @OA\Get(
+     *     path="/api/sms-analytics/closures/{periodKey}",
+     *     tags={"SMS Analytics"},
+     *     summary="Get closure detail",
+     *     description="Détail d'une clôture de période spécifique",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="periodKey",
+     *         in="path",
+     *         required=true,
+     *         description="Clé de la période au format YYYY-MM",
+     *         @OA\Schema(type="string", example="2026-01")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détail de la clôture",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="closure", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Clôture non trouvée")
+     * )
      */
     public function closureDetail(Request $request, string $periodKey)
     {
@@ -181,7 +338,29 @@ class SmsAnalyticsController extends Controller
     }
 
     /**
-     * Générer un rapport pour une période
+     * @OA\Post(
+     *     path="/api/sms-analytics/report",
+     *     tags={"SMS Analytics"},
+     *     summary="Generate period report",
+     *     description="Générer un rapport détaillé pour une période spécifique",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"period"},
+     *             @OA\Property(property="period", type="string", example="2026-01", description="Période au format YYYY-MM")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Rapport généré",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="report", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function generateReport(Request $request)
     {
@@ -196,7 +375,29 @@ class SmsAnalyticsController extends Controller
     }
 
     /**
-     * Exporter les analytics en CSV
+     * @OA\Get(
+     *     path="/api/sms-analytics/export",
+     *     tags={"SMS Analytics"},
+     *     summary="Export analytics as CSV",
+     *     description="Exporter les analytics en fichier CSV pour une période donnée",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="period",
+     *         in="query",
+     *         required=false,
+     *         description="Période au format YYYY-MM (par défaut la période en cours)",
+     *         @OA\Schema(type="string", example="2026-01")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Fichier CSV téléchargé",
+     *         @OA\MediaType(
+     *             mediaType="text/csv",
+     *             @OA\Schema(type="string", format="binary")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function export(Request $request)
     {

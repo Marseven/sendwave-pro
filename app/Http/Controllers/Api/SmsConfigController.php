@@ -11,6 +11,18 @@ class SmsConfigController extends Controller
 {
     /**
      * Obtenir toutes les configurations SMS
+     *
+     * @OA\Get(
+     *     path="/api/sms-configs",
+     *     tags={"SMS Config"},
+     *     summary="Get all SMS configurations",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="List of SMS configurations", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index()
     {
@@ -30,6 +42,20 @@ class SmsConfigController extends Controller
 
     /**
      * Obtenir une configuration spécifique
+     *
+     * @OA\Get(
+     *     path="/api/sms-configs/{provider}",
+     *     tags={"SMS Config"},
+     *     summary="Get a specific SMS provider configuration",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
+     *     @OA\Response(response=200, description="SMS configuration details", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=404, description="Configuration not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function show(string $provider)
     {
@@ -75,6 +101,28 @@ class SmsConfigController extends Controller
 
     /**
      * Mettre à jour une configuration
+     *
+     * @OA\Put(
+     *     path="/api/sms-configs/{provider}",
+     *     tags={"SMS Config"},
+     *     summary="Update an SMS provider configuration",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         @OA\Property(property="api_url", type="string"),
+     *         @OA\Property(property="port", type="integer"),
+     *         @OA\Property(property="username", type="string"),
+     *         @OA\Property(property="password", type="string"),
+     *         @OA\Property(property="origin_addr", type="string"),
+     *         @OA\Property(property="cost_per_sms", type="integer"),
+     *         @OA\Property(property="is_active", type="boolean")
+     *     )),
+     *     @OA\Response(response=200, description="Configuration updated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function update(Request $request, string $provider)
     {
@@ -112,6 +160,27 @@ class SmsConfigController extends Controller
 
     /**
      * Tester une configuration
+     *
+     * @OA\Post(
+     *     path="/api/sms-configs/{provider}/test",
+     *     tags={"SMS Config"},
+     *     summary="Send a test SMS using a specific provider configuration",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"phone_number"},
+     *         @OA\Property(property="phone_number", type="string", example="24177123456"),
+     *         @OA\Property(property="message", type="string", example="Test message")
+     *     )),
+     *     @OA\Response(response=200, description="Test successful", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=400, description="Test failed or configuration disabled"),
+     *     @OA\Response(response=404, description="Configuration not found"),
+     *     @OA\Response(response=500, description="Server error during test"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function test(Request $request, string $provider)
     {
@@ -170,6 +239,20 @@ class SmsConfigController extends Controller
 
     /**
      * Activer/Désactiver une configuration
+     *
+     * @OA\Post(
+     *     path="/api/sms-configs/{provider}/toggle",
+     *     tags={"SMS Config"},
+     *     summary="Toggle activation of an SMS provider configuration",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
+     *     @OA\Response(response=200, description="Configuration toggled", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=404, description="Configuration not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function toggle(Request $request, string $provider)
     {
@@ -233,6 +316,19 @@ class SmsConfigController extends Controller
 
     /**
      * Réinitialiser les configurations depuis .env
+     *
+     * @OA\Post(
+     *     path="/api/sms-configs/{provider}/reset",
+     *     tags={"SMS Config"},
+     *     summary="Reset SMS provider configuration to default .env values",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
+     *     @OA\Response(response=200, description="Configuration reset to defaults", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function reset(string $provider)
     {

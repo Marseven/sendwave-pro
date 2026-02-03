@@ -10,6 +10,23 @@ class AuditLogController extends Controller
 {
     /**
      * List audit logs
+     *
+     * @OA\Get(
+     *     path="/api/audit-logs",
+     *     tags={"Audit Logs"},
+     *     summary="List audit logs with optional filters",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="action", in="query", required=false, @OA\Schema(type="string"), description="Filter by action type"),
+     *     @OA\Parameter(name="start_date", in="query", required=false, @OA\Schema(type="string", format="date-time"), description="Filter from date"),
+     *     @OA\Parameter(name="end_date", in="query", required=false, @OA\Schema(type="string", format="date-time"), description="Filter to date"),
+     *     @OA\Parameter(name="model_type", in="query", required=false, @OA\Schema(type="string"), description="Filter by model type"),
+     *     @OA\Parameter(name="model_id", in="query", required=false, @OA\Schema(type="integer"), description="Filter by model ID"),
+     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Paginated list of audit logs", @OA\JsonContent(
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -43,6 +60,19 @@ class AuditLogController extends Controller
 
     /**
      * Get specific audit log
+     *
+     * @OA\Get(
+     *     path="/api/audit-logs/{id}",
+     *     tags={"Audit Logs"},
+     *     summary="Get a specific audit log entry",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Audit log details", @OA\JsonContent(
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=404, description="Audit log not found"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function show(Request $request, int $id)
     {
@@ -55,6 +85,17 @@ class AuditLogController extends Controller
 
     /**
      * Get available actions
+     *
+     * @OA\Get(
+     *     path="/api/audit-logs/actions",
+     *     tags={"Audit Logs"},
+     *     summary="Get list of distinct audit log action types",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="List of available action types", @OA\JsonContent(
+     *         @OA\Property(property="data", type="array", @OA\Items(type="string"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function actions(Request $request)
     {

@@ -14,6 +14,21 @@ class AccountController extends Controller
 {
     /**
      * Get list of accounts
+     *
+     * @OA\Get(
+     *     path="/api/accounts",
+     *     tags={"Accounts"},
+     *     summary="List all accounts (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string"), description="Search by name, email or company ID"),
+     *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string"), description="Filter by status"),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden")
+     * )
      */
     public function index(Request $request)
     {
@@ -54,6 +69,40 @@ class AccountController extends Controller
 
     /**
      * Create a new account
+     *
+     * @OA\Post(
+     *     path="/api/accounts",
+     *     tags={"Accounts"},
+     *     summary="Create a new account with admin user (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"name", "email", "admin_name", "admin_email", "admin_password"},
+     *         @OA\Property(property="name", type="string"),
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="phone", type="string"),
+     *         @OA\Property(property="company_id", type="string"),
+     *         @OA\Property(property="address", type="string"),
+     *         @OA\Property(property="city", type="string"),
+     *         @OA\Property(property="country", type="string", maxLength=2),
+     *         @OA\Property(property="sms_credits", type="number"),
+     *         @OA\Property(property="monthly_budget", type="number"),
+     *         @OA\Property(property="budget_alert_threshold", type="number"),
+     *         @OA\Property(property="block_on_budget_exceeded", type="boolean"),
+     *         @OA\Property(property="notes", type="string"),
+     *         @OA\Property(property="admin_name", type="string"),
+     *         @OA\Property(property="admin_email", type="string", format="email"),
+     *         @OA\Property(property="admin_password", type="string", minLength=8)
+     *     )),
+     *     @OA\Response(response=201, description="Account created", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function store(Request $request)
     {
@@ -136,6 +185,21 @@ class AccountController extends Controller
 
     /**
      * Get a specific account
+     *
+     * @OA\Get(
+     *     path="/api/accounts/{id}",
+     *     tags={"Accounts"},
+     *     summary="Get a specific account by ID",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Account not found")
+     * )
      */
     public function show(Request $request, $id)
     {
@@ -170,6 +234,36 @@ class AccountController extends Controller
 
     /**
      * Update an account
+     *
+     * @OA\Put(
+     *     path="/api/accounts/{id}",
+     *     tags={"Accounts"},
+     *     summary="Update an existing account (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         @OA\Property(property="name", type="string"),
+     *         @OA\Property(property="email", type="string", format="email"),
+     *         @OA\Property(property="phone", type="string"),
+     *         @OA\Property(property="company_id", type="string"),
+     *         @OA\Property(property="address", type="string"),
+     *         @OA\Property(property="city", type="string"),
+     *         @OA\Property(property="country", type="string", maxLength=2),
+     *         @OA\Property(property="monthly_budget", type="number"),
+     *         @OA\Property(property="budget_alert_threshold", type="number"),
+     *         @OA\Property(property="block_on_budget_exceeded", type="boolean"),
+     *         @OA\Property(property="notes", type="string")
+     *     )),
+     *     @OA\Response(response=200, description="Account updated", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Account not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function update(Request $request, $id)
     {
@@ -216,6 +310,22 @@ class AccountController extends Controller
 
     /**
      * Delete an account
+     *
+     * @OA\Delete(
+     *     path="/api/accounts/{id}",
+     *     tags={"Accounts"},
+     *     summary="Delete an account (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Account deleted", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=400, description="Account has users"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Account not found")
+     * )
      */
     public function destroy(Request $request, $id)
     {
@@ -255,6 +365,30 @@ class AccountController extends Controller
 
     /**
      * Add credits to an account
+     *
+     * @OA\Post(
+     *     path="/api/accounts/{id}/credits",
+     *     tags={"Accounts"},
+     *     summary="Add SMS credits to an account (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"amount"},
+     *         @OA\Property(property="amount", type="number", minimum=0.01),
+     *         @OA\Property(property="note", type="string", maxLength=500)
+     *     )),
+     *     @OA\Response(response=200, description="Credits added", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object",
+     *             @OA\Property(property="new_balance", type="number")
+     *         )
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Account not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function addCredits(Request $request, $id)
     {
@@ -294,6 +428,22 @@ class AccountController extends Controller
 
     /**
      * Suspend an account
+     *
+     * @OA\Post(
+     *     path="/api/accounts/{id}/suspend",
+     *     tags={"Accounts"},
+     *     summary="Suspend an account and all its users (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Account suspended", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Account not found")
+     * )
      */
     public function suspend(Request $request, $id)
     {
@@ -329,6 +479,22 @@ class AccountController extends Controller
 
     /**
      * Activate an account
+     *
+     * @OA\Post(
+     *     path="/api/accounts/{id}/activate",
+     *     tags={"Accounts"},
+     *     summary="Activate an account and all its users (SuperAdmin only)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Account activated", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Account not found")
+     * )
      */
     public function activate(Request $request, $id)
     {
@@ -364,6 +530,32 @@ class AccountController extends Controller
 
     /**
      * Get account statistics
+     *
+     * @OA\Get(
+     *     path="/api/accounts/{id}/stats",
+     *     tags={"Accounts"},
+     *     summary="Get statistics for an account",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="object",
+     *             @OA\Property(property="sms_credits", type="number"),
+     *             @OA\Property(property="monthly_budget", type="number"),
+     *             @OA\Property(property="budget_used", type="number"),
+     *             @OA\Property(property="budget_usage_percent", type="number"),
+     *             @OA\Property(property="sms_sent_total", type="integer"),
+     *             @OA\Property(property="sms_sent_month", type="integer"),
+     *             @OA\Property(property="campaigns_count", type="integer"),
+     *             @OA\Property(property="contacts_count", type="integer"),
+     *             @OA\Property(property="users_count", type="integer"),
+     *             @OA\Property(property="last_activity_at", type="string", format="date-time")
+     *         )
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Account not found")
+     * )
      */
     public function stats(Request $request, $id)
     {
@@ -409,6 +601,21 @@ class AccountController extends Controller
 
     /**
      * Get users of an account
+     *
+     * @OA\Get(
+     *     path="/api/accounts/{id}/users",
+     *     tags={"Accounts"},
+     *     summary="Get all users belonging to an account",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="success", type="boolean", example=true),
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Forbidden"),
+     *     @OA\Response(response=404, description="Account not found")
+     * )
      */
     public function users(Request $request, $id)
     {

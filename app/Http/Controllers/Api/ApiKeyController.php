@@ -11,6 +11,18 @@ class ApiKeyController extends Controller
 {
     /**
      * Liste des clés API de l'utilisateur
+     *
+     * @OA\Get(
+     *     path="/api/api-keys",
+     *     tags={"API Keys"},
+     *     summary="List all API keys for the authenticated user",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -27,6 +39,26 @@ class ApiKeyController extends Controller
 
     /**
      * Créer une nouvelle clé API
+     *
+     * @OA\Post(
+     *     path="/api/api-keys",
+     *     tags={"API Keys"},
+     *     summary="Create a new API key",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         required={"name"},
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="type", type="string", enum={"production","test"}),
+     *         @OA\Property(property="permissions", type="array", @OA\Items(type="string", enum={"send_sms","view_history","manage_contacts","view_balance"})),
+     *         @OA\Property(property="rate_limit", type="integer", minimum=1, maximum=10000)
+     *     )),
+     *     @OA\Response(response=201, description="API key created", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function store(Request $request)
     {
@@ -60,6 +92,20 @@ class ApiKeyController extends Controller
 
     /**
      * Afficher une clé API
+     *
+     * @OA\Get(
+     *     path="/api/api-keys/{id}",
+     *     tags={"API Keys"},
+     *     summary="Get a specific API key",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Success", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="API key not found")
+     * )
      */
     public function show(Request $request, string $id)
     {
@@ -74,6 +120,26 @@ class ApiKeyController extends Controller
 
     /**
      * Mettre à jour une clé API
+     *
+     * @OA\Put(
+     *     path="/api/api-keys/{id}",
+     *     tags={"API Keys"},
+     *     summary="Update an API key",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\RequestBody(required=true, @OA\JsonContent(
+     *         @OA\Property(property="name", type="string", maxLength=255),
+     *         @OA\Property(property="permissions", type="array", @OA\Items(type="string", enum={"send_sms","view_history","manage_contacts","view_balance"})),
+     *         @OA\Property(property="rate_limit", type="integer", minimum=1, maximum=10000)
+     *     )),
+     *     @OA\Response(response=200, description="API key updated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="API key not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      */
     public function update(Request $request, string $id)
     {
@@ -97,6 +163,20 @@ class ApiKeyController extends Controller
 
     /**
      * Révoquer une clé API
+     *
+     * @OA\Post(
+     *     path="/api/api-keys/{id}/revoke",
+     *     tags={"API Keys"},
+     *     summary="Revoke an API key",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="API key revoked", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="API key not found")
+     * )
      */
     public function revoke(Request $request, string $id)
     {
@@ -113,6 +193,19 @@ class ApiKeyController extends Controller
 
     /**
      * Supprimer une clé API
+     *
+     * @OA\Delete(
+     *     path="/api/api-keys/{id}",
+     *     tags={"API Keys"},
+     *     summary="Delete an API key",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="API key deleted", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="API key not found")
+     * )
      */
     public function destroy(Request $request, string $id)
     {
@@ -128,6 +221,20 @@ class ApiKeyController extends Controller
 
     /**
      * Régénérer une clé API
+     *
+     * @OA\Post(
+     *     path="/api/api-keys/{id}/regenerate",
+     *     tags={"API Keys"},
+     *     summary="Regenerate an API key with a new secret",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="API key regenerated", @OA\JsonContent(
+     *         @OA\Property(property="message", type="string"),
+     *         @OA\Property(property="data", type="object")
+     *     )),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="API key not found")
+     * )
      */
     public function regenerate(Request $request, string $id)
     {
