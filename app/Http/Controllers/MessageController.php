@@ -236,6 +236,14 @@ class MessageController extends Controller
             $message = $validated['message'];
             $userId = $request->user()->id;
 
+            // Extract API key context for analytics traceability
+            $apiKey = $request->attributes->get('api_key');
+            $analyticsContext = [
+                'message_type' => $request->input('type', 'transactional'),
+                'api_key_id' => $apiKey?->id,
+                'sub_account_id' => $apiKey?->sub_account_id,
+            ];
+
             // Resolve all phone numbers from the three sources
             $phoneNumbers = collect($validated['recipients'] ?? []);
 
@@ -414,9 +422,7 @@ class MessageController extends Controller
                 ]);
 
                 // Enregistrer dans sms_analytics pour la comptabilité
-                $this->analyticsRecordService->recordSms($messageRecord, [
-                    'message_type' => $request->input('type', 'transactional'),
-                ]);
+                $this->analyticsRecordService->recordSms($messageRecord, $analyticsContext);
 
                 if ($result['success']) {
                     // Debit credits
@@ -506,9 +512,7 @@ class MessageController extends Controller
                             'provider_response' => $detail,
                         ]);
 
-                        $this->analyticsRecordService->recordSms($messageRecord, [
-                            'message_type' => $request->input('type', 'transactional'),
-                        ]);
+                        $this->analyticsRecordService->recordSms($messageRecord, $analyticsContext);
 
                         $messageIds[] = $messageRecord->id;
                         if ($detail['success']) {
@@ -546,9 +550,7 @@ class MessageController extends Controller
                             'provider_response' => $detail,
                         ]);
 
-                        $this->analyticsRecordService->recordSms($messageRecord, [
-                            'message_type' => $request->input('type', 'transactional'),
-                        ]);
+                        $this->analyticsRecordService->recordSms($messageRecord, $analyticsContext);
 
                         $messageIds[] = $messageRecord->id;
                         if ($detail['success']) {
@@ -688,6 +690,14 @@ class MessageController extends Controller
             $reference = $validated['reference'] ?? null;
             $userId = $request->user()->id;
 
+            // Extract API key context for analytics traceability
+            $apiKey = $request->attributes->get('api_key');
+            $otpAnalyticsContext = [
+                'message_type' => 'otp',
+                'api_key_id' => $apiKey?->id,
+                'sub_account_id' => $apiKey?->sub_account_id,
+            ];
+
             // Check blacklist
             $blacklistFilter = $this->stopWordService->filterBlacklisted($userId, [$recipient]);
             if (empty($blacklistFilter['allowed'])) {
@@ -771,9 +781,7 @@ class MessageController extends Controller
             ]);
 
             // Record analytics
-            $this->analyticsRecordService->recordSms($messageRecord, [
-                'message_type' => 'otp',
-            ]);
+            $this->analyticsRecordService->recordSms($messageRecord, $otpAnalyticsContext);
 
             if ($result['success']) {
                 // Debit credits

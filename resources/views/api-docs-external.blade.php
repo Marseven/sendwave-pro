@@ -52,6 +52,12 @@
             border-bottom-color: #59b0ff;
             color: #59b0ff;
         }
+        .admin-only-section { display: none; }
+        .admin-only-section.revealed { display: block !important; }
+        a.admin-only-section { display: none; }
+        a.admin-only-section.revealed { display: flex !important; }
+        .admin-login-modal { display: none; position: fixed; inset: 0; z-index: 100; }
+        .admin-login-modal.open { display: flex; }
         @media (max-width: 1023px) {
             .sidebar-overlay { display: none; }
             .sidebar-overlay.open { display: block; }
@@ -94,15 +100,19 @@
                 <span class="inline-flex items-center justify-center w-11 h-5 text-[10px] font-bold rounded bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">POST</span>
                 Send SMS
             </a>
-            <a href="#analyze" class="sidebar-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
+            <a href="#contacts" class="sidebar-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
+                <span class="inline-flex items-center justify-center w-11 h-5 text-[10px] font-bold rounded bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400">CRUD</span>
+                Contacts
+            </a>
+            <a href="#analyze" class="sidebar-link admin-only-section flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
                 <span class="inline-flex items-center justify-center w-11 h-5 text-[10px] font-bold rounded bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">POST</span>
                 Analyze
             </a>
-            <a href="#history" class="sidebar-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
+            <a href="#history" class="sidebar-link admin-only-section flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
                 <span class="inline-flex items-center justify-center w-11 h-5 text-[10px] font-bold rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400">GET</span>
                 History
             </a>
-            <a href="#stats" class="sidebar-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
+            <a href="#stats" class="sidebar-link admin-only-section flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
                 <span class="inline-flex items-center justify-center w-11 h-5 text-[10px] font-bold rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400">GET</span>
                 Stats
             </a>
@@ -115,15 +125,15 @@
                 <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                 Rate Limits
             </a>
-            <a href="#ip-whitelisting" class="sidebar-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
+            <a href="#ip-whitelisting" class="sidebar-link admin-only-section flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
                 <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" /></svg>
                 IP Whitelisting
             </a>
-            <a href="#code-examples" class="sidebar-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
+            <a href="#code-examples" class="sidebar-link admin-only-section flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
                 <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" /></svg>
                 Exemples de code
             </a>
-            <a href="#permissions" class="sidebar-link flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
+            <a href="#permissions" class="sidebar-link admin-only-section flex items-center gap-3 px-3 py-2 text-sm rounded-lg border-l-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
                 <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" /></svg>
                 Permissions
             </a>
@@ -144,6 +154,9 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-400">v3.1</span>
                 </div>
                 <div class="flex items-center gap-2">
+                    <!-- Admin Login/Logout -->
+                    <button onclick="openAdminLogin()" id="adminLoginBtn" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-colors">Se connecter</button>
+                    <button onclick="adminLogout()" id="adminLogoutBtn" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors" style="display:none;">Deconnexion</button>
                     <!-- Dark Mode Toggle -->
                     <button onclick="toggleDarkMode()" id="darkModeBtn" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Basculer le mode sombre">
                         <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>
@@ -528,8 +541,159 @@
                 </div>
             </section>
 
+            <!-- Endpoint: Contacts -->
+            <section id="contacts" class="mb-16">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Contacts</h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Gerer vos contacts via l'API : lister, creer, consulter, modifier et supprimer des contacts.
+                </p>
+
+                <!-- GET /api/contacts -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400">GET</span>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white font-mono">/api/contacts</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Lister tous vos contacts avec pagination. Filtrable par nom, telephone ou groupe.
+                    </p>
+                    <div class="overflow-x-auto mb-4">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 dark:border-gray-800">
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Parametre</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Type</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                <tr>
+                                    <td class="py-3 px-4 font-mono text-brand-600 dark:text-brand-400">page</td>
+                                    <td class="py-3 px-4 text-gray-500 dark:text-gray-400">integer</td>
+                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">Numero de page (defaut: 1)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-mono text-brand-600 dark:text-brand-400">per_page</td>
+                                    <td class="py-3 px-4 text-gray-500 dark:text-gray-400">integer</td>
+                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">Resultats par page (defaut: 20, max: 100)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-mono text-brand-600 dark:text-brand-400">search</td>
+                                    <td class="py-3 px-4 text-gray-500 dark:text-gray-400">string</td>
+                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">Rechercher par nom, prenom ou telephone</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- POST /api/contacts -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">POST</span>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white font-mono">/api/contacts</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Creer un nouveau contact.
+                    </p>
+                    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden mb-4">
+                        <div class="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">application/json</span>
+                            <button onclick="copyToClipboard(document.getElementById('contacts-create-body').textContent, this)" class="copy-btn px-3 py-1 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">Copier</button>
+                        </div>
+                        <pre class="p-5 bg-gray-950 overflow-x-auto"><code id="contacts-create-body" class="text-sm text-gray-300 font-mono">{
+  "first_name": "Jean",
+  "last_name": "Dupont",
+  "phone": "+24177123456",
+  "email": "jean@example.com",
+  "custom_fields": {
+    "ville": "Libreville",
+    "categorie": "VIP"
+  }
+}</code></pre>
+                    </div>
+                    <div class="overflow-x-auto mb-4">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 dark:border-gray-800">
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Parametre</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Type</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Requis</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                                <tr>
+                                    <td class="py-3 px-4 font-mono text-brand-600 dark:text-brand-400">first_name</td>
+                                    <td class="py-3 px-4 text-gray-500 dark:text-gray-400">string</td>
+                                    <td class="py-3 px-4"><span class="text-green-600 dark:text-green-400 font-medium">Oui</span></td>
+                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">Prenom du contact</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-mono text-brand-600 dark:text-brand-400">last_name</td>
+                                    <td class="py-3 px-4 text-gray-500 dark:text-gray-400">string</td>
+                                    <td class="py-3 px-4"><span class="text-green-600 dark:text-green-400 font-medium">Oui</span></td>
+                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">Nom du contact</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-mono text-brand-600 dark:text-brand-400">phone</td>
+                                    <td class="py-3 px-4 text-gray-500 dark:text-gray-400">string</td>
+                                    <td class="py-3 px-4"><span class="text-green-600 dark:text-green-400 font-medium">Oui</span></td>
+                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">Numero au format E.164 (+241...)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-mono text-brand-600 dark:text-brand-400">email</td>
+                                    <td class="py-3 px-4 text-gray-500 dark:text-gray-400">string</td>
+                                    <td class="py-3 px-4"><span class="text-gray-400">Non</span></td>
+                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">Adresse email</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-mono text-brand-600 dark:text-brand-400">custom_fields</td>
+                                    <td class="py-3 px-4 text-gray-500 dark:text-gray-400">object</td>
+                                    <td class="py-3 px-4"><span class="text-gray-400">Non</span></td>
+                                    <td class="py-3 px-4 text-gray-600 dark:text-gray-400">Champs personnalises (cle/valeur)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- GET /api/contacts/{id} -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400">GET</span>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white font-mono">/api/contacts/{id}</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Recuperer les details d'un contact par son ID.
+                    </p>
+                </div>
+
+                <!-- PUT /api/contacts/{id} -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400">PUT</span>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white font-mono">/api/contacts/{id}</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Mettre a jour un contact existant. Memes parametres que la creation (tous optionnels).
+                    </p>
+                </div>
+
+                <!-- DELETE /api/contacts/{id} -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400">DELETE</span>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white font-mono">/api/contacts/{id}</h3>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        Supprimer un contact par son ID.
+                    </p>
+                </div>
+            </section>
+
             <!-- Endpoint: Analyze -->
-            <section id="analyze" class="mb-16">
+            <section id="analyze" class="mb-16 admin-only-section">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">POST</span>
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white font-mono">/api/messages/analyze</h2>
@@ -572,7 +736,7 @@
             </section>
 
             <!-- Endpoint: History -->
-            <section id="history" class="mb-16">
+            <section id="history" class="mb-16 admin-only-section">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400">GET</span>
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white font-mono">/api/messages/history</h2>
@@ -640,7 +804,7 @@
             </section>
 
             <!-- Endpoint: Stats -->
-            <section id="stats" class="mb-16">
+            <section id="stats" class="mb-16 admin-only-section">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400">GET</span>
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white font-mono">/api/messages/stats</h2>
@@ -795,7 +959,7 @@
             </section>
 
             <!-- IP Whitelisting -->
-            <section id="ip-whitelisting" class="mb-16">
+            <section id="ip-whitelisting" class="mb-16 admin-only-section">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">IP Whitelisting</h2>
                 <p class="text-gray-600 dark:text-gray-400 mb-6">
                     Pour renforcer la securite, vous pouvez configurer une liste blanche d'adresses IP autorisees pour chaque cle API. Lorsque cette fonctionnalite est activee, seules les requetes provenant des adresses IP autorisees seront acceptees.
@@ -835,7 +999,7 @@
             </section>
 
             <!-- Code Examples -->
-            <section id="code-examples" class="mb-16">
+            <section id="code-examples" class="mb-16 admin-only-section">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Exemples de code</h2>
                 <p class="text-gray-600 dark:text-gray-400 mb-6">
                     Exemples d'integration pour l'envoi d'un SMS OTP dans differents langages de programmation.
@@ -964,7 +1128,7 @@ else:
             </section>
 
             <!-- Permissions -->
-            <section id="permissions" class="mb-16">
+            <section id="permissions" class="mb-16 admin-only-section">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Permissions des cles API</h2>
                 <p class="text-gray-600 dark:text-gray-400 mb-6">
                     Chaque cle API est associee a un sous-compte avec des permissions specifiques. Les permissions determinent les endpoints accessibles.
@@ -1037,6 +1201,30 @@ else:
                 </div>
             </div>
         </footer>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="admin-login-modal items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 w-full max-w-md mx-4 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Connexion Super-Admin</h3>
+                <button onclick="closeAdminLogin()" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                    <input type="email" id="adminEmail" required class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="votre@email.com" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mot de passe</label>
+                    <input type="password" id="adminPassword" required class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="Mot de passe" />
+                </div>
+                <p id="adminLoginError" class="text-sm text-red-600 dark:text-red-400 hidden"></p>
+                <button type="submit" id="adminLoginSubmit" class="w-full px-4 py-2.5 bg-brand-600 text-white rounded-lg font-medium text-sm hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Se connecter</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -1154,6 +1342,89 @@ else:
                 }
             });
         }
+
+        // Admin auth
+        function openAdminLogin() {
+            document.getElementById('adminLoginModal').classList.add('open');
+            document.getElementById('adminEmail').focus();
+        }
+
+        function closeAdminLogin() {
+            document.getElementById('adminLoginModal').classList.remove('open');
+            document.getElementById('adminLoginError').classList.add('hidden');
+            document.getElementById('adminEmail').value = '';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorEl = document.getElementById('adminLoginError');
+            const submitBtn = document.getElementById('adminLoginSubmit');
+
+            errorEl.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Connexion...';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || 'Identifiants incorrects');
+                }
+
+                const user = data.data?.user || data.user;
+                if (!user || user.role !== 'super_admin') {
+                    throw new Error('Acces reserve aux Super-Administrateurs');
+                }
+
+                revealAllSections();
+                closeAdminLogin();
+                document.getElementById('adminLoginBtn').style.display = 'none';
+                document.getElementById('adminLogoutBtn').style.display = 'inline-flex';
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Se connecter';
+            }
+        }
+
+        function revealAllSections() {
+            document.querySelectorAll('.admin-only-section').forEach(el => {
+                el.classList.add('revealed');
+            });
+        }
+
+        function hideAllSections() {
+            document.querySelectorAll('.admin-only-section').forEach(el => {
+                el.classList.remove('revealed');
+            });
+        }
+
+        function adminLogout() {
+            hideAllSections();
+            document.getElementById('adminLoginBtn').style.display = 'inline-flex';
+            document.getElementById('adminLogoutBtn').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeAdminLogin();
+        });
+
+        // Close modal on backdrop click
+        document.getElementById('adminLoginModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAdminLogin();
+        });
     </script>
 </body>
 </html>

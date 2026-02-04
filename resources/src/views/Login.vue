@@ -30,7 +30,7 @@
                 id="email"
                 v-model="formData.email"
                 type="email"
-                placeholder="admin@jobs-sms.com"
+                placeholder="votre@email.com"
                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 required
               />
@@ -46,7 +46,7 @@
                   id="password"
                   v-model="formData.password"
                   :type="showPassword ? 'text' : 'password'"
-                  placeholder="password123"
+                  placeholder="Mot de passe"
                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 />
@@ -77,15 +77,6 @@
             </button>
           </form>
 
-          <div class="mt-6 p-4 bg-muted rounded-lg">
-            <p class="text-sm text-muted-foreground mb-2">
-              <strong>Compte de démonstration :</strong>
-            </p>
-            <p class="text-sm">
-              Email: admin@jobs-sms.com<br />
-              Mot de passe: password123
-            </p>
-          </div>
         </div>
       </div>
     </div>
@@ -104,8 +95,8 @@ const showPassword = ref(false)
 const isLoading = ref(false)
 
 const formData = reactive({
-  email: 'admin@jobs-sms.com',
-  password: 'password123'
+  email: '',
+  password: ''
 })
 
 const errors = reactive({

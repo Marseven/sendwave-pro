@@ -22,10 +22,10 @@ class UserSeeder extends Seeder
 
         // Create SuperAdmin user
         User::firstOrCreate(
-            ['email' => 'admin@jobs-sms.com'],
+            ['email' => 'admin@admin.com'],
             [
                 'name' => 'Hervé Ndjibi',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'role' => UserRole::SUPER_ADMIN->value,
                 'permissions' => UserRole::SUPER_ADMIN->defaultPermissions(),
                 'status' => 'active',
@@ -33,6 +33,6 @@ class UserSeeder extends Seeder
             ]
         );
 
-        $this->command->info('SuperAdmin user created: admin@jobs-sms.com');
+        $this->command->info('SuperAdmin user created: admin@admin.com');
     }
 }
