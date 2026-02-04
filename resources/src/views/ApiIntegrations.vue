@@ -71,7 +71,11 @@
                       Copier
                     </button>
                   </div>
-                  <div class="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+                  <div class="mt-2 flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                    <span v-if="apiKey.sub_account_name" class="inline-flex items-center gap-1">
+                      <UserIcon class="w-3 h-3" />
+                      {{ apiKey.sub_account_name }}
+                    </span>
                     <span>Créée le {{ formatDate(apiKey.created_at) }}</span>
                     <span v-if="apiKey.last_used_at">Dernière utilisation: {{ formatDate(apiKey.last_used_at) }}</span>
                     <span>Limite: {{ apiKey.rate_limit }} req/min</span>
@@ -83,6 +87,16 @@
                       class="px-2 py-0.5 text-xs rounded bg-primary/10 text-primary"
                     >
                       {{ permissionLabels[perm] || perm }}
+                    </span>
+                  </div>
+                  <div v-if="apiKey.allowed_ips && apiKey.allowed_ips.length > 0" class="mt-2 flex flex-wrap gap-1">
+                    <span class="text-xs text-muted-foreground mr-1">IPs:</span>
+                    <span
+                      v-for="ip in apiKey.allowed_ips"
+                      :key="ip"
+                      class="px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 font-mono"
+                    >
+                      {{ ip }}
                     </span>
                   </div>
                 </div>
@@ -194,7 +208,7 @@
           </button>
         </div>
 
-        <form @submit.prevent="createKey" class="space-y-4">
+        <form @submit.prevent="createKey" class="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           <div class="space-y-2">
             <label class="text-sm font-medium">Nom de la clé *</label>
             <input
@@ -204,6 +218,23 @@
               required
               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             />
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Sous-compte rattaché *</label>
+            <select
+              v-model.number="createForm.sub_account_id"
+              required
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="" disabled>Sélectionner un sous-compte</option>
+              <option v-for="account in subAccounts" :key="account.id" :value="account.id">
+                {{ account.name }} ({{ account.status === 'active' ? 'Actif' : 'Inactif' }})
+              </option>
+            </select>
+            <p v-if="subAccounts.length === 0" class="text-xs text-destructive">
+              Aucun sous-compte disponible. Créez d'abord un sous-compte.
+            </p>
           </div>
 
           <div class="space-y-2">
@@ -243,6 +274,37 @@
             />
           </div>
 
+          <div class="space-y-2">
+            <label class="text-sm font-medium">IPs autorisées (optionnel)</label>
+            <p class="text-xs text-muted-foreground">Restreignez l'accès à des adresses IP spécifiques. Laissez vide pour tout autoriser.</p>
+            <div class="flex gap-2">
+              <input
+                v-model="ipInput"
+                type="text"
+                placeholder="Ex: 192.168.1.1"
+                @keydown.enter.prevent="addIp"
+                class="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
+              />
+              <button
+                type="button"
+                @click="addIp"
+                class="h-10 px-3 rounded-md border hover:bg-accent text-sm"
+              >
+                Ajouter
+              </button>
+            </div>
+            <div v-if="createForm.allowed_ips.length > 0" class="flex flex-wrap gap-1 mt-1">
+              <span
+                v-for="(ip, index) in createForm.allowed_ips"
+                :key="ip"
+                class="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 font-mono"
+              >
+                {{ ip }}
+                <button type="button" @click="removeIp(index)" class="hover:text-destructive">&times;</button>
+              </span>
+            </div>
+          </div>
+
           <div class="flex gap-3 pt-4 border-t">
             <button
               type="button"
@@ -253,7 +315,7 @@
             </button>
             <button
               type="submit"
-              :disabled="creating"
+              :disabled="creating || !createForm.sub_account_id"
               class="flex-1 h-10 px-4 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {{ creating ? 'Création...' : 'Créer la clé' }}
@@ -308,9 +370,11 @@ import {
   CheckCircleIcon,
   ClipboardIcon,
   MagnifyingGlassIcon,
-  BookOpenIcon
+  BookOpenIcon,
+  UserIcon
 } from '@heroicons/vue/24/outline'
 import { apiKeyService, type ApiKey } from '@/services/apiKeyService'
+import { subAccountService, type SubAccount } from '@/services/subAccountService'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
 import { apiCategories, getTotalEndpoints } from '@/data/apiDocumentation'
 
@@ -351,11 +415,13 @@ const visibleCategories = computed(() => {
 
 // API Keys state
 const apiKeys = ref<ApiKey[]>([])
+const subAccounts = ref<SubAccount[]>([])
 const loading = ref(false)
 const creating = ref(false)
 const showCreateModal = ref(false)
 const showNewKeyModal = ref(false)
 const newKey = ref('')
+const ipInput = ref('')
 
 const permissionLabels: Record<string, string> = {
   send_sms: 'Envoyer des SMS',
@@ -366,15 +432,22 @@ const permissionLabels: Record<string, string> = {
 
 const createForm = reactive({
   name: '',
+  sub_account_id: '' as number | '',
   type: 'production' as 'production' | 'test',
   permissions: ['send_sms', 'view_history'] as string[],
-  rate_limit: 100
+  rate_limit: 100,
+  allowed_ips: [] as string[]
 })
 
 async function loadApiKeys() {
   loading.value = true
   try {
-    apiKeys.value = await apiKeyService.getAll()
+    const [keys, accounts] = await Promise.all([
+      apiKeyService.getAll(),
+      subAccountService.getAll()
+    ])
+    apiKeys.value = keys
+    subAccounts.value = accounts
   } catch (err) {
     console.error('Error loading API keys:', err)
   } finally {
@@ -384,10 +457,34 @@ async function loadApiKeys() {
 
 function openCreateModal() {
   createForm.name = ''
+  createForm.sub_account_id = ''
   createForm.type = 'production'
   createForm.permissions = ['send_sms', 'view_history']
   createForm.rate_limit = 100
+  createForm.allowed_ips = []
+  ipInput.value = ''
   showCreateModal.value = true
+}
+
+function addIp() {
+  const ip = ipInput.value.trim()
+  if (!ip) return
+  // Basic IP validation
+  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/
+  if (!ipRegex.test(ip)) {
+    showError('Format IP invalide (ex: 192.168.1.1)')
+    return
+  }
+  if (createForm.allowed_ips.includes(ip)) {
+    showError('Cette IP est déjà dans la liste')
+    return
+  }
+  createForm.allowed_ips.push(ip)
+  ipInput.value = ''
+}
+
+function removeIp(index: number) {
+  createForm.allowed_ips.splice(index, 1)
 }
 
 async function createKey() {
@@ -395,10 +492,22 @@ async function createKey() {
     showError('Veuillez entrer un nom pour la clé')
     return
   }
+  if (!createForm.sub_account_id) {
+    showError('Veuillez sélectionner un sous-compte')
+    return
+  }
 
   creating.value = true
   try {
-    const result = await apiKeyService.create(createForm)
+    const payload = {
+      name: createForm.name,
+      sub_account_id: createForm.sub_account_id as number,
+      type: createForm.type,
+      permissions: createForm.permissions,
+      rate_limit: createForm.rate_limit,
+      allowed_ips: createForm.allowed_ips.length > 0 ? createForm.allowed_ips : undefined
+    }
+    const result = await apiKeyService.create(payload)
     showCreateModal.value = false
 
     newKey.value = result.full_key || result.key

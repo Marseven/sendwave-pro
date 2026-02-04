@@ -7,17 +7,22 @@ export interface ApiKey {
   full_key?: string | null
   type: 'production' | 'test'
   status: 'active' | 'revoked'
+  sub_account_id: number | null
+  sub_account_name?: string | null
   permissions: string[]
   rate_limit: number
+  allowed_ips?: string[] | null
   last_used_at?: string | null
   created_at: string
 }
 
 export interface CreateApiKeyRequest {
   name: string
+  sub_account_id: number
   type?: 'production' | 'test'
   permissions?: string[]
   rate_limit?: number
+  allowed_ips?: string[]
 }
 
 export const apiKeyService = {

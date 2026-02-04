@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ApiKey;
+use App\Models\SubAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -27,6 +28,7 @@ class ApiKeyController extends Controller
     public function index(Request $request)
     {
         $apiKeys = ApiKey::where('user_id', $request->user()->id)
+            ->with('subAccount:id,name')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(fn($key) => $this->formatApiKey($key));
@@ -64,6 +66,7 @@ class ApiKeyController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'sub_account_id' => 'required|integer|exists:sub_accounts,id',
             'type' => 'nullable|in:production,test',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|in:send_sms,view_history,manage_contacts,view_balance',
@@ -72,12 +75,17 @@ class ApiKeyController extends Controller
             'allowed_ips.*' => 'required|ip',
         ]);
 
+        // Vérifier que le sous-compte appartient à l'utilisateur
+        $subAccount = SubAccount::where('parent_user_id', $request->user()->id)
+            ->findOrFail($validated['sub_account_id']);
+
         // Générer une clé unique
         $prefix = ($validated['type'] ?? 'production') === 'test' ? 'sk_test_' : 'sk_live_';
         $key = $prefix . Str::random(32);
 
         $apiKey = ApiKey::create([
             'user_id' => $request->user()->id,
+            'sub_account_id' => $subAccount->id,
             'name' => $validated['name'],
             'key' => $key,
             'provider' => $validated['type'] ?? 'production',
@@ -151,12 +159,19 @@ class ApiKeyController extends Controller
 
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
+            'sub_account_id' => 'nullable|integer|exists:sub_accounts,id',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|in:send_sms,view_history,manage_contacts,view_balance',
             'rate_limit' => 'nullable|integer|min:1|max:10000',
             'allowed_ips' => 'nullable|array',
             'allowed_ips.*' => 'required|ip',
         ]);
+
+        // Vérifier que le sous-compte appartient à l'utilisateur
+        if (isset($validated['sub_account_id'])) {
+            SubAccount::where('parent_user_id', $request->user()->id)
+                ->findOrFail($validated['sub_account_id']);
+        }
 
         $apiKey->update($validated);
 
@@ -279,6 +294,8 @@ class ApiKeyController extends Controller
             'full_key' => $showFullKey ? $apiKey->key : null,
             'type' => $apiKey->provider === 'test' ? 'test' : 'production',
             'status' => $apiKey->is_active ? 'active' : 'revoked',
+            'sub_account_id' => $apiKey->sub_account_id,
+            'sub_account_name' => $apiKey->subAccount?->name,
             'permissions' => $apiKey->permissions ?? ['send_sms', 'view_history'],
             'rate_limit' => $apiKey->rate_limit ?? 100,
             'allowed_ips' => $apiKey->allowed_ips,
