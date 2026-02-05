@@ -120,7 +120,7 @@
                   <span>Profil</span>
                 </button>
                 <button
-                  v-if="authStore.hasPermission('manage_settings')"
+                  v-if="authStore.isSuperAdmin"
                   @click="goToSettings"
                   class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md hover:bg-accent transition-colors text-left"
                 >
@@ -254,11 +254,11 @@ const menuItems: MenuItem[] = [
   { path: '/accounts?tab=users', label: 'Gestion Utilisateurs', icon: UserGroupIcon, superAdminOnly: true },
   // Admin - Gestion des sous-comptes/agents
   { path: '/accounts', label: 'Sous-comptes', icon: CreditCardIcon, permission: Permission.MANAGE_SUB_ACCOUNTS },
-  { path: '/sms-config', label: 'Config. Opérateurs', icon: SignalIcon, permission: Permission.MANAGE_SETTINGS },
+  { path: '/sms-config', label: 'Config. Opérateurs', icon: SignalIcon, superAdminOnly: true },
   { path: '/api-keys', label: 'Clés API', icon: CodeBracketIcon, permission: Permission.MANAGE_API_KEYS },
   { path: '/webhooks', label: 'Webhooks', icon: LinkIcon, permission: Permission.MANAGE_WEBHOOKS },
-  { path: '/audit-logs', label: 'Journal d\'audit', icon: ClipboardDocumentListIcon, permission: Permission.VIEW_AUDIT_LOGS },
-  { path: '/settings', label: 'Paramètres', icon: Cog6ToothIcon, permission: Permission.MANAGE_SETTINGS },
+  { path: '/audit-logs', label: 'Journal d\'audit', icon: ClipboardDocumentListIcon, superAdminOnly: true },
+  { path: '/settings', label: 'Paramètres', icon: Cog6ToothIcon, superAdminOnly: true },
 ]
 
 // Filter menu items based on user permissions and role

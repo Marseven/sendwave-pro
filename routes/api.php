@@ -100,17 +100,19 @@ Route::middleware('auth.api')->group(function () {
     Route::post('api-keys/{id}/revoke', [ApiKeyController::class, 'revoke']);
     Route::post('api-keys/{id}/regenerate', [ApiKeyController::class, 'regenerate']);
 
-    // SMS Providers & Configurations (réservé au compte parent uniquement)
-    Route::get('sms-providers', [SmsProviderController::class, 'index']);
-    Route::post('sms-providers', [SmsProviderController::class, 'store']);
-    Route::get('sms-providers/{code}', [SmsProviderController::class, 'show']);
-    Route::post('sms-providers/{code}/test', [SmsProviderController::class, 'test']);
-    Route::get('sms-configs', [\App\Http\Controllers\Api\SmsConfigController::class, 'index']);
-    Route::get('sms-configs/{provider}', [\App\Http\Controllers\Api\SmsConfigController::class, 'show']);
-    Route::put('sms-configs/{provider}', [\App\Http\Controllers\Api\SmsConfigController::class, 'update']);
-    Route::post('sms-configs/{provider}/test', [\App\Http\Controllers\Api\SmsConfigController::class, 'test']);
-    Route::post('sms-configs/{provider}/toggle', [\App\Http\Controllers\Api\SmsConfigController::class, 'toggle']);
-    Route::post('sms-configs/{provider}/reset', [\App\Http\Controllers\Api\SmsConfigController::class, 'reset']);
+    // SMS Providers & Configurations (SuperAdmin uniquement)
+    Route::middleware('super_admin')->group(function () {
+        Route::get('sms-providers', [SmsProviderController::class, 'index']);
+        Route::post('sms-providers', [SmsProviderController::class, 'store']);
+        Route::get('sms-providers/{code}', [SmsProviderController::class, 'show']);
+        Route::post('sms-providers/{code}/test', [SmsProviderController::class, 'test']);
+        Route::get('sms-configs', [\App\Http\Controllers\Api\SmsConfigController::class, 'index']);
+        Route::get('sms-configs/{provider}', [\App\Http\Controllers\Api\SmsConfigController::class, 'show']);
+        Route::put('sms-configs/{provider}', [\App\Http\Controllers\Api\SmsConfigController::class, 'update']);
+        Route::post('sms-configs/{provider}/test', [\App\Http\Controllers\Api\SmsConfigController::class, 'test']);
+        Route::post('sms-configs/{provider}/toggle', [\App\Http\Controllers\Api\SmsConfigController::class, 'toggle']);
+        Route::post('sms-configs/{provider}/reset', [\App\Http\Controllers\Api\SmsConfigController::class, 'reset']);
+    });
 
     // Message History (permission: view_history)
     Route::middleware('permission:view_history')->group(function () {
@@ -146,10 +148,12 @@ Route::middleware('auth.api')->group(function () {
     Route::post('phone/normalize', [IncomingSmsController::class, 'normalizePhone']);
     Route::post('phone/normalize-many', [IncomingSmsController::class, 'normalizePhones']);
 
-    // Audit Logs (réservé au compte parent uniquement)
-    Route::get('audit-logs', [\App\Http\Controllers\Api\AuditLogController::class, 'index']);
-    Route::get('audit-logs/actions', [\App\Http\Controllers\Api\AuditLogController::class, 'actions']);
-    Route::get('audit-logs/{id}', [\App\Http\Controllers\Api\AuditLogController::class, 'show']);
+    // Audit Logs (SuperAdmin uniquement)
+    Route::middleware('super_admin')->group(function () {
+        Route::get('audit-logs', [\App\Http\Controllers\Api\AuditLogController::class, 'index']);
+        Route::get('audit-logs/actions', [\App\Http\Controllers\Api\AuditLogController::class, 'actions']);
+        Route::get('audit-logs/{id}', [\App\Http\Controllers\Api\AuditLogController::class, 'show']);
+    });
 
     // Webhooks (réservé au compte parent uniquement)
     Route::get('webhooks/events', [\App\Http\Controllers\Api\WebhookController::class, 'events']);

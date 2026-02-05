@@ -127,7 +127,7 @@ const routes: RouteRecordRaw[] = [
     path: '/settings',
     name: 'Settings',
     component: () => import('@/views/Settings.vue'),
-    meta: { requiresAuth: true, permission: Permission.MANAGE_SETTINGS }
+    meta: { requiresAuth: true, minRole: 'super_admin' }
   },
   {
     path: '/campaign/create',
@@ -169,13 +169,13 @@ const routes: RouteRecordRaw[] = [
     path: '/sms-config',
     name: 'SmsConfig',
     component: () => import('@/views/SmsConfig.vue'),
-    meta: { requiresAuth: true, permission: Permission.MANAGE_SETTINGS }
+    meta: { requiresAuth: true, minRole: 'super_admin' }
   },
   {
     path: '/audit-logs',
     name: 'AuditLogs',
     component: () => import('@/views/AuditLogs.vue'),
-    meta: { requiresAuth: true, permission: Permission.VIEW_AUDIT_LOGS }
+    meta: { requiresAuth: true, minRole: 'super_admin' }
   },
   {
     path: '/access-denied',

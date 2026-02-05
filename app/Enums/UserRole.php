@@ -41,11 +41,9 @@ enum UserRole: string
             self::SUPER_ADMIN => Permission::values(),
             self::ADMIN => [
                 // Admin operations
-                Permission::MANAGE_SETTINGS->value,
                 Permission::MANAGE_API_KEYS->value,
                 Permission::MANAGE_WEBHOOKS->value,
                 Permission::MANAGE_SUB_ACCOUNTS->value,
-                Permission::VIEW_AUDIT_LOGS->value,
                 // Regular operations
                 Permission::SEND_SMS->value,
                 Permission::VIEW_HISTORY->value,
