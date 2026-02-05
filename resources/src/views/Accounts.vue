@@ -641,7 +641,7 @@
                   v-model="accountForm.phone"
                   type="text"
                   class="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  placeholder="+229 XX XX XX XX"
+                  placeholder="+241 XX XX XX XX"
                 />
               </div>
               <div>

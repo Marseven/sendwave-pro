@@ -148,7 +148,7 @@ class AccountController extends Controller
                 'company_id' => $validated['company_id'] ?? null,
                 'address' => $validated['address'] ?? null,
                 'city' => $validated['city'] ?? null,
-                'country' => $validated['country'] ?? 'BJ',
+                'country' => $validated['country'] ?? 'GA',
                 'sms_credits' => $validated['sms_credits'] ?? 0,
                 'monthly_budget' => $validated['monthly_budget'] ?? null,
                 'budget_alert_threshold' => $validated['budget_alert_threshold'] ?? 80,
