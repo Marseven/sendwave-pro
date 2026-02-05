@@ -14,7 +14,6 @@ use App\Services\MessageVariableService;
 use App\Models\Message;
 use App\Models\Contact;
 use App\Models\ContactGroup;
-use App\Models\SubAccount;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -234,7 +233,9 @@ class MessageController extends Controller
 
         try {
             $message = $validated['message'];
-            $userId = $request->user()->id;
+            $user = $request->user();
+            $userId = $user->id;
+            $subAccount = $request->attributes->get('sub_account');
 
             // Extract API key context for analytics traceability
             $apiKey = $request->attributes->get('api_key');
@@ -291,16 +292,15 @@ class MessageController extends Controller
             }
 
             // === Budget Check (SubAccount + User/Account) ===
-            $user = $request->user();
             $account = null;
             $recipientCount = count($recipients);
             $smsCountPerMessage = ceil(strlen($message) / 160);
             $estimatedCostPerSms = config('sms.cost_per_sms', 20);
             $estimatedTotalCost = $recipientCount * $smsCountPerMessage * $estimatedCostPerSms;
 
-            if ($user instanceof SubAccount) {
+            if ($subAccount) {
                 // SubAccount: check via BudgetService
-                $budgetCheck = $this->budgetService->checkBudget($user, $estimatedTotalCost);
+                $budgetCheck = $this->budgetService->checkBudget($subAccount, $estimatedTotalCost);
 
                 if (!$budgetCheck['allowed']) {
                     return response()->json([
@@ -316,7 +316,7 @@ class MessageController extends Controller
                 }
 
                 // Check credit limit
-                if (!$user->canSendSms()) {
+                if (!$subAccount->canSendSms()) {
                     return response()->json([
                         'message' => 'Envoi non autorisé',
                         'error' => 'Limite de crédits atteinte ou compte inactif.',
@@ -426,8 +426,8 @@ class MessageController extends Controller
 
                 if ($result['success']) {
                     // Debit credits
-                    if ($user instanceof SubAccount) {
-                        $user->incrementSmsUsed(1);
+                    if ($subAccount) {
+                        $subAccount->incrementSmsUsed(1);
                     } elseif ($account) {
                         $account->useCredits($cost);
                     }
@@ -564,8 +564,8 @@ class MessageController extends Controller
 
                 // Debit credits for sent messages
                 if ($sentCount > 0) {
-                    if ($user instanceof SubAccount) {
-                        $user->incrementSmsUsed($sentCount);
+                    if ($subAccount) {
+                        $subAccount->incrementSmsUsed($sentCount);
                     } elseif ($account) {
                         $account->useCredits($sentCost);
                     }
@@ -688,7 +688,9 @@ class MessageController extends Controller
             $recipient = $validated['recipient'];
             $message = $validated['message'];
             $reference = $validated['reference'] ?? null;
-            $userId = $request->user()->id;
+            $user = $request->user();
+            $userId = $user->id;
+            $subAccount = $request->attributes->get('sub_account');
 
             // Extract API key context for analytics traceability
             $apiKey = $request->attributes->get('api_key');
@@ -709,12 +711,11 @@ class MessageController extends Controller
             }
 
             // Budget check
-            $user = $request->user();
             $account = null;
             $estimatedCost = $this->calculateCost($message);
 
-            if ($user instanceof SubAccount) {
-                $budgetCheck = $this->budgetService->checkBudget($user, $estimatedCost);
+            if ($subAccount) {
+                $budgetCheck = $this->budgetService->checkBudget($subAccount, $estimatedCost);
                 if (!$budgetCheck['allowed']) {
                     return response()->json([
                         'success' => false,
@@ -723,7 +724,7 @@ class MessageController extends Controller
                     ], 403);
                 }
 
-                if (!$user->canSendSms()) {
+                if (!$subAccount->canSendSms()) {
                     return response()->json([
                         'success' => false,
                         'error' => 'CREDITS_EXCEEDED',
@@ -785,8 +786,8 @@ class MessageController extends Controller
 
             if ($result['success']) {
                 // Debit credits
-                if ($user instanceof SubAccount) {
-                    $user->incrementSmsUsed(1);
+                if ($subAccount) {
+                    $subAccount->incrementSmsUsed(1);
                 } elseif ($account) {
                     $account->useCredits($cost);
                 }

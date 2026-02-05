@@ -58,7 +58,7 @@ class AuthenticateApi
             ], 403);
         }
 
-        // Resolve the owning user
+        // Always resolve to the parent User for data scoping compatibility
         $user = $apiKey->user;
 
         if (!$user) {
@@ -68,10 +68,32 @@ class AuthenticateApi
             ], 401);
         }
 
+        // If linked to a SubAccount, validate it and store separately for budget/credit checks
+        if ($apiKey->sub_account_id) {
+            $subAccount = $apiKey->subAccount;
+
+            if (!$subAccount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sous-compte associé à la clé API introuvable.',
+                ], 401);
+            }
+
+            if ($subAccount->status !== 'active') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sous-compte suspendu ou inactif.',
+                    'error' => 'ACCOUNT_BLOCKED',
+                ], 403);
+            }
+
+            $request->attributes->set('sub_account', $subAccount);
+        }
+
         // Update last used timestamp
         $apiKey->markAsUsed();
 
-        // Set user on the request so $request->user() works everywhere
+        // Set parent User as authenticated entity (preserves data scoping across all controllers)
         $request->setUserResolver(fn() => $user);
 
         // Store the API key on the request for permission checks
