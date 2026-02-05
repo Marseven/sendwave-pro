@@ -377,9 +377,20 @@ import { apiKeyService, type ApiKey } from '@/services/apiKeyService'
 import { subAccountService, type SubAccount } from '@/services/subAccountService'
 import { showSuccess, showError, showConfirm } from '@/utils/notifications'
 import { apiCategories, getTotalEndpoints } from '@/data/apiDocumentation'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const baseUrl = computed(() => window.location.origin)
-const totalEndpoints = getTotalEndpoints()
+
+// Filter categories based on user role
+const filteredCategories = computed(() => {
+  if (authStore.isSuperAdmin) return apiCategories
+  return apiCategories.filter(cat => !cat.superAdminOnly)
+})
+
+const totalEndpoints = computed(() =>
+  filteredCategories.value.reduce((sum, cat) => sum + cat.endpoints.length, 0)
+)
 
 // Tab state
 const activeTab = ref('keys')
@@ -394,10 +405,10 @@ const methodFilter = ref('')
 
 const visibleCategories = computed(() => {
   if (!searchQuery.value && !methodFilter.value) {
-    return apiCategories
+    return filteredCategories.value
   }
 
-  return apiCategories.filter(category => {
+  return filteredCategories.value.filter(category => {
     const q = searchQuery.value.toLowerCase()
     const m = methodFilter.value
 

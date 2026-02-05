@@ -24,6 +24,7 @@ export interface ApiCategory {
   name: string
   description: string
   icon?: string
+  superAdminOnly?: boolean
   endpoints: ApiEndpointData[]
 }
 
@@ -1464,6 +1465,7 @@ export const apiCategories: ApiCategory[] = [
     id: 'sms-config',
     name: 'Configuration SMS',
     description: "Configuration des opérateurs SMS (Airtel, Moov) et providers",
+    superAdminOnly: true,
     endpoints: [
       {
         method: 'GET',
@@ -1675,6 +1677,7 @@ export const apiCategories: ApiCategory[] = [
     id: 'audit-logs',
     name: "Journal d'Audit",
     description: "Traçabilité des actions utilisateurs et système",
+    superAdminOnly: true,
     endpoints: [
       {
         method: 'GET',
@@ -1726,6 +1729,7 @@ export const apiCategories: ApiCategory[] = [
     id: 'accounts',
     name: 'Comptes',
     description: 'Gestion des comptes clients (SuperAdmin uniquement)',
+    superAdminOnly: true,
     endpoints: [
       {
         method: 'GET',
@@ -1929,6 +1933,7 @@ export const apiCategories: ApiCategory[] = [
     id: 'custom-roles',
     name: 'Rôles Personnalisés',
     description: 'Création et gestion de rôles personnalisés (SuperAdmin)',
+    superAdminOnly: true,
     endpoints: [
       {
         method: 'GET',
@@ -2010,6 +2015,7 @@ export const apiCategories: ApiCategory[] = [
     id: 'system',
     name: 'Système',
     description: 'Endpoints systèmes en lecture seule',
+    superAdminOnly: true,
     endpoints: [
       {
         method: 'GET',

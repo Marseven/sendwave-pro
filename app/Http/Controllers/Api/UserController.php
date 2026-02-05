@@ -659,9 +659,15 @@ class UserController extends Controller
      */
     public function systemRoles(Request $request)
     {
+        $currentUser = $request->user();
         $roles = [];
 
         foreach (UserRole::cases() as $role) {
+            // Hide super_admin role from non-SuperAdmin users
+            if ($role === UserRole::SUPER_ADMIN && !$currentUser->isSuperAdmin()) {
+                continue;
+            }
+
             $roles[] = [
                 'value' => $role->value,
                 'label' => $role->label(),
