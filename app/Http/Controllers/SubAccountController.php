@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SubAccount;
 use App\Services\WebhookService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -49,16 +50,22 @@ class SubAccountController extends Controller
         $userId = $request->user()->id;
 
         $subAccounts = SubAccount::byParent($userId)
-            ->select('id', 'name', 'email', 'role', 'status', 'sms_credit_limit', 'sms_used', 'last_connection', 'created_at')
+            ->select('id', 'account_id', 'name', 'email', 'role', 'status', 'is_default', 'sms_credits', 'budget_used', 'sms_credit_limit', 'sms_used', 'monthly_budget', 'last_connection', 'created_at')
+            ->orderBy('is_default', 'desc')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($account) {
                 return [
                     'id' => $account->id,
+                    'account_id' => $account->account_id,
                     'name' => $account->name,
                     'email' => $account->email,
                     'role' => $account->role,
                     'status' => $account->status,
+                    'is_default' => $account->is_default,
+                    'sms_credits' => (float) $account->sms_credits,
+                    'budget_used' => (float) $account->budget_used,
+                    'monthly_budget' => $account->monthly_budget ? (float) $account->monthly_budget : null,
                     'sms_credit_limit' => $account->sms_credit_limit,
                     'sms_used' => $account->sms_used,
                     'remaining_credits' => $account->remaining_credits,
@@ -105,21 +112,29 @@ class SubAccountController extends Controller
             'email' => 'required|email|unique:sub_accounts,email',
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,manager,sender,viewer',
+            'sms_credits' => 'nullable|numeric|min:0',
+            'monthly_budget' => 'nullable|numeric|min:0',
             'sms_credit_limit' => 'nullable|integer|min:0',
         ]);
 
         try {
             $subAccount = SubAccount::create([
                 'parent_user_id' => $request->user()->id,
+                'account_id' => $request->user()->account_id,
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => $validated['role'],
                 'status' => 'active',
+                'sms_credits' => $validated['sms_credits'] ?? 0,
+                'monthly_budget' => $validated['monthly_budget'] ?? null,
                 'sms_credit_limit' => $validated['sms_credit_limit'] ?? null,
                 'sms_used' => 0,
                 'permissions' => (new SubAccount(['role' => $validated['role']]))->getDefaultPermissions(),
             ]);
+
+            // Sync account total credits
+            $subAccount->syncAccountCredits();
 
             Log::info('Sub-account created', [
                 'parent_user_id' => $request->user()->id,
@@ -140,9 +155,13 @@ class SubAccountController extends Controller
                 'message' => 'Sous-compte créé avec succès',
                 'data' => [
                     'id' => $subAccount->id,
+                    'account_id' => $subAccount->account_id,
                     'name' => $subAccount->name,
                     'email' => $subAccount->email,
                     'role' => $subAccount->role,
+                    'is_default' => $subAccount->is_default,
+                    'sms_credits' => (float) $subAccount->sms_credits,
+                    'budget_used' => (float) $subAccount->budget_used,
                     'permissions' => $subAccount->permissions,
                     'sms_credit_limit' => $subAccount->sms_credit_limit,
                 ]
@@ -187,14 +206,19 @@ class SubAccountController extends Controller
             'message' => 'Détails du sous-compte',
             'data' => [
                 'id' => $subAccount->id,
+                'account_id' => $subAccount->account_id,
                 'name' => $subAccount->name,
                 'email' => $subAccount->email,
                 'role' => $subAccount->role,
                 'status' => $subAccount->status,
+                'is_default' => $subAccount->is_default,
+                'sms_credits' => (float) $subAccount->sms_credits,
+                'budget_used' => (float) $subAccount->budget_used,
                 'permissions' => $subAccount->permissions,
                 'sms_credit_limit' => $subAccount->sms_credit_limit,
                 'sms_used' => $subAccount->sms_used,
                 'remaining_credits' => $subAccount->remaining_credits,
+                'monthly_budget' => $subAccount->monthly_budget ? (float) $subAccount->monthly_budget : null,
                 'last_connection' => $subAccount->last_connection?->format('Y-m-d H:i:s'),
                 'created_at' => $subAccount->created_at->format('Y-m-d H:i:s'),
             ]
@@ -308,6 +332,12 @@ class SubAccountController extends Controller
         $subAccount = SubAccount::byParent($request->user()->id)
             ->findOrFail($id);
 
+        if ($subAccount->is_default) {
+            return response()->json([
+                'message' => 'Impossible de supprimer le sous-compte principal.',
+            ], 400);
+        }
+
         try {
             $subAccount->delete();
 
@@ -366,21 +396,25 @@ class SubAccountController extends Controller
             ->findOrFail($id);
 
         $validated = $request->validate([
-            'amount' => 'required|integer|min:1',
+            'amount' => 'required|numeric|min:0.01',
         ]);
 
         try {
-            $subAccount->addCredits($validated['amount']);
+            $subAccount->addCreditsFcfa($validated['amount']);
 
-            Log::info('Credits added to sub-account', [
+            Log::info('Credits (FCFA) added to sub-account', [
                 'sub_account_id' => $id,
                 'amount' => $validated['amount'],
-                'new_limit' => $subAccount->sms_credit_limit,
+                'new_balance' => $subAccount->fresh()->sms_credits,
             ]);
+
+            $subAccount->refresh();
 
             return response()->json([
                 'message' => 'Crédits ajoutés avec succès',
                 'data' => [
+                    'sms_credits' => (float) $subAccount->sms_credits,
+                    'budget_used' => (float) $subAccount->budget_used,
                     'sms_credit_limit' => $subAccount->sms_credit_limit,
                     'sms_used' => $subAccount->sms_used,
                     'remaining_credits' => $subAccount->remaining_credits,
@@ -547,6 +581,83 @@ class SubAccountController extends Controller
             return response()->json([
                 'message' => 'Erreur lors de l\'activation',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Transférer des crédits entre sous-comptes
+     */
+    public function transferCredits(Request $request)
+    {
+        $validated = $request->validate([
+            'from_sub_account_id' => 'required|integer|exists:sub_accounts,id',
+            'to_sub_account_id' => 'required|integer|exists:sub_accounts,id|different:from_sub_account_id',
+            'amount' => 'required|numeric|min:0.01',
+        ]);
+
+        $userId = $request->user()->id;
+        $accountId = $request->user()->account_id;
+
+        $from = SubAccount::byParent($userId)->findOrFail($validated['from_sub_account_id']);
+        $to = SubAccount::byParent($userId)->findOrFail($validated['to_sub_account_id']);
+
+        // Verify both belong to the same account
+        if ($from->account_id !== $to->account_id) {
+            return response()->json([
+                'message' => 'Les deux sous-comptes doivent appartenir au même compte.',
+            ], 400);
+        }
+
+        // Check sufficient balance
+        if ((float) $from->sms_credits < $validated['amount']) {
+            return response()->json([
+                'message' => 'Solde insuffisant sur le sous-compte source.',
+                'data' => [
+                    'available' => (float) $from->sms_credits,
+                    'requested' => $validated['amount'],
+                ],
+            ], 400);
+        }
+
+        try {
+            DB::transaction(function () use ($from, $to, $validated) {
+                $from->decrement('sms_credits', $validated['amount']);
+                $to->increment('sms_credits', $validated['amount']);
+            });
+
+            // No need to sync account credits — total remains the same
+
+            Log::info('Credits transferred between sub-accounts', [
+                'from' => $from->id,
+                'to' => $to->id,
+                'amount' => $validated['amount'],
+            ]);
+
+            return response()->json([
+                'message' => 'Transfert effectué avec succès',
+                'data' => [
+                    'from' => [
+                        'id' => $from->id,
+                        'name' => $from->name,
+                        'sms_credits' => (float) $from->fresh()->sms_credits,
+                    ],
+                    'to' => [
+                        'id' => $to->id,
+                        'name' => $to->name,
+                        'sms_credits' => (float) $to->fresh()->sms_credits,
+                    ],
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to transfer credits', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Erreur lors du transfert de crédits',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

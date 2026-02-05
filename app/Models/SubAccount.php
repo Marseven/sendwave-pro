@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class SubAccount extends Authenticatable
@@ -16,11 +17,15 @@ class SubAccount extends Authenticatable
 
     protected $fillable = [
         'parent_user_id',
+        'account_id',
         'name',
         'email',
         'password',
         'role',
         'status',
+        'is_default',
+        'sms_credits',
+        'budget_used',
         'sms_credit_limit',
         'sms_used',
         'permissions',
@@ -38,6 +43,9 @@ class SubAccount extends Authenticatable
         'last_connection' => 'datetime',
         'password' => 'hashed',
         'permissions' => 'array',
+        'is_default' => 'boolean',
+        'sms_credits' => 'decimal:2',
+        'budget_used' => 'decimal:2',
         'sms_credit_limit' => 'integer',
         'sms_used' => 'integer',
         'monthly_budget' => 'decimal:2',
@@ -51,6 +59,11 @@ class SubAccount extends Authenticatable
     public function parentUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'parent_user_id');
+    }
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
     }
 
     public function apiKeys(): HasMany
@@ -172,5 +185,54 @@ class SubAccount extends Authenticatable
     public function scopeByParent($query, int $parentUserId)
     {
         return $query->where('parent_user_id', $parentUserId);
+    }
+
+    public function scopeDefault($query)
+    {
+        return $query->where('is_default', true);
+    }
+
+    public function scopeByAccount($query, int $accountId)
+    {
+        return $query->where('account_id', $accountId);
+    }
+
+    /**
+     * FCFA Credits Management
+     */
+    public function useCredits(float $amount): bool
+    {
+        if ((float) $this->sms_credits < $amount) {
+            return false;
+        }
+
+        $this->decrement('sms_credits', $amount);
+        $this->increment('budget_used', $amount);
+        $this->increment('sms_used');
+
+        $this->syncAccountCredits();
+
+        return true;
+    }
+
+    public function addCreditsFcfa(float $amount): void
+    {
+        $this->increment('sms_credits', $amount);
+        $this->syncAccountCredits();
+    }
+
+    public function syncAccountCredits(): void
+    {
+        if (!$this->account_id) {
+            return;
+        }
+
+        $total = DB::table('sub_accounts')
+            ->where('account_id', $this->account_id)
+            ->sum('sms_credits');
+
+        DB::table('accounts')
+            ->where('id', $this->account_id)
+            ->update(['sms_credits' => $total]);
     }
 }

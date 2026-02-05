@@ -88,6 +88,7 @@ Route::middleware('auth.api')->group(function () {
     });
 
     // Sub Accounts (réservé au compte parent uniquement - pas de permission)
+    Route::post('sub-accounts/transfer-credits', [SubAccountController::class, 'transferCredits']);
     Route::post('sub-accounts/{id}/credits', [SubAccountController::class, 'addCredits']);
     Route::post('sub-accounts/{id}/permissions', [SubAccountController::class, 'updatePermissions']);
     Route::post('sub-accounts/{id}/suspend', [SubAccountController::class, 'suspend']);

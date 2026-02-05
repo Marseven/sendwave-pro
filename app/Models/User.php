@@ -119,6 +119,20 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the default SubAccount for this user's account
+     */
+    public function getDefaultSubAccount(): ?SubAccount
+    {
+        if (!$this->account_id) {
+            return null;
+        }
+
+        return SubAccount::where('account_id', $this->account_id)
+            ->where('is_default', true)
+            ->first();
+    }
+
+    /**
      * Relation with SMS messages
      */
     public function smsMessages(): HasMany

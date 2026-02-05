@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Account extends Model
 {
@@ -44,6 +45,22 @@ class Account extends Model
         'settings' => 'array',
         'last_activity_at' => 'datetime',
     ];
+
+    /**
+     * Get all sub-accounts belonging to this account
+     */
+    public function subAccounts(): HasMany
+    {
+        return $this->hasMany(SubAccount::class);
+    }
+
+    /**
+     * Get the default sub-account
+     */
+    public function defaultSubAccount(): HasOne
+    {
+        return $this->hasOne(SubAccount::class)->where('is_default', true);
+    }
 
     /**
      * Get all users belonging to this account
@@ -124,29 +141,29 @@ class Account extends Model
     }
 
     /**
-     * Add SMS credits to the account
+     * Add SMS credits to the account via the default sub-account.
      */
     public function addCredits(float $amount): void
     {
-        $this->increment('sms_credits', $amount);
+        $defaultSub = $this->defaultSubAccount;
+
+        if ($defaultSub) {
+            $defaultSub->addCreditsFcfa($amount);
+        } else {
+            // Fallback direct increment if no default sub-account exists yet
+            $this->increment('sms_credits', $amount);
+        }
     }
 
     /**
-     * Use SMS credits
+     * Use SMS credits — disabled on Account level.
+     * Always debit via SubAccount instead.
      */
     public function useCredits(float $amount): bool
     {
-        if ($this->sms_credits < $amount) {
-            return false;
-        }
-
-        $this->decrement('sms_credits', $amount);
-        $this->increment('budget_used', $amount);
-        $this->increment('sms_sent_total');
-        $this->increment('sms_sent_month');
-        $this->update(['last_activity_at' => now()]);
-
-        return true;
+        throw new \RuntimeException(
+            'Les débits doivent passer par un sous-compte (SubAccount::useCredits).'
+        );
     }
 
     /**

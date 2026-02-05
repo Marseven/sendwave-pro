@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Account;
+use App\Models\SubAccount;
 use App\Models\User;
 use App\Enums\UserRole;
+use App\Enums\SubAccountRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AccountController extends Controller
 {
@@ -164,6 +167,23 @@ class AccountController extends Controller
                 'permissions' => UserRole::ADMIN->defaultPermissions(),
                 'status' => 'active',
             ]);
+
+            // Auto-create default SubAccount with initial credits
+            $defaultSub = SubAccount::create([
+                'account_id'     => $account->id,
+                'parent_user_id' => $adminUser->id,
+                'name'           => 'Compte principal',
+                'email'          => "default.{$account->id}@internal.sendwave",
+                'password'       => Hash::make(Str::random(32)),
+                'role'           => 'admin',
+                'status'         => 'active',
+                'is_default'     => true,
+                'sms_credits'    => $validated['sms_credits'] ?? 0,
+                'permissions'    => SubAccountRole::ADMIN->defaultPermissions(),
+            ]);
+
+            // Sync account sms_credits from sub-accounts
+            $defaultSub->syncAccountCredits();
 
             DB::commit();
 

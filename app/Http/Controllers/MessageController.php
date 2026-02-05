@@ -237,12 +237,25 @@ class MessageController extends Controller
             $userId = $user->id;
             $subAccount = $request->attributes->get('sub_account');
 
+            // If no SubAccount (Bearer token), use the default sub-account
+            if (!$subAccount) {
+                $subAccount = $user->getDefaultSubAccount();
+            }
+
+            if (!$subAccount) {
+                return response()->json([
+                    'message' => 'Envoi non autorisé',
+                    'error' => 'Aucun sous-compte associé. Contactez votre administrateur.',
+                    'error_code' => 'NO_SUB_ACCOUNT',
+                ], 403);
+            }
+
             // Extract API key context for analytics traceability
             $apiKey = $request->attributes->get('api_key');
             $analyticsContext = [
                 'message_type' => $request->input('type', 'transactional'),
                 'api_key_id' => $apiKey?->id,
-                'sub_account_id' => $apiKey?->sub_account_id,
+                'sub_account_id' => $subAccount->id,
             ];
 
             // Resolve all phone numbers from the three sources
@@ -291,94 +304,48 @@ class MessageController extends Controller
                 ], 400);
             }
 
-            // === Budget Check (SubAccount + User/Account) ===
-            $account = null;
+            // === Budget Check (always via SubAccount) ===
             $recipientCount = count($recipients);
             $smsCountPerMessage = ceil(strlen($message) / 160);
             $estimatedCostPerSms = config('sms.cost_per_sms', 20);
             $estimatedTotalCost = $recipientCount * $smsCountPerMessage * $estimatedCostPerSms;
 
-            if ($subAccount) {
-                // SubAccount: check via BudgetService
-                $budgetCheck = $this->budgetService->checkBudget($subAccount, $estimatedTotalCost);
+            // SubAccount: check via BudgetService
+            $budgetCheck = $this->budgetService->checkBudget($subAccount, $estimatedTotalCost);
 
-                if (!$budgetCheck['allowed']) {
-                    return response()->json([
-                        'message' => 'Budget dépassé',
-                        'error' => $budgetCheck['message'] ?? 'Budget mensuel dépassé. Envoi bloqué.',
-                        'error_code' => $budgetCheck['error_code'] ?? 'BUDGET_EXCEEDED',
-                        'budget_info' => [
-                            'remaining' => $budgetCheck['remaining'],
-                            'percent_used' => $budgetCheck['percent_used'] ?? null,
-                            'estimated_cost' => $estimatedTotalCost,
-                        ],
-                    ], 403);
-                }
+            if (!$budgetCheck['allowed']) {
+                return response()->json([
+                    'message' => 'Budget dépassé',
+                    'error' => $budgetCheck['message'] ?? 'Budget mensuel dépassé. Envoi bloqué.',
+                    'error_code' => $budgetCheck['error_code'] ?? 'BUDGET_EXCEEDED',
+                    'budget_info' => [
+                        'remaining' => $budgetCheck['remaining'],
+                        'percent_used' => $budgetCheck['percent_used'] ?? null,
+                        'estimated_cost' => $estimatedTotalCost,
+                    ],
+                ], 403);
+            }
 
-                // Check credit limit
-                if (!$subAccount->canSendSms()) {
-                    return response()->json([
-                        'message' => 'Envoi non autorisé',
-                        'error' => 'Limite de crédits atteinte ou compte inactif.',
-                        'error_code' => 'CREDITS_EXCEEDED',
-                    ], 403);
-                }
-            } else {
-                // User: check Account budget
-                $account = $user->account;
+            // Check credit limit and active status
+            if (!$subAccount->canSendSms()) {
+                return response()->json([
+                    'message' => 'Envoi non autorisé',
+                    'error' => 'Limite de crédits atteinte ou compte inactif.',
+                    'error_code' => 'CREDITS_EXCEEDED',
+                ], 403);
+            }
 
-                if ($account) {
-                    if (!$account->canSendSms()) {
-                        $reason = $account->isSuspended()
-                            ? 'Compte suspendu.'
-                            : ($account->sms_credits <= 0
-                                ? 'Crédits SMS insuffisants.'
-                                : 'Budget mensuel dépassé. Envoi bloqué.');
-
-                        return response()->json([
-                            'message' => 'Envoi non autorisé',
-                            'error' => $reason,
-                            'error_code' => 'ACCOUNT_BLOCKED',
-                            'budget_info' => [
-                                'sms_credits' => (float) $account->sms_credits,
-                                'monthly_budget' => $account->monthly_budget ? (float) $account->monthly_budget : null,
-                                'budget_used' => (float) $account->budget_used,
-                                'estimated_cost' => $estimatedTotalCost,
-                            ],
-                        ], 403);
-                    }
-
-                    // Check if estimated cost exceeds remaining credits
-                    if ($account->sms_credits < $estimatedTotalCost) {
-                        return response()->json([
-                            'message' => 'Crédits insuffisants',
-                            'error' => 'Pas assez de crédits SMS pour cet envoi.',
-                            'error_code' => 'CREDITS_INSUFFICIENT',
-                            'budget_info' => [
-                                'sms_credits' => (float) $account->sms_credits,
-                                'estimated_cost' => $estimatedTotalCost,
-                            ],
-                        ], 403);
-                    }
-
-                    // Check if estimated cost exceeds remaining budget
-                    if ($account->monthly_budget !== null && $account->block_on_budget_exceeded) {
-                        $remainingBudget = (float) $account->monthly_budget - (float) $account->budget_used;
-                        if ($estimatedTotalCost > $remainingBudget) {
-                            return response()->json([
-                                'message' => 'Budget insuffisant',
-                                'error' => 'Le coût estimé dépasse le budget restant.',
-                                'error_code' => 'BUDGET_INSUFFICIENT',
-                                'budget_info' => [
-                                    'remaining_budget' => $remainingBudget,
-                                    'estimated_cost' => $estimatedTotalCost,
-                                    'monthly_budget' => (float) $account->monthly_budget,
-                                    'budget_used' => (float) $account->budget_used,
-                                ],
-                            ], 403);
-                        }
-                    }
-                }
+            // Check FCFA credits
+            if ((float) $subAccount->sms_credits < $estimatedTotalCost) {
+                return response()->json([
+                    'message' => 'Crédits insuffisants',
+                    'error' => 'Pas assez de crédits SMS pour cet envoi.',
+                    'error_code' => 'CREDITS_INSUFFICIENT',
+                    'budget_info' => [
+                        'sms_credits' => (float) $subAccount->sms_credits,
+                        'estimated_cost' => $estimatedTotalCost,
+                    ],
+                ], 403);
             }
 
             // Analyser les numéros avant l'envoi
@@ -425,12 +392,8 @@ class MessageController extends Controller
                 $this->analyticsRecordService->recordSms($messageRecord, $analyticsContext);
 
                 if ($result['success']) {
-                    // Debit credits
-                    if ($subAccount) {
-                        $subAccount->incrementSmsUsed(1);
-                    } elseif ($account) {
-                        $account->useCredits($cost);
-                    }
+                    // Debit credits via SubAccount
+                    $subAccount->useCredits($cost);
 
                     // Trigger webhook for message.sent
                     $this->webhookService->trigger('message.sent', $userId, [
@@ -562,13 +525,9 @@ class MessageController extends Controller
                     }
                 }
 
-                // Debit credits for sent messages
+                // Debit credits for sent messages via SubAccount
                 if ($sentCount > 0) {
-                    if ($subAccount) {
-                        $subAccount->incrementSmsUsed($sentCount);
-                    } elseif ($account) {
-                        $account->useCredits($sentCost);
-                    }
+                    $subAccount->useCredits($sentCost);
                 }
 
                 Log::info('Bulk SMS sent', [
@@ -692,12 +651,25 @@ class MessageController extends Controller
             $userId = $user->id;
             $subAccount = $request->attributes->get('sub_account');
 
+            // If no SubAccount (Bearer token), use the default sub-account
+            if (!$subAccount) {
+                $subAccount = $user->getDefaultSubAccount();
+            }
+
+            if (!$subAccount) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'NO_SUB_ACCOUNT',
+                    'message' => 'Aucun sous-compte associé. Contactez votre administrateur.',
+                ], 403);
+            }
+
             // Extract API key context for analytics traceability
             $apiKey = $request->attributes->get('api_key');
             $otpAnalyticsContext = [
                 'message_type' => 'otp',
                 'api_key_id' => $apiKey?->id,
-                'sub_account_id' => $apiKey?->sub_account_id,
+                'sub_account_id' => $subAccount->id,
             ];
 
             // Check blacklist
@@ -710,51 +682,32 @@ class MessageController extends Controller
                 ], 400);
             }
 
-            // Budget check
-            $account = null;
+            // Budget check (always via SubAccount)
             $estimatedCost = $this->calculateCost($message);
 
-            if ($subAccount) {
-                $budgetCheck = $this->budgetService->checkBudget($subAccount, $estimatedCost);
-                if (!$budgetCheck['allowed']) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => $budgetCheck['error_code'] ?? 'BUDGET_EXCEEDED',
-                        'message' => $budgetCheck['message'] ?? 'Budget mensuel dépassé. Envoi bloqué.',
-                    ], 403);
-                }
+            $budgetCheck = $this->budgetService->checkBudget($subAccount, $estimatedCost);
+            if (!$budgetCheck['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $budgetCheck['error_code'] ?? 'BUDGET_EXCEEDED',
+                    'message' => $budgetCheck['message'] ?? 'Budget mensuel dépassé. Envoi bloqué.',
+                ], 403);
+            }
 
-                if (!$subAccount->canSendSms()) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'CREDITS_EXCEEDED',
-                        'message' => 'Limite de crédits atteinte ou compte inactif.',
-                    ], 403);
-                }
-            } else {
-                $account = $user->account;
+            if (!$subAccount->canSendSms()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'CREDITS_EXCEEDED',
+                    'message' => 'Limite de crédits atteinte ou compte inactif.',
+                ], 403);
+            }
 
-                if ($account) {
-                    if (!$account->canSendSms()) {
-                        return response()->json([
-                            'success' => false,
-                            'error' => 'ACCOUNT_BLOCKED',
-                            'message' => $account->isSuspended()
-                                ? 'Compte suspendu.'
-                                : ($account->sms_credits <= 0
-                                    ? 'Crédits SMS insuffisants.'
-                                    : 'Budget mensuel dépassé. Envoi bloqué.'),
-                        ], 403);
-                    }
-
-                    if ($account->sms_credits < $estimatedCost) {
-                        return response()->json([
-                            'success' => false,
-                            'error' => 'CREDITS_INSUFFICIENT',
-                            'message' => 'Pas assez de crédits SMS pour cet envoi.',
-                        ], 403);
-                    }
-                }
+            if ((float) $subAccount->sms_credits < $estimatedCost) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'CREDITS_INSUFFICIENT',
+                    'message' => 'Pas assez de crédits SMS pour cet envoi.',
+                ], 403);
             }
 
             // Send SMS
@@ -785,12 +738,8 @@ class MessageController extends Controller
             $this->analyticsRecordService->recordSms($messageRecord, $otpAnalyticsContext);
 
             if ($result['success']) {
-                // Debit credits
-                if ($subAccount) {
-                    $subAccount->incrementSmsUsed(1);
-                } elseif ($account) {
-                    $account->useCredits($cost);
-                }
+                // Debit credits via SubAccount
+                $subAccount->useCredits($cost);
 
                 // Trigger webhook
                 $this->webhookService->trigger('message.sent', $userId, [
