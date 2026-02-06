@@ -16,7 +16,7 @@ class MessageHistoryController extends Controller
      *     tags={"Messages"},
      *     summary="Get message history",
      *     description="Retrieve paginated history of sent messages with optional filters",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="search",
      *         in="query",
@@ -139,7 +139,7 @@ class MessageHistoryController extends Controller
      *     tags={"Messages"},
      *     summary="Get a specific message",
      *     description="Retrieve a single message by ID with campaign details",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -179,7 +179,7 @@ class MessageHistoryController extends Controller
      *     tags={"Messages"},
      *     summary="Get message statistics",
      *     description="Retrieve aggregated statistics for all messages (total, delivered, pending, failed, cost)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Message statistics",
@@ -226,7 +226,7 @@ class MessageHistoryController extends Controller
      *     tags={"Messages"},
      *     summary="Export message history to CSV",
      *     description="Export filtered message history as a downloadable CSV file",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="search",
      *         in="query",

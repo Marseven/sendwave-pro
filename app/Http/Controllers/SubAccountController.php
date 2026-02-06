@@ -26,7 +26,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts",
      *     tags={"Sub-Accounts"},
      *     summary="List all sub-accounts of the authenticated user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
      *         @OA\Property(property="data", type="array", @OA\Items(type="object",
@@ -87,7 +87,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts",
      *     tags={"Sub-Accounts"},
      *     summary="Create a new sub-account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"name", "email", "password", "role"},
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -187,7 +187,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts/{id}",
      *     tags={"Sub-Accounts"},
      *     summary="Get a specific sub-account by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -232,7 +232,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts/{id}",
      *     tags={"Sub-Accounts"},
      *     summary="Update an existing sub-account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -317,7 +317,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts/{id}",
      *     tags={"Sub-Accounts"},
      *     summary="Delete a sub-account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Sub-account deleted", @OA\JsonContent(
      *         @OA\Property(property="message", type="string")
@@ -370,7 +370,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts/{id}/credits",
      *     tags={"Sub-Accounts"},
      *     summary="Add SMS credits to a sub-account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"amount"},
@@ -441,7 +441,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts/{id}/permissions",
      *     tags={"Sub-Accounts"},
      *     summary="Update permissions for a sub-account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"permissions"},
@@ -507,7 +507,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts/{id}/suspend",
      *     tags={"Sub-Accounts"},
      *     summary="Suspend a sub-account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Sub-account suspended", @OA\JsonContent(
      *         @OA\Property(property="message", type="string")
@@ -553,7 +553,7 @@ class SubAccountController extends Controller
      *     path="/api/sub-accounts/{id}/activate",
      *     tags={"Sub-Accounts"},
      *     summary="Activate a sub-account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Sub-account activated", @OA\JsonContent(
      *         @OA\Property(property="message", type="string")

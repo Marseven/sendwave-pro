@@ -25,7 +25,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks",
      *     tags={"Webhooks"},
      *     summary="List all webhooks for the authenticated user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="data", type="array", @OA\Items(type="object")),
      *         @OA\Property(property="meta", type="object")
@@ -50,7 +50,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks/events",
      *     tags={"Webhooks"},
      *     summary="Get all available webhook event types",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="data", type="object")
      *     )),
@@ -71,7 +71,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks",
      *     tags={"Webhooks"},
      *     summary="Create a new webhook",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"name","url","events"},
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -131,7 +131,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks/{id}",
      *     tags={"Webhooks"},
      *     summary="Get a specific webhook with recent logs",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="data", type="object")
@@ -158,7 +158,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks/{id}",
      *     tags={"Webhooks"},
      *     summary="Update an existing webhook",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -220,7 +220,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks/{id}",
      *     tags={"Webhooks"},
      *     summary="Delete a webhook",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Webhook deleted", @OA\JsonContent(
      *         @OA\Property(property="message", type="string")
@@ -259,7 +259,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks/{id}/test",
      *     tags={"Webhooks"},
      *     summary="Send a test payload to the webhook URL",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Test successful", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -289,7 +289,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks/{id}/toggle",
      *     tags={"Webhooks"},
      *     summary="Toggle webhook active/inactive status",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Status toggled", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -330,7 +330,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks/{id}/logs",
      *     tags={"Webhooks"},
      *     summary="Get delivery logs for a specific webhook",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="event", in="query", required=false, @OA\Schema(type="string"), description="Filter by event type"),
      *     @OA\Parameter(name="success", in="query", required=false, @OA\Schema(type="boolean"), description="Filter by success status"),
@@ -367,7 +367,7 @@ class WebhookController extends Controller
      *     path="/api/webhooks/{id}/stats",
      *     tags={"Webhooks"},
      *     summary="Get delivery statistics for a specific webhook",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="data", type="object",

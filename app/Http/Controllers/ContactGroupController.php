@@ -15,7 +15,7 @@ class ContactGroupController extends Controller
      *     tags={"Contact Groups"},
      *     summary="List all contact groups",
      *     description="Retrieve all contact groups for the authenticated user with contact counts",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of contact groups",
@@ -51,7 +51,7 @@ class ContactGroupController extends Controller
      *     tags={"Contact Groups"},
      *     summary="Create a new contact group",
      *     description="Create a new contact group, optionally with initial contacts",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -125,7 +125,7 @@ class ContactGroupController extends Controller
      *     tags={"Contact Groups"},
      *     summary="Get a specific contact group",
      *     description="Retrieve a contact group by ID with its contacts",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -163,7 +163,7 @@ class ContactGroupController extends Controller
      *     tags={"Contact Groups"},
      *     summary="Update a contact group",
      *     description="Update an existing contact group by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -234,7 +234,7 @@ class ContactGroupController extends Controller
      *     tags={"Contact Groups"},
      *     summary="Delete a contact group",
      *     description="Remove a contact group by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -290,7 +290,7 @@ class ContactGroupController extends Controller
      *     tags={"Contact Groups"},
      *     summary="Add contacts to a group",
      *     description="Add one or more contacts to a contact group",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -365,7 +365,7 @@ class ContactGroupController extends Controller
      *     tags={"Contact Groups"},
      *     summary="Remove contacts from a group",
      *     description="Remove one or more contacts from a contact group",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -440,7 +440,7 @@ class ContactGroupController extends Controller
      *     tags={"Contact Groups"},
      *     summary="Get contacts of a group",
      *     description="Retrieve all contacts belonging to a specific group",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",

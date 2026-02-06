@@ -222,6 +222,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -280,6 +283,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -334,6 +340,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -372,6 +381,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -508,6 +520,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             },
@@ -593,6 +608,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -642,6 +660,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             },
@@ -735,6 +756,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             },
@@ -783,6 +807,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -852,6 +879,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -913,6 +943,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -1014,6 +1047,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -1101,6 +1137,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -1306,6 +1345,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -1480,6 +1522,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -1562,6 +1607,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }
@@ -1637,6 +1685,9 @@
                 "security": [
                     {
                         "sanctum": []
+                    },
+                    {
+                        "apiKey": []
                     }
                 ]
             }

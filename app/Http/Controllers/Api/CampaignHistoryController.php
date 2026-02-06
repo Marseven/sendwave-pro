@@ -15,7 +15,7 @@ class CampaignHistoryController extends Controller
      *     tags={"Campaigns"},
      *     summary="Get campaign history",
      *     description="Retrieve paginated history of sent campaigns with optional filters",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="search",
      *         in="query",
@@ -118,7 +118,7 @@ class CampaignHistoryController extends Controller
      *     tags={"Campaigns"},
      *     summary="Get a specific campaign from history",
      *     description="Retrieve a single campaign by ID from history",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -153,7 +153,7 @@ class CampaignHistoryController extends Controller
      *     tags={"Campaigns"},
      *     summary="Get campaign statistics",
      *     description="Retrieve aggregated statistics for all campaigns (total, completed, scheduled, failed, cost, recipients)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Campaign statistics",

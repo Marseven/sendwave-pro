@@ -24,7 +24,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/dashboard",
      *     tags={"Analytics"},
      *     summary="Get dashboard analytics widgets",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="period", in="query", required=false, @OA\Schema(type="string", enum={"today","week","month","year"}), description="Analytics period"),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="data", type="object"),
@@ -56,7 +56,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/chart",
      *     tags={"Analytics"},
      *     summary="Get daily chart data for analytics",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="period", in="query", required=false, @OA\Schema(type="string", enum={"week","month","year"}), description="Chart period"),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated")
@@ -82,7 +82,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/report",
      *     tags={"Analytics"},
      *     summary="Get a comprehensive analytics report",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="start_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report start date"),
      *     @OA\Parameter(name="end_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report end date"),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
@@ -122,7 +122,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/export/pdf",
      *     tags={"Analytics"},
      *     summary="Export analytics report as PDF",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="start_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report start date"),
      *     @OA\Parameter(name="end_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report end date"),
      *     @OA\Response(response=200, description="PDF file download", @OA\MediaType(mediaType="application/pdf")),
@@ -165,7 +165,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/export/excel",
      *     tags={"Analytics"},
      *     summary="Export analytics report as Excel",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="start_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report start date"),
      *     @OA\Parameter(name="end_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report end date"),
      *     @OA\Response(response=200, description="Excel file download", @OA\MediaType(mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")),
@@ -204,7 +204,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/export/csv",
      *     tags={"Analytics"},
      *     summary="Export analytics report as CSV",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="start_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report start date"),
      *     @OA\Parameter(name="end_date", in="query", required=true, @OA\Schema(type="string", format="date"), description="Report end date"),
      *     @OA\Response(response=200, description="CSV file download", @OA\MediaType(mediaType="text/csv")),
@@ -271,7 +271,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/providers",
      *     tags={"Analytics"},
      *     summary="Get SMS provider distribution statistics",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="period", in="query", required=false, @OA\Schema(type="string", enum={"week","month","year"}), description="Statistics period"),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="data", type="object"),
@@ -305,7 +305,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/top-campaigns",
      *     tags={"Analytics"},
      *     summary="Get top performing campaigns",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="period", in="query", required=false, @OA\Schema(type="string", enum={"week","month","year"}), description="Statistics period"),
      *     @OA\Parameter(name="limit", in="query", required=false, @OA\Schema(type="integer", default=5), description="Number of campaigns to return"),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
@@ -341,7 +341,7 @@ class AnalyticsController extends Controller
      *     path="/api/analytics/update",
      *     tags={"Analytics"},
      *     summary="Manually trigger analytics update for a given date",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=false, @OA\JsonContent(
      *         @OA\Property(property="date", type="string", format="date", description="Date to update analytics for (defaults to today)")
      *     )),

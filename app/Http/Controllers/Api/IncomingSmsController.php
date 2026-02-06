@@ -245,7 +245,7 @@ class IncomingSmsController extends Controller
      *     path="/api/blacklist/stats",
      *     tags={"Blacklist"},
      *     summary="Get blacklist statistics for the current user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Blacklist statistics", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean"),
      *         @OA\Property(property="data", type="object")
@@ -271,7 +271,7 @@ class IncomingSmsController extends Controller
      *     path="/api/blacklist/stop-keywords",
      *     tags={"Blacklist"},
      *     summary="Get list of recognized STOP keywords",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="List of STOP keywords", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean"),
      *         @OA\Property(property="data", type="array", @OA\Items(type="string"))
@@ -294,7 +294,7 @@ class IncomingSmsController extends Controller
      *     path="/api/phone/normalize",
      *     tags={"Phone"},
      *     summary="Normalize a single phone number to E.164 format",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"phone"},
      *         @OA\Property(property="phone", type="string", example="77123456"),
@@ -332,7 +332,7 @@ class IncomingSmsController extends Controller
      *     path="/api/phone/normalize-many",
      *     tags={"Phone"},
      *     summary="Normalize multiple phone numbers to E.164 format",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"phones"},
      *         @OA\Property(property="phones", type="array", @OA\Items(type="string"), example={"77123456", "60123456"}),

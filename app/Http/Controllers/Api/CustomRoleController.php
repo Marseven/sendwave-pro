@@ -18,7 +18,7 @@ class CustomRoleController extends Controller
      *     path="/api/custom-roles",
      *     tags={"Custom Roles"},
      *     summary="List all custom roles (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
      *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
@@ -57,7 +57,7 @@ class CustomRoleController extends Controller
      *     path="/api/custom-roles",
      *     tags={"Custom Roles"},
      *     summary="Create a new custom role (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"name", "permissions"},
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -127,7 +127,7 @@ class CustomRoleController extends Controller
      *     path="/api/custom-roles/{id}",
      *     tags={"Custom Roles"},
      *     summary="Get a specific custom role by ID (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -171,7 +171,7 @@ class CustomRoleController extends Controller
      *     path="/api/custom-roles/{id}",
      *     tags={"Custom Roles"},
      *     summary="Update an existing custom role (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -247,7 +247,7 @@ class CustomRoleController extends Controller
      *     path="/api/custom-roles/{id}",
      *     tags={"Custom Roles"},
      *     summary="Delete a custom role (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Custom role deleted", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -310,7 +310,7 @@ class CustomRoleController extends Controller
      *     path="/api/custom-roles/{id}/duplicate",
      *     tags={"Custom Roles"},
      *     summary="Duplicate an existing custom role (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=201, description="Custom role duplicated", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -374,7 +374,7 @@ class CustomRoleController extends Controller
      *     path="/api/custom-roles/permissions",
      *     tags={"Custom Roles"},
      *     summary="Get available permissions for role creation (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
      *         @OA\Property(property="data", type="object")

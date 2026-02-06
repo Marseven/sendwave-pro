@@ -47,7 +47,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="List all campaigns",
      *     description="Retrieve all campaigns for the authenticated user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="List of campaigns",
@@ -77,7 +77,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Create a new campaign",
      *     description="Store a newly created campaign",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -131,7 +131,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Get a specific campaign",
      *     description="Retrieve a single campaign by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -162,7 +162,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Update a campaign",
      *     description="Update an existing campaign by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -222,7 +222,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Delete a campaign",
      *     description="Remove a campaign by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -257,7 +257,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Clone a campaign",
      *     description="Create a copy of an existing campaign with reset counters and draft status",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -323,7 +323,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Send a campaign",
      *     description="Send SMS campaign to specified recipients with automatic operator routing",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -547,7 +547,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Create or update campaign schedule",
      *     description="Set up recurring or one-time schedule for a campaign",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -628,7 +628,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Get campaign schedule",
      *     description="Retrieve the schedule configuration for a campaign",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -667,7 +667,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Delete campaign schedule",
      *     description="Remove the schedule configuration for a campaign",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -702,7 +702,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Create campaign variants for A/B testing",
      *     description="Create or replace campaign variants. Percentages must sum to 100.",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -780,7 +780,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Get campaign variants",
      *     description="Retrieve all A/B testing variants for a campaign",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -820,7 +820,7 @@ class CampaignController extends Controller
      *     tags={"Campaigns"},
      *     summary="Delete campaign variants",
      *     description="Remove all A/B testing variants for a campaign",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",

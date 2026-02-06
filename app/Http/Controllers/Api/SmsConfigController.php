@@ -16,7 +16,7 @@ class SmsConfigController extends Controller
      *     path="/api/sms-configs",
      *     tags={"SMS Config"},
      *     summary="Get all SMS configurations",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="List of SMS configurations", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
      *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
@@ -47,7 +47,7 @@ class SmsConfigController extends Controller
      *     path="/api/sms-configs/{provider}",
      *     tags={"SMS Config"},
      *     summary="Get a specific SMS provider configuration",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
      *     @OA\Response(response=200, description="SMS configuration details", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -106,7 +106,7 @@ class SmsConfigController extends Controller
      *     path="/api/sms-configs/{provider}",
      *     tags={"SMS Config"},
      *     summary="Update an SMS provider configuration",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         @OA\Property(property="api_url", type="string"),
@@ -165,7 +165,7 @@ class SmsConfigController extends Controller
      *     path="/api/sms-configs/{provider}/test",
      *     tags={"SMS Config"},
      *     summary="Send a test SMS using a specific provider configuration",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"phone_number"},
@@ -244,7 +244,7 @@ class SmsConfigController extends Controller
      *     path="/api/sms-configs/{provider}/toggle",
      *     tags={"SMS Config"},
      *     summary="Toggle activation of an SMS provider configuration",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
      *     @OA\Response(response=200, description="Configuration toggled", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -321,7 +321,7 @@ class SmsConfigController extends Controller
      *     path="/api/sms-configs/{provider}/reset",
      *     tags={"SMS Config"},
      *     summary="Reset SMS provider configuration to default .env values",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="provider", in="path", required=true, @OA\Schema(type="string", enum={"airtel", "moov"})),
      *     @OA\Response(response=200, description="Configuration reset to defaults", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),

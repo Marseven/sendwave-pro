@@ -14,7 +14,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates",
      *     tags={"Templates"},
      *     summary="List all message templates",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="category", in="query", required=false, @OA\Schema(type="string"), description="Filter by category"),
      *     @OA\Parameter(name="public_only", in="query", required=false, @OA\Schema(type="boolean"), description="Filter public templates only"),
      *     @OA\Parameter(name="sort", in="query", required=false, @OA\Schema(type="string", enum={"popular","recent"}), description="Sort order"),
@@ -65,7 +65,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates",
      *     tags={"Templates"},
      *     summary="Create a new message template",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"name","content","category"},
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -110,7 +110,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates/{id}",
      *     tags={"Templates"},
      *     summary="Get a specific message template",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(type="object")),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -130,7 +130,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates/{id}",
      *     tags={"Templates"},
      *     summary="Update a message template",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -179,7 +179,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates/{id}/toggle-public",
      *     tags={"Templates"},
      *     summary="Toggle template public/private status",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="Status toggled", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -210,7 +210,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates/{id}",
      *     tags={"Templates"},
      *     summary="Delete a message template",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="Template deleted", @OA\JsonContent(
      *         @OA\Property(property="message", type="string")
@@ -236,7 +236,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates/{id}/use",
      *     tags={"Templates"},
      *     summary="Use a template and increment its usage count",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="Template used", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -268,7 +268,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates/{id}/preview",
      *     tags={"Templates"},
      *     summary="Preview a template with sample data",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\RequestBody(required=false, @OA\JsonContent(
      *         @OA\Property(property="sample_data", type="object")
@@ -308,7 +308,7 @@ class MessageTemplateController extends Controller
      *     path="/api/templates/categories",
      *     tags={"Templates"},
      *     summary="Get all available template categories",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="data", type="object")
      *     )),

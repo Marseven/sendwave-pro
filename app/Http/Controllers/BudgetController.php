@@ -18,7 +18,7 @@ class BudgetController extends Controller
      *     tags={"Budget"},
      *     summary="Get budget status",
      *     description="Obtenir le statut du budget pour un sous-compte spécifique",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="subAccountId",
      *         in="path",
@@ -77,7 +77,7 @@ class BudgetController extends Controller
      *     tags={"Budget"},
      *     summary="Get all budgets status",
      *     description="Obtenir le statut des budgets pour tous les sous-comptes de l'utilisateur",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Liste des budgets",
@@ -127,7 +127,7 @@ class BudgetController extends Controller
      *     tags={"Budget"},
      *     summary="Update budget settings",
      *     description="Mettre à jour les paramètres de budget d'un sous-compte",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="subAccountId",
      *         in="path",
@@ -183,7 +183,7 @@ class BudgetController extends Controller
      *     tags={"Budget"},
      *     summary="Check if send is allowed",
      *     description="Vérifier si un envoi est autorisé par rapport au budget avant l'envoi effectif",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -241,7 +241,7 @@ class BudgetController extends Controller
      *     tags={"Budget"},
      *     summary="Get budget usage history",
      *     description="Historique d'utilisation du budget par mois (12 derniers mois)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="subAccountId",
      *         in="path",

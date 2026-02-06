@@ -23,7 +23,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="List all contacts",
      *     description="Retrieve contacts for the authenticated user with search, filters and pagination",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="search", in="query", required=false, description="Search by name, email or phone", @OA\Schema(type="string")),
      *     @OA\Parameter(name="group_id", in="query", required=false, description="Filter by contact group ID", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="status", in="query", required=false, description="Filter by status (active, inactive)", @OA\Schema(type="string", enum={"active", "inactive"})),
@@ -98,7 +98,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="Create a new contact",
      *     description="Store a newly created contact",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -188,7 +188,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="Get a specific contact",
      *     description="Retrieve a single contact by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -221,7 +221,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="Update a contact",
      *     description="Update an existing contact by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -314,7 +314,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="Delete a contact",
      *     description="Remove a contact by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -358,7 +358,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="Delete multiple contacts",
      *     description="Supprime plusieurs contacts en une seule requête",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -418,7 +418,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="Export contacts",
      *     description="Export contacts to CSV or JSON format",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="format",
      *         in="query",
@@ -519,7 +519,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="Import contacts from file",
      *     description="Import contacts from CSV, XLSX, or XLS file (max 20MB)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
@@ -625,7 +625,7 @@ class ContactController extends Controller
      *     tags={"Contacts"},
      *     summary="Preview import file",
      *     description="Preview headers and sample data from an import file before importing",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(

@@ -16,7 +16,7 @@ class BlacklistController extends Controller
      *     path="/api/blacklist",
      *     tags={"Blacklist"},
      *     summary="List all blacklisted numbers",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Paginated list of blacklisted numbers", @OA\JsonContent(
      *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
@@ -40,7 +40,7 @@ class BlacklistController extends Controller
      *     path="/api/blacklist",
      *     tags={"Blacklist"},
      *     summary="Add a phone number to the blacklist",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"phone_number"},
      *         @OA\Property(property="phone_number", type="string", example="24177123456"),
@@ -101,7 +101,7 @@ class BlacklistController extends Controller
      *     path="/api/blacklist/{id}",
      *     tags={"Blacklist"},
      *     summary="Remove a phone number from the blacklist",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Number removed from blacklist", @OA\JsonContent(
      *         @OA\Property(property="message", type="string")
@@ -140,7 +140,7 @@ class BlacklistController extends Controller
      *     path="/api/blacklist/check",
      *     tags={"Blacklist"},
      *     summary="Check if a phone number is blacklisted",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"phone_number"},
      *         @OA\Property(property="phone_number", type="string", example="24177123456")

@@ -158,7 +158,7 @@ class MessageController extends Controller
      *     tags={"Messages"},
      *     summary="Send SMS message(s)",
      *     description="Envoyer un ou plusieurs messages SMS avec routage automatique par opérateur. Les numéros blacklistés sont automatiquement filtrés.",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -589,7 +589,7 @@ class MessageController extends Controller
      *     tags={"Messages"},
      *     summary="Send OTP SMS",
      *     description="Envoyer un SMS OTP à un seul destinataire. Endpoint simplifié pour l'envoi de codes de vérification.",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -814,7 +814,7 @@ class MessageController extends Controller
      *     tags={"Messages"},
      *     summary="Analyze phone numbers",
      *     description="Analyser des numéros de téléphone pour déterminer l'opérateur et la validité",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -859,7 +859,7 @@ class MessageController extends Controller
      *     tags={"Messages"},
      *     summary="Get phone number info",
      *     description="Obtenir les informations d'un numéro de téléphone (opérateur, pays, validité)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(

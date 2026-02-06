@@ -139,7 +139,7 @@ class AuthController extends Controller
      *     tags={"Authentication"},
      *     summary="Logout user",
      *     description="Revoke current access token",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Logout successful",
@@ -168,7 +168,7 @@ class AuthController extends Controller
      *     tags={"Authentication"},
      *     summary="Get current user",
      *     description="Get authenticated user information with permissions",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="User details",
@@ -198,7 +198,7 @@ class AuthController extends Controller
      *     tags={"Authentication"},
      *     summary="Get user permissions",
      *     description="Get current user's permissions and role info",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="User permissions",
@@ -236,7 +236,7 @@ class AuthController extends Controller
      *     tags={"Authentication"},
      *     summary="Get all available permissions",
      *     description="Get list of all permissions grouped by category",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Available permissions",

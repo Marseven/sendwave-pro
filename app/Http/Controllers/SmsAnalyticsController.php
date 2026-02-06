@@ -20,7 +20,7 @@ class SmsAnalyticsController extends Controller
      *     tags={"SMS Analytics"},
      *     summary="Get analytics overview",
      *     description="Vue d'ensemble des analytics pour une période donnée (par défaut la période en cours). Inclut les statistiques globales, par opérateur, par type et par sous-compte.",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="period",
      *         in="query",
@@ -128,7 +128,7 @@ class SmsAnalyticsController extends Controller
      *     tags={"SMS Analytics"},
      *     summary="List detailed analytics",
      *     description="Liste paginée des analytics SMS détaillés avec filtres optionnels",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -225,7 +225,7 @@ class SmsAnalyticsController extends Controller
      *     tags={"SMS Analytics"},
      *     summary="List available periods",
      *     description="Liste des périodes disponibles avec statistiques agrégées pour chaque période",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Liste des périodes",
@@ -277,7 +277,7 @@ class SmsAnalyticsController extends Controller
      *     tags={"SMS Analytics"},
      *     summary="List period closures",
      *     description="Liste des clôtures de période mensuelles",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Liste des clôtures",
@@ -307,7 +307,7 @@ class SmsAnalyticsController extends Controller
      *     tags={"SMS Analytics"},
      *     summary="Get closure detail",
      *     description="Détail d'une clôture de période spécifique",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="periodKey",
      *         in="path",
@@ -343,7 +343,7 @@ class SmsAnalyticsController extends Controller
      *     tags={"SMS Analytics"},
      *     summary="Generate period report",
      *     description="Générer un rapport détaillé pour une période spécifique",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -380,7 +380,7 @@ class SmsAnalyticsController extends Controller
      *     tags={"SMS Analytics"},
      *     summary="Export analytics as CSV",
      *     description="Exporter les analytics en fichier CSV pour une période donnée",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(
      *         name="period",
      *         in="query",

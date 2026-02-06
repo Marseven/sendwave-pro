@@ -17,7 +17,7 @@ class ApiKeyController extends Controller
      *     path="/api/api-keys",
      *     tags={"API Keys"},
      *     summary="List all API keys for the authenticated user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
      *         @OA\Property(property="data", type="array", @OA\Items(type="object"))
@@ -46,7 +46,7 @@ class ApiKeyController extends Controller
      *     path="/api/api-keys",
      *     tags={"API Keys"},
      *     summary="Create a new API key",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"name"},
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -108,7 +108,7 @@ class ApiKeyController extends Controller
      *     path="/api/api-keys/{id}",
      *     tags={"API Keys"},
      *     summary="Get a specific API key",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -136,7 +136,7 @@ class ApiKeyController extends Controller
      *     path="/api/api-keys/{id}",
      *     tags={"API Keys"},
      *     summary="Update an API key",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         @OA\Property(property="name", type="string", maxLength=255),
@@ -188,7 +188,7 @@ class ApiKeyController extends Controller
      *     path="/api/api-keys/{id}/revoke",
      *     tags={"API Keys"},
      *     summary="Revoke an API key",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="API key revoked", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),
@@ -218,7 +218,7 @@ class ApiKeyController extends Controller
      *     path="/api/api-keys/{id}",
      *     tags={"API Keys"},
      *     summary="Delete an API key",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="API key deleted", @OA\JsonContent(
      *         @OA\Property(property="message", type="string")
@@ -246,7 +246,7 @@ class ApiKeyController extends Controller
      *     path="/api/api-keys/{id}/regenerate",
      *     tags={"API Keys"},
      *     summary="Regenerate an API key with a new secret",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
      *     @OA\Response(response=200, description="API key regenerated", @OA\JsonContent(
      *         @OA\Property(property="message", type="string"),

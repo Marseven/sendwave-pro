@@ -22,7 +22,7 @@ class AccountController extends Controller
      *     path="/api/accounts",
      *     tags={"Accounts"},
      *     summary="List all accounts (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string"), description="Search by name, email or company ID"),
      *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string"), description="Filter by status"),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
@@ -77,7 +77,7 @@ class AccountController extends Controller
      *     path="/api/accounts",
      *     tags={"Accounts"},
      *     summary="Create a new account with admin user (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"name", "email", "admin_name", "admin_email", "admin_password"},
      *         @OA\Property(property="name", type="string"),
@@ -210,7 +210,7 @@ class AccountController extends Controller
      *     path="/api/accounts/{id}",
      *     tags={"Accounts"},
      *     summary="Get a specific account by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -259,7 +259,7 @@ class AccountController extends Controller
      *     path="/api/accounts/{id}",
      *     tags={"Accounts"},
      *     summary="Update an existing account (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         @OA\Property(property="name", type="string"),
@@ -335,7 +335,7 @@ class AccountController extends Controller
      *     path="/api/accounts/{id}",
      *     tags={"Accounts"},
      *     summary="Delete an account (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Account deleted", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -390,7 +390,7 @@ class AccountController extends Controller
      *     path="/api/accounts/{id}/credits",
      *     tags={"Accounts"},
      *     summary="Add SMS credits to an account (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"amount"},
@@ -453,7 +453,7 @@ class AccountController extends Controller
      *     path="/api/accounts/{id}/suspend",
      *     tags={"Accounts"},
      *     summary="Suspend an account and all its users (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Account suspended", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -504,7 +504,7 @@ class AccountController extends Controller
      *     path="/api/accounts/{id}/activate",
      *     tags={"Accounts"},
      *     summary="Activate an account and all its users (SuperAdmin only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Account activated", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -555,7 +555,7 @@ class AccountController extends Controller
      *     path="/api/accounts/{id}/stats",
      *     tags={"Accounts"},
      *     summary="Get statistics for an account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -626,7 +626,7 @@ class AccountController extends Controller
      *     path="/api/accounts/{id}/users",
      *     tags={"Accounts"},
      *     summary="Get all users belonging to an account",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),

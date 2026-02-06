@@ -15,7 +15,7 @@ class AuditLogController extends Controller
      *     path="/api/audit-logs",
      *     tags={"Audit Logs"},
      *     summary="List audit logs with optional filters",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="action", in="query", required=false, @OA\Schema(type="string"), description="Filter by action type"),
      *     @OA\Parameter(name="start_date", in="query", required=false, @OA\Schema(type="string", format="date-time"), description="Filter from date"),
      *     @OA\Parameter(name="end_date", in="query", required=false, @OA\Schema(type="string", format="date-time"), description="Filter to date"),
@@ -65,7 +65,7 @@ class AuditLogController extends Controller
      *     path="/api/audit-logs/{id}",
      *     tags={"Audit Logs"},
      *     summary="Get a specific audit log entry",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Audit log details", @OA\JsonContent(
      *         @OA\Property(property="data", type="object")
@@ -90,7 +90,7 @@ class AuditLogController extends Controller
      *     path="/api/audit-logs/actions",
      *     tags={"Audit Logs"},
      *     summary="Get list of distinct audit log action types",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="List of available action types", @OA\JsonContent(
      *         @OA\Property(property="data", type="array", @OA\Items(type="string"))
      *     )),

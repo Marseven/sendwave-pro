@@ -20,7 +20,7 @@ class UserController extends Controller
      *     path="/api/users",
      *     tags={"Users"},
      *     summary="List users manageable by current user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="account_id", in="query", required=false, @OA\Schema(type="integer"), description="Filter by account (SuperAdmin only)"),
      *     @OA\Parameter(name="role", in="query", required=false, @OA\Schema(type="string"), description="Filter by role"),
      *     @OA\Parameter(name="status", in="query", required=false, @OA\Schema(type="string"), description="Filter by status"),
@@ -94,7 +94,7 @@ class UserController extends Controller
      *     path="/api/users",
      *     tags={"Users"},
      *     summary="Create a new user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"name", "email", "password", "role"},
      *         @OA\Property(property="name", type="string", example="John Doe"),
@@ -194,7 +194,7 @@ class UserController extends Controller
      *     path="/api/users/{id}",
      *     tags={"Users"},
      *     summary="Get a specific user by ID",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -238,7 +238,7 @@ class UserController extends Controller
      *     path="/api/users/{id}",
      *     tags={"Users"},
      *     summary="Update an existing user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         @OA\Property(property="name", type="string"),
@@ -328,7 +328,7 @@ class UserController extends Controller
      *     path="/api/users/{id}",
      *     tags={"Users"},
      *     summary="Delete a user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="User deleted", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -383,7 +383,7 @@ class UserController extends Controller
      *     path="/api/users/{id}/suspend",
      *     tags={"Users"},
      *     summary="Suspend a user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="User suspended", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -430,7 +430,7 @@ class UserController extends Controller
      *     path="/api/users/{id}/activate",
      *     tags={"Users"},
      *     summary="Activate a user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\Response(response=200, description="User activated", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
@@ -477,7 +477,7 @@ class UserController extends Controller
      *     path="/api/users/{id}/permissions",
      *     tags={"Users"},
      *     summary="Update permissions for a user",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(required=true, @OA\JsonContent(
      *         required={"permissions"},
@@ -552,7 +552,7 @@ class UserController extends Controller
      *     path="/api/users/available-roles",
      *     tags={"Users"},
      *     summary="Get roles the current user can assign",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
      *         @OA\Property(property="data", type="array", @OA\Items(type="object",
@@ -594,7 +594,7 @@ class UserController extends Controller
      *     path="/api/users/available-permissions",
      *     tags={"Users"},
      *     summary="Get permissions the current user can assign",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
      *         @OA\Property(property="data", type="object")
@@ -642,7 +642,7 @@ class UserController extends Controller
      *     path="/api/users/system-roles",
      *     tags={"Users"},
      *     summary="Get all system roles (read-only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
      *         @OA\Property(property="data", type="array", @OA\Items(type="object",
@@ -691,7 +691,7 @@ class UserController extends Controller
      *     path="/api/users/system-permissions",
      *     tags={"Users"},
      *     summary="Get all system permissions (read-only)",
-     *     security={{"sanctum":{}}},
+     *     security={{"sanctum":{}},{"apiKey":{}}},
      *     @OA\Response(response=200, description="Success", @OA\JsonContent(
      *         @OA\Property(property="success", type="boolean", example=true),
      *         @OA\Property(property="data", type="object")
