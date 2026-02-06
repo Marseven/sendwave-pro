@@ -188,7 +188,7 @@ class SmsAnalyticsController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $perPage = $request->input('per_page', 50);
+        $perPage = min((int) $request->input('per_page', 50), 100);
 
         $query = SmsAnalytics::where('user_id', $user->id)
             ->with(['subAccount:id,name', 'campaign:id,name', 'message:id,recipient_phone,content']);

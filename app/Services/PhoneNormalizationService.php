@@ -33,7 +33,6 @@ class PhoneNormalizationService
                 '67' => 'mtn',
                 '68' => 'mtn',
                 '69' => 'orange',
-                '65' => 'orange',
                 '66' => 'nexttel',
             ],
         ],

@@ -67,7 +67,8 @@ Route::middleware('auth.api')->group(function () {
 
     // Campaigns (permission: create_campaigns)
     Route::middleware('permission:create_campaigns')->group(function () {
-        Route::post('campaigns/{id}/send', [CampaignController::class, 'send']);
+        Route::post('campaigns/{id}/send', [CampaignController::class, 'send'])
+            ->middleware('throttle:sms-send');
         Route::post('campaigns/{id}/clone', [CampaignController::class, 'clone']);
         Route::post('campaigns/{id}/schedule', [CampaignController::class, 'storeSchedule']);
         Route::get('campaigns/{id}/schedule', [CampaignController::class, 'getSchedule']);

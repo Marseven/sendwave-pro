@@ -11,6 +11,7 @@ use App\Models\CampaignVariant;
 use App\Models\Message;
 use App\Models\Contact;
 use App\Services\SMS\SmsRouter;
+use App\Services\BudgetService;
 use App\Services\WebhookService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +21,8 @@ class CampaignController extends Controller
 {
     public function __construct(
         protected SmsRouter $smsRouter,
-        protected WebhookService $webhookService
+        protected WebhookService $webhookService,
+        protected BudgetService $budgetService
     ) {}
 
     /**
@@ -377,6 +379,40 @@ class CampaignController extends Controller
         try {
             $recipients = $validated['recipients'];
             $message = $validated['message'];
+            $user = $request->user();
+            $subAccount = $request->attributes->get('sub_account') ?? $user->getDefaultSubAccount();
+
+            // === Budget Check ===
+            if ($subAccount) {
+                $smsCountPerMessage = ceil(strlen($message) / 160);
+                $estimatedCostPerSms = config('sms.cost_per_sms', 20);
+                $estimatedTotalCost = count($recipients) * $smsCountPerMessage * $estimatedCostPerSms;
+
+                $budgetCheck = $this->budgetService->checkBudget($subAccount, $estimatedTotalCost);
+                if (!$budgetCheck['allowed']) {
+                    return response()->json([
+                        'message' => 'Budget dépassé',
+                        'error' => $budgetCheck['message'] ?? 'Budget mensuel dépassé. Envoi bloqué.',
+                        'error_code' => $budgetCheck['error_code'] ?? 'BUDGET_EXCEEDED',
+                    ], 403);
+                }
+
+                if (!$subAccount->canSendSms()) {
+                    return response()->json([
+                        'message' => 'Envoi non autorisé',
+                        'error' => 'Limite de crédits atteinte ou compte inactif.',
+                        'error_code' => 'CREDITS_EXCEEDED',
+                    ], 403);
+                }
+
+                if ((float) $subAccount->sms_credits < $estimatedTotalCost) {
+                    return response()->json([
+                        'message' => 'Crédits insuffisants',
+                        'error' => 'Pas assez de crédits SMS pour cet envoi.',
+                        'error_code' => 'CREDITS_INSUFFICIENT',
+                    ], 403);
+                }
+            }
 
             // Analyser les numéros
             $analysis = $this->smsRouter->analyzeNumbers($recipients);
@@ -429,6 +465,15 @@ class CampaignController extends Controller
                 ]);
 
                 $messageIds[] = $messageRecord->id;
+            }
+
+            // Débiter les crédits pour les messages envoyés
+            $sentCost = collect($result['details'])
+                ->filter(fn($d) => $d['success'])
+                ->sum(fn($d) => ceil(strlen($message) / 160) * config("sms.{$d['provider']}.cost_per_sms", 20));
+
+            if ($subAccount && $sentCost > 0) {
+                $subAccount->useCredits($sentCost);
             }
 
             // Mettre à jour la campagne

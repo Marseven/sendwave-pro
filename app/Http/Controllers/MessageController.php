@@ -58,6 +58,16 @@ class MessageController extends Controller
             $cleaned = substr($cleaned, 2);
         }
 
+        // Supprimer le code pays 241 pour obtenir le numéro local
+        if (str_starts_with($cleaned, '241') && strlen($cleaned) === 11) {
+            $cleaned = substr($cleaned, 3);
+        }
+
+        // Supprimer le 0 initial (format local gabonais: 074... -> 74...)
+        if (str_starts_with($cleaned, '0') && strlen($cleaned) >= 8) {
+            $cleaned = substr($cleaned, 1);
+        }
+
         return $cleaned;
     }
 

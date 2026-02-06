@@ -94,6 +94,7 @@ class AirtelService
             return [
                 'success' => false,
                 'message' => 'Erreur lors de l\'envoi du SMS',
+                'error_code' => 'GATEWAY_ERROR',
                 'provider' => 'airtel',
                 'phone' => $cleanNumber,
                 'error' => $body,
@@ -107,6 +108,7 @@ class AirtelService
             return [
                 'success' => false,
                 'message' => 'Exception lors de l\'envoi du SMS',
+                'error_code' => 'CONNECTION_ERROR',
                 'provider' => 'airtel',
                 'phone' => $phoneNumber,
                 'error' => $e->getMessage(),
@@ -161,14 +163,24 @@ class AirtelService
         // Enlever tous les caractères non numériques
         $cleaned = preg_replace('/[^0-9]/', '', $phoneNumber);
 
-        // Si le numéro commence par 241, c'est bon
-        if (str_starts_with($cleaned, '241')) {
+        // Si le numéro commence par 241 et fait 11 chiffres, c'est bon
+        if (str_starts_with($cleaned, '241') && strlen($cleaned) === 11) {
             return $cleaned;
         }
 
-        // Si le numéro commence par 74, 77, 76 (Airtel), ajouter 241
-        if (preg_match('/^(74|77|76)/', $cleaned)) {
+        // Supprimer le 0 initial (format local gabonais: 074... -> 74...)
+        if (str_starts_with($cleaned, '0') && strlen($cleaned) >= 8) {
+            $cleaned = substr($cleaned, 1);
+        }
+
+        // Si le numéro fait 8 chiffres (format local), ajouter 241
+        if (strlen($cleaned) === 8) {
             return '241' . $cleaned;
+        }
+
+        // Si commence par 241 (déjà avec code pays)
+        if (str_starts_with($cleaned, '241')) {
+            return $cleaned;
         }
 
         // Sinon, ajouter 241 par défaut

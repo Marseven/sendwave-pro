@@ -105,8 +105,8 @@ class BudgetController extends Controller
             ->whereNotNull('monthly_budget')
             ->get();
 
-        $budgets = $subAccounts->map(function ($subAccount) use ($user) {
-            $status = $this->budgetService->getBudgetStatus($user->id, $subAccount->id);
+        $budgets = $subAccounts->map(function ($subAccount) {
+            $status = $this->budgetService->getBudgetStatus($subAccount);
 
             return [
                 'sub_account' => [
@@ -217,16 +217,20 @@ class BudgetController extends Controller
         $subAccountId = $validated['sub_account_id'] ?? null;
 
         if ($subAccountId) {
-            // Vérifier que le sous-compte appartient à l'utilisateur
-            SubAccount::where('parent_user_id', $user->id)
+            $subAccount = SubAccount::where('parent_user_id', $user->id)
                 ->findOrFail($subAccountId);
+        } else {
+            $subAccount = $user->getDefaultSubAccount();
         }
 
-        $check = $this->budgetService->checkBudget(
-            $user->id,
-            $subAccountId,
-            $validated['estimated_cost']
-        );
+        if (!$subAccount) {
+            return response()->json([
+                'allowed' => false,
+                'message' => 'Aucun sous-compte trouvé',
+            ]);
+        }
+
+        $check = $this->budgetService->checkBudget($subAccount, $validated['estimated_cost']);
 
         return response()->json($check);
     }

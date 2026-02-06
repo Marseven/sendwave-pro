@@ -165,6 +165,7 @@ class MoovService
             return [
                 'success' => false,
                 'message' => 'Exception lors de l\'envoi du SMS',
+                'error_code' => 'CONNECTION_ERROR',
                 'provider' => 'moov',
                 'phone' => $phoneNumber,
                 'error' => $e->getMessage(),
@@ -270,13 +271,14 @@ class MoovService
             ]);
 
             // Marquer tous les numeros restants comme echecs
-            $remaining = count($phoneNumbers) - count($results);
+            $alreadyProcessed = count($results);
+            $remaining = count($phoneNumbers) - $alreadyProcessed;
             $failed += $remaining;
 
             for ($i = 0; $i < $remaining; $i++) {
                 $results[] = [
                     'success' => false,
-                    'phone' => $phoneNumbers[count($results)] ?? 'unknown',
+                    'phone' => $phoneNumbers[$alreadyProcessed + $i] ?? 'unknown',
                     'error' => 'Connection lost: ' . $e->getMessage(),
                 ];
             }
@@ -313,17 +315,27 @@ class MoovService
         // Enlever tous les caracteres non numeriques
         $cleaned = preg_replace('/[^0-9]/', '', $phoneNumber);
 
-        // Si le numero commence par 0, le remplacer par 241
-        if (str_starts_with($cleaned, '0') && strlen($cleaned) === 9) {
-            $cleaned = '241' . substr($cleaned, 1);
+        // Si commence par 241 et fait 11 chiffres, c'est bon
+        if (str_starts_with($cleaned, '241') && strlen($cleaned) === 11) {
+            return $cleaned;
         }
 
-        // Si le numero n'a pas le prefixe pays, l'ajouter
+        // Supprimer le 0 initial (format local gabonais: 066... -> 66...)
+        if (str_starts_with($cleaned, '0') && strlen($cleaned) >= 8) {
+            $cleaned = substr($cleaned, 1);
+        }
+
+        // Si le numero fait 8 chiffres (format local), ajouter 241
         if (strlen($cleaned) === 8) {
             $cleaned = '241' . $cleaned;
         }
 
-        return $cleaned;
+        // Si commence par 241 (déjà avec code pays)
+        if (str_starts_with($cleaned, '241')) {
+            return $cleaned;
+        }
+
+        return '241' . $cleaned;
     }
 
     /**

@@ -36,6 +36,11 @@ class OperatorDetector
             $cleaned = substr($cleaned, 3);
         }
 
+        // Enlever le 0 initial (format local gabonais: 074... -> 74...)
+        if (str_starts_with($cleaned, '0') && strlen($cleaned) >= 8) {
+            $cleaned = substr($cleaned, 1);
+        }
+
         // Récupérer les 2 premiers chiffres (préfixe opérateur au Gabon)
         $prefix = substr($cleaned, 0, 2);
 
@@ -88,6 +93,11 @@ class OperatorDetector
 
         if (str_starts_with($cleaned, '241')) {
             $cleaned = substr($cleaned, 3);
+        }
+
+        // Enlever le 0 initial (format local gabonais)
+        if (str_starts_with($cleaned, '0') && strlen($cleaned) >= 8) {
+            $cleaned = substr($cleaned, 1);
         }
 
         $prefix = substr($cleaned, 0, 2);
